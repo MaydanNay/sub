@@ -3,3 +3,9 @@ npm install
 npm run dev
 
 python run_project.py
+
+
+
+git add .
+git commit -m "."
+git push -u origin main

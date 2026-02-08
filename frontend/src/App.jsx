@@ -21,7 +21,9 @@ import QuestPlay from './pages/QuestPlay';
 import PrizeDrop from './pages/PrizeDrop';
 import PrizeDropPlay from './pages/PrizeDropPlay';
 import Slots from './pages/Slots';
+import SlotsPlay from './pages/SlotsPlay';
 import ScratchCard from './pages/ScratchCard';
+import ScratchCardPlay from './pages/ScratchCardPlay';
 import ReferralSystem from './pages/ReferralSystem';
 import ReferralView from './pages/ReferralView';
 import VotingSystem from './pages/VotingSystem';
@@ -36,9 +38,12 @@ import MysteryBoxIntro from './pages/MysteryBoxIntro';
 import MysteryBoxPlay from './pages/MysteryBoxPlay';
 import BusinessValueControl from './components/BusinessValueControl';
 
+import ScrollToTop from './components/ScrollToTop';
+
 function App() {
     return (
         <Router>
+            <ScrollToTop />
             <Routes>
                 <Route path="/" element={<Catalog />} />
                 <Route path="/game/coffee" element={<CoffeeTycoon />} />
@@ -48,9 +53,11 @@ function App() {
                 <Route path="/game/barista" element={<CoffeeMaker />} />
                 <Route path="/game/barista/play" element={<CoffeeMakerPlay />} />
                 <Route path="/game/scratch" element={<ScratchCard />} />
+                <Route path="/game/scratch/play" element={<ScratchCardPlay />} />
                 <Route path="/game/drop" element={<PrizeDrop />} />
                 <Route path="/game/drop/play" element={<PrizeDropPlay />} />
                 <Route path="/game/slots" element={<Slots />} />
+                <Route path="/game/slots/play" element={<SlotsPlay />} />
                 <Route path="/game/memory" element={<MemoryGame />} />
                 <Route path="/game/memory/play" element={<MemoryPlay />} />
                 <Route path="/game/reaction" element={<ReactionGame />} />

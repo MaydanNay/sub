@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PrizeDrawer from '../components/PrizeDrawer';
 import ThemeCustomizer from '../components/ThemeCustomizer';
 import {
-    IconPuzzle, IconStar, IconTrophy, IconMap
+    IconPuzzle, IconStar, IconTrophy, IconMap, IconGift, IconClover
 } from '../components/GameIcons';
 
 const PuzzleCollector = () => {

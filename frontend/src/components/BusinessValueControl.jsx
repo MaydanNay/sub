@@ -6,6 +6,7 @@ import BusinessValueCard from './BusinessValueCard';
 
 const BusinessValueControl = () => {
     const { pathname } = useLocation();
+    const isPlayPage = pathname.endsWith('/play') || pathname.includes('/play/');
     const [isOpen, setIsOpen] = useState(false);
     const [content, setContent] = useState(null);
 
@@ -16,7 +17,7 @@ const BusinessValueControl = () => {
         setIsOpen(false);
     }, [pathname]);
 
-    if (!content) return null;
+    if (!content || isPlayPage) return null;
 
     return (
         <>

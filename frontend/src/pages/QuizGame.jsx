@@ -5,7 +5,7 @@ import SoundManager from '../utils/SoundManager';
 import PrizeDrawer from '../components/PrizeDrawer';
 import ThemeCustomizer from '../components/ThemeCustomizer';
 import {
-    IconQuestion, IconBrain, IconTarget, IconStar
+    IconQuestion, IconBrain, IconTarget, IconStar, IconTrophy, IconHeart, IconMap
 } from '../components/GameIcons';
 
 const QuizGame = () => {

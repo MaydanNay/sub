@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 const ThemeCustomizer = () => {
+    const { pathname } = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [primaryColor, setPrimaryColor] = useState(() => {
         return localStorage.getItem('demo_primary_color') || '#4f46e5'; // Default indigo-600
@@ -11,6 +13,9 @@ const ThemeCustomizer = () => {
         document.documentElement.style.setProperty('--primary-color', primaryColor);
         localStorage.setItem('demo_primary_color', primaryColor);
     }, [primaryColor]);
+
+    // Only show on Catalog page (root path)
+    if (pathname !== '/') return null;
 
     const colors = [
         { name: 'Indigo', value: '#4f46e5' },

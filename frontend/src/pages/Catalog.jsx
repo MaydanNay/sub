@@ -7,8 +7,9 @@ import {
     IconDice, IconWheel, IconTicket, IconTarget, IconSlotMachine, IconChest,
     IconSheep, IconCoffee, IconPuzzle, IconMap,
     IconQuestion, IconCards, IconZap,
-    IconTrophy, IconHandshake, IconVote
+    IconTrophy, IconHandshake, IconVote, IconDownload
 } from '../components/GameIcons';
+import InstallPWA from '../components/InstallPWA';
 
 const Catalog = () => {
     const [activeCategory, setActiveCategory] = useState(() => {
@@ -115,6 +116,9 @@ const Catalog = () => {
                 >
                     Вовлекайте клиентов через геймификацию. Выберите механику для ваших бизнес-целей.
                 </motion.p>
+
+                {/* PWA Install Button */}
+                <InstallPWA variant="header" />
             </header>
 
             {/* Navigation Tabs */}
