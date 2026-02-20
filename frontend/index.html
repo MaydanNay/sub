@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Gamification Catalog</title>
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#8b5cf6" />
@@ -18,9 +18,12 @@
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
   <script>
+    // Unregister stale service workers
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
       });
     }
   </script>

@@ -59,6 +59,19 @@ export const IconHeart = ({ className }) => (
     </svg>
 );
 
+export const IconEye = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconShield = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 // --- CATEGORY ICONS ---
 
 export const IconLightning = ({ className }) => (
@@ -358,5 +371,150 @@ export const IconDownload = ({ className }) => (
     <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
         <path d="M12 15V3m0 12l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// --- UTILITY ICONS ---
+
+export const IconPlus = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconX = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconCheck = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconSettings = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+    </svg>
+);
+
+export const IconArrowLeft = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconArrowRight = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconCamera = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2" />
+    </svg>
+);
+
+export const IconLock = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
+        <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2" />
+    </svg>
+);
+
+export const IconShoppingBag = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconChefHat = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 13.87A4 4 0 017.41 6a5.11 5.11 0 011.05-1.54 5 5 0 017.08 0A5.11 5.11 0 0116.59 6 4 4 0 0118 13.87V21H6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="6" y1="17" x2="18" y2="17" stroke="currentColor" strokeWidth="2" />
+    </svg>
+);
+
+export const IconBook = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+export const IconSushi = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 12h20M2 12l2 3h16l2-3M2 12l2-3h16l2 3" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" className="stroke-red-600" />
+        <path d="M12 5v2m0 10v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="3" className="fill-white stroke-red-500" strokeWidth="2" />
+        <path d="M7 12h10" stroke="currentColor" strokeWidth="2" className="stroke-red-500" strokeDasharray="1 2" />
+    </svg>
+);
+export const IconFish = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 10c-2-4-7-6-12-6-5 0-9 4-9 9s4 9 9 9c5 0 10-2 12-6-2-2-2-4 0-6z" className="fill-orange-300 stroke-orange-500" strokeWidth="2" />
+        <circle cx="16" cy="10" r="1.5" className="fill-black" />
+        <path d="M5 13l2-2m-2 2l2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+);
+
+export const IconJerboa = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="14" r="7" className="fill-amber-200 stroke-amber-600" strokeWidth="1.5" />
+        <path d="M9 8c0-3 1-5 3-5s3 2 3 5" className="stroke-amber-600" strokeWidth="1.5" fill="none" />
+        <path d="M7 6c0-2.5 1-4 2.5-4" className="stroke-amber-600" strokeWidth="1.5" fill="none" />
+        <path d="M17 6c0-2.5-1-4-2.5-4" className="stroke-amber-600" strokeWidth="1.5" fill="none" />
+        <circle cx="9" cy="13" r="1" className="fill-black" />
+        <circle cx="15" cy="13" r="1" className="fill-black" />
+        <path d="M11 16c1 1 2 0 2-1" className="stroke-amber-800" strokeWidth="1" fill="none" />
+        <path d="M10 21l-2-2M14 21l2-2" className="stroke-amber-800" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+);
+
+export const IconFlower = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C14 5 17 7 20 7C17 7 14 10 12 12C10 10 7 7 4 7C7 7 10 5 12 2Z" className="fill-pink-300 stroke-pink-500" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M12 12C14 15 17 17 20 17C17 17 14 20 12 22C10 20 7 17 4 17C7 17 10 15 12 12Z" className="fill-pink-300 stroke-pink-500" strokeWidth="2" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="3" className="fill-yellow-300 stroke-yellow-500" strokeWidth="2" />
+    </svg>
+);
+
+export const IconLipstick = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 14h4v8h-4z" className="fill-gray-200 stroke-gray-400" strokeWidth="2" />
+        <path d="M7 14h10" className="stroke-gray-400" strokeWidth="2" />
+        <path d="M10 6h4v8h-4z" className="fill-red-500 stroke-red-600" strokeWidth="2" />
+        <path d="M10 6l2-4 2 4" className="fill-red-400 stroke-red-600" strokeWidth="2" />
+    </svg>
+);
+
+export const IconClock = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+);
+
+export const IconRotateCw = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+    </svg>
+);
+
+export const IconList = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const IconHome = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 9.5L12 3l9 6.5V20a2 2 0 01-2 2H5a2 2 0 01-2-2V9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );

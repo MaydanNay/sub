@@ -37,6 +37,47 @@ import TreasureMapPlay from './pages/TreasureMapPlay';
 import MysteryBoxIntro from './pages/MysteryBoxIntro';
 import MysteryBoxPlay from './pages/MysteryBoxPlay';
 import BusinessValueControl from './components/BusinessValueControl';
+import ShuShi from './pages/ShuShi';
+import ShuShiPlay from './pages/ShuShiPlay';
+import MobileContainer from './components/MobileContainer';
+
+import ShuBoomIntro from './pages/ShuBoom/ShuBoomIntro';
+import ShuBoomHome from './pages/ShuBoom/ShuBoomHome';
+import ShuBoomCollection from './pages/ShuBoom/ShuBoomCollection';
+import ShuBoomMap from './pages/ShuBoom/ShuBoomMap';
+import ShuBoomAR from './pages/ShuBoom/ShuBoomAR';
+import ShuBoomShop from './pages/ShuBoom/ShuBoomShop';
+
+import NauryzIntro from './pages/Nauryz/NauryzIntro';
+import NauryzGame from './pages/Nauryz/NauryzGame';
+
+import ShalamGame from './pages/Shalam/ShalamGame';
+
+import ShuBankIntro from './pages/ShuBank/ShuBankIntro';
+import ShuBankPlay from './pages/ShuBank/ShuBankPlay';
+import ShuBankShop from './pages/ShuBank/ShuBankShop';
+
+import ShuBeautyIntro from './pages/ShuBeauty/Intro';
+import ShuBeautyGame from './pages/ShuBeauty/Game';
+import ShuBeautyPlay from './pages/ShuBeauty/ShuBeautyPlay';
+
+import ShuMetalIntro from './pages/ShuMetal/ShuMetalIntro';
+import ShuMetalHome from './pages/ShuMetal/ShuMetalHome';
+import ShuMetalTasks from './pages/ShuMetal/ShuMetalTasks';
+import ShuMetalShop from './pages/ShuMetal/ShuMetalShop';
+import ShuMetalLeaderboard from './pages/ShuMetal/ShuMetalLeaderboard';
+import ShuMetalMood from './pages/ShuMetal/ShuMetalMood';
+
+import ShuDomIntro from './pages/ShuDom/ShuDomIntro';
+import ShuDomGame from './pages/ShuDom/ShuDomGame';
+import ShuDomRooms from './pages/ShuDom/ShuDomRooms';
+import ShuDomHouse from './pages/ShuDom/ShuDomHouse';
+import ShuDomRoomDetail from './pages/ShuDom/ShuDomRoomDetail';
+import ShuGnumGame from './pages/ShuGnum/ShuGnumGame';
+
+import ShuQazHome from './pages/ShuQaz/ShuQazHome';
+import ShuQazDictionary from './pages/ShuQaz/ShuQazDictionary';
+import ShuQazTraining from './pages/ShuQaz/ShuQazTraining';
 
 import ScrollToTop from './components/ScrollToTop';
 
@@ -45,6 +86,22 @@ function App() {
         <Router>
             <ScrollToTop />
             <Routes>
+                {/* ShuBoom Routes */}
+                {/* ShuBoom Routes */}
+                <Route element={<MobileContainer />}>
+                    <Route path="/game/shuboom" element={<ShuBoomIntro />} />
+                    <Route path="/game/shuboom/play" element={<ShuBoomHome />} />
+                    <Route path="/game/shuboom/collection" element={<ShuBoomCollection />} />
+                    <Route path="/game/shuboom/map" element={<ShuBoomMap />} />
+                    <Route path="/game/shuboom/ar" element={<ShuBoomAR />} />
+                    <Route path="/game/shuboom/shop" element={<ShuBoomShop />} />
+                </Route>
+
+                <Route element={<MobileContainer />}>
+                    <Route path="/game/nauryz" element={<NauryzIntro />} />
+                    <Route path="/game/nauryz/play" element={<NauryzGame />} />
+                </Route>
+
                 <Route path="/" element={<Catalog />} />
                 <Route path="/game/coffee" element={<CoffeeTycoon />} />
                 <Route path="/game/coffee/play" element={<CoffeeTycoonPlay />} />
@@ -82,6 +139,43 @@ function App() {
                 <Route path="/game/treasure/play" element={<TreasureMapPlay />} />
                 <Route path="/game/mystery" element={<MysteryBoxIntro />} />
                 <Route path="/game/mystery/play" element={<MysteryBoxPlay />} />
+                <Route path="/game/shushi" element={<ShuShi />} />
+                <Route path="/game/shushi/play" element={<ShuShiPlay />} />
+                <Route path="/game/shalam" element={<ShalamGame />} />
+
+                <Route path="/game/shubank" element={<ShuBankIntro />} />
+                <Route path="/game/shubank/play" element={<ShuBankPlay />} />
+                <Route path="/game/shubank/shop" element={<ShuBankShop />} />
+
+                <Route path="/game/shubeauty" element={<ShuBeautyIntro />} />
+                <Route path="/game/shubeauty/play" element={<ShuBeautyPlay />} />
+
+                {/* ShuMetal Routes */}
+                <Route element={<MobileContainer />}>
+                    <Route path="/game/shumetal" element={<ShuMetalIntro />} />
+                    <Route path="/game/shumetal/play" element={<ShuMetalHome />} />
+                    <Route path="/game/shumetal/tasks" element={<ShuMetalTasks />} />
+                    <Route path="/game/shumetal/shop" element={<ShuMetalShop />} />
+                    <Route path="/game/shumetal/social" element={<ShuMetalLeaderboard />} />
+                    <Route path="/game/shumetal/mood" element={<ShuMetalMood />} />
+                </Route>
+
+                <Route element={<MobileContainer />}>
+                    <Route path="/game/shudom" element={<ShuDomIntro />} />
+                    <Route path="/game/shudom/play" element={<ShuDomGame />} />
+                    <Route path="/game/shudom/rooms" element={<ShuDomRooms />} />
+                    <Route path="/game/shudom/house" element={<ShuDomHouse />} />
+                    <Route path="/game/shudom/room/:roomId" element={<ShuDomRoomDetail />} />
+
+                    {/* ShuGnum: Оливье Doda */}
+                    <Route path="/game/shugnum" element={<ShuGnumGame />} />
+
+                    {/* ShuQaz: Learn Kazakh */}
+                    <Route path="/game/shuqaz" element={<ShuQazHome />} />
+                    <Route path="/game/shuqaz/dictionary" element={<ShuQazDictionary />} />
+                    <Route path="/game/shuqaz/train" element={<ShuQazTraining />} />
+                </Route>
+
                 <Route path="/game/:gameId" element={<GamePage />} />
             </Routes>
             <BusinessValueControl />

@@ -7,9 +7,12 @@ import {
     IconDice, IconWheel, IconTicket, IconTarget, IconSlotMachine, IconChest,
     IconSheep, IconCoffee, IconPuzzle, IconMap,
     IconQuestion, IconCards, IconZap,
-    IconTrophy, IconHandshake, IconVote, IconDownload
+    IconTrophy, IconHandshake, IconVote, IconDownload, IconSushi, IconJerboa, IconFlower
 } from '../components/GameIcons';
 import InstallPWA from '../components/InstallPWA';
+
+import shuBankIcon from './ShuBank/images/pers/0.PNG';
+import shuBoomIcon from './ShuBoom/images/pers_1_v2.PNG';
 
 const Catalog = () => {
     const [activeCategory, setActiveCategory] = useState(() => {
@@ -24,6 +27,35 @@ const Catalog = () => {
     };
 
     const categories = [
+        {
+            id: 'major',
+            title: 'Крутые',
+            fullTitle: 'Крутые игры',
+            description: 'Полноценные игровые миры с глубоким погружением',
+            icon: IconTrophy,
+            color: 'from-pink-500 to-rose-600',
+            textColor: 'text-pink-600',
+            games: [
+                {
+                    id: 'shugnum',
+                    title: 'ShuGnum: Оливье Doda',
+                    description: 'Нарежь 10 кг салата и получи бонусы!',
+                    icon: '🔪',
+                    color: 'from-green-400 to-lime-600',
+                    status: 'active',
+                    goal: 'Собери легендарный тазик Оливье',
+                },
+                { id: 'shubank', title: 'ShuBank', description: 'Финансовый тамагочи: расти вместе с банком!', icon: shuBankIcon, color: 'from-amber-400 to-orange-600', status: 'active', goal: 'LTV/Лояльность' },
+                { id: 'shubeauty', title: 'ShuBeauty', description: 'Spring Maze: собери идеальный бокс!', icon: IconFlower, color: 'from-pink-400 to-purple-600', status: 'active', goal: 'Вовлечение' },
+                { id: 'shushi', title: 'ShuShi', description: 'Стань суши-мастером!', icon: IconSushi, color: 'from-pink-500 to-rose-600', status: 'active', goal: 'Вовлечение' },
+                { id: 'shuboom', title: 'ShuBoom', description: 'Геймифицированная лояльность: собирай друзей, открывай сундуки!', icon: shuBoomIcon, color: 'from-orange-400 to-pink-600', status: 'active', goal: 'Лояльность' },
+                { id: 'shumetal', title: 'ShuMetal', description: 'Стань легендой завода: качай навыки, зарабатывай AluCoins!', icon: IconTrophy, color: 'from-orange-500 to-zinc-800', status: 'active', goal: 'ERG/Лояльность' },
+                { id: 'shudom', title: 'ShuDom', description: 'Techno Mania: собери умный дом в стиле Match-3!', icon: IconChest, color: 'from-blue-500 to-orange-500', status: 'active', goal: 'Удержание/Продажи' },
+                { id: 'nauryz', title: 'ShuBakery', description: 'Сезонная игра: готовь блюда, собирай коллекцию!', icon: IconCoffee, color: 'from-amber-400 to-orange-600', status: 'active', goal: 'Сезонное' },
+                { id: 'shalam', title: 'Shalam', description: 'Агент Свободы против корпораций!', icon: IconTrophy, color: 'from-red-500 to-blue-600', status: 'active', goal: 'Виральность' },
+                { id: 'shuqaz', title: 'ShuQaz', description: 'Учи казахский, ухаживая за барсом Барысом!', icon: '🐆', color: 'from-blue-400 to-cyan-600', status: 'active', goal: 'Изучение языка' },
+            ]
+        },
         {
             id: 'instant',
             title: 'Мгновенные',
@@ -187,8 +219,19 @@ const Catalog = () => {
                                             <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${game.color} opacity-10 rounded-bl-[100px] transition-transform group-hover:scale-150 duration-500`}></div>
 
                                             <div className="relative z-10">
-                                                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${game.color} p-4 text-white shadow-lg mb-6 group-hover:rotate-6 transition-transform duration-300`}>
-                                                    <GameIcon className="w-full h-full drop-shadow-md" />
+                                                <div className={`${typeof GameIcon === 'string'
+                                                        ? (GameIcon.includes('.') || GameIcon.includes('/') ? 'w-28 h-28 p-2' : 'w-20 h-20')
+                                                        : 'w-20 h-20 p-4'
+                                                    } rounded-2xl bg-gradient-to-br ${game.color} text-white shadow-lg mb-6 group-hover:rotate-6 transition-transform duration-300 flex items-center justify-center`}>
+                                                    {typeof GameIcon === 'string' ? (
+                                                        (GameIcon.includes('.') || GameIcon.includes('/')) ? (
+                                                            <img src={GameIcon} alt={game.title} className="w-full h-full object-contain drop-shadow-md" />
+                                                        ) : (
+                                                            <span className="text-5xl drop-shadow-md select-none">{GameIcon}</span>
+                                                        )
+                                                    ) : (
+                                                        <GameIcon className="w-full h-full drop-shadow-md" />
+                                                    )}
                                                 </div>
 
                                                 <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
@@ -203,12 +246,6 @@ const Catalog = () => {
                                                     <span className="px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-full uppercase tracking-wide">
                                                         {game.goal}
                                                     </span>
-                                                    {game.status === 'active' && (
-                                                        <span className="px-3 py-1 bg-green-100 text-green-600 text-xs font-bold rounded-full flex items-center gap-1">
-                                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                                            Live
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </div>
 

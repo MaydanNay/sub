@@ -1,0 +1,28 @@
+
+> frontend@0.0.0 build
+> vite build
+
+vite v4.5.14 building for production...
+transforming...
+✓ 2509 modules transformed.
+✓ built in 11.60s
+"IconEye" is not exported by "src/components/GameIcons.jsx", imported by "src/pages/ShuMetal/ShuMetalTasks.jsx".
+file: /home/maydan/sub/frontend/src/pages/ShuMetal/ShuMetalTasks.jsx:7:4
+5: import {
+6:     IconLightning,
+7:     IconEye,
+       ^
+8:     IconShield,
+9:     IconBrain,
+error during build:
+RollupError: "IconEye" is not exported by "src/components/GameIcons.jsx", imported by "src/pages/ShuMetal/ShuMetalTasks.jsx".
+    at error (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2287:30)
+    at Module.error (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:13745:16)
+    at Module.traceVariable (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:14175:29)
+    at ModuleScope.findVariable (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:12615:39)
+    at Identifier.bind (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:8319:40)
+    at Property.bind (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5892:23)
+    at ObjectExpression.bind (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5888:28)
+    at VariableDeclarator.bind (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5892:23)
+    at VariableDeclaration.bind (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5888:28)
+    at Program.bind (file:///home/maydan/sub/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5888:28)
