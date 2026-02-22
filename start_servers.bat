@@ -9,5 +9,5 @@ start "Frontend Server" cmd /k "cd frontend && npm install && npm run dev"
 
 echo Both servers should be starting in new windows.
 echo Backend: http://localhost:8000
-echo Frontend: http://localhost:5173
+echo Frontend: http://localhost:5175
 pause
