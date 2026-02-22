@@ -1,11 +1,1 @@
-<svg width="643" height="643" viewBox="0 0 643 643" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M0 0V522H80V563H161V482H241V563H322V442H402V522H482V563H563V482H643V0H0Z" fill="#A54C26"/>
-<rect x="643" y="80" width="80" height="80" transform="rotate(180 643 80)" fill="#702B0D"/>
-<rect x="401" y="269" width="80" height="80" transform="rotate(180 401 269)" fill="#702B0D"/>
-<rect x="160" y="383" width="80" height="80" transform="rotate(180 160 383)" fill="#702B0D"/>
-<rect x="80" y="303" width="80" height="80" transform="rotate(180 80 303)" fill="#702B0D"/>
-<rect x="643" y="423" width="80" height="80" transform="rotate(180 643 423)" fill="#702B0D"/>
-<rect x="491" y="160" width="41" height="38" transform="rotate(180 491 160)" fill="#702B0D"/>
-<rect x="131" y="59" width="41" height="38" transform="rotate(180 131 59)" fill="#702B0D"/>
-<rect x="471" y="421" width="41" height="38" transform="rotate(180 471 421)" fill="#702B0D"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="643" height="643" fill="none" viewBox="0 0 643 643"><path fill="#a54c26" fill-rule="evenodd" d="M0 0v522h80v41h81v-81h80v81h81V442h80v80h80v41h81v-81h80V0z" clip-rule="evenodd"/><path fill="#702b0d" d="M643 80h-80V0h80zM401 269h-80v-80h80zM160 383H80v-80h80zm-80-80H0v-80h80zm563 120h-80v-80h80zM491 160h-41v-38h41zM131 59H90V21h41zm340 362h-41v-38h41z"/></svg>

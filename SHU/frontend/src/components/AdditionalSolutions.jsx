@@ -4,7 +4,7 @@ import '../styles/AdditionalSolutions.css';
 import windowSvg from '../image/window.svg';
 // groundSvg import removed as we use Data URI now
 import diamondSvg from '../image/diamond.svg';
-import girlGif from '../image/girl.gif'; // Import the girl character
+import girlGif from '../image/girl.webp'; // Import the girl character
 
 const AdditionalSolutions = () => {
     const targetRef = useRef(null);

@@ -1,10 +1,10 @@
 import '../styles/GameDev.css'
 import ScrollReveal from './ui/ScrollReveal'
 import linesImg from '../image/lines.svg'
-import crownImg from '../image/crown.svg'
-import ufoImg from '../image/ufo.svg'
-import sticker1 from '../image/sticker_1.svg'
-import sticker2 from '../image/sticker_2.svg'
+import crownImg from '../image/crown.webp'
+import ufoImg from '../image/ufo.webp'
+import sticker1 from '../image/sticker_1.webp'
+import sticker2 from '../image/sticker_2.webp'
 
 const GameDev = () => {
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import '../styles/Solutions.css';
 import coffee from '../image/coffee.svg';
-import makeup from '../image/makeup.svg';
-import offece from '../image/offece.svg';
-import safety from '../image/safety.svg';
+import makeup from '../image/makeup.webp';
+import offece from '../image/offece.webp';
+import safety from '../image/safety.webp';
 import eye from '../image/eye.svg';
 import emojisvg from '../image/emojisvg.svg';
 import ScrollReveal from './ui/ScrollReveal';
