@@ -1,0 +1,99 @@
+.grid-details {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.grid-line {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Horizontal lines */
+.horizontal-25,
+.horizontal-50,
+.horizontal-75 {
+    width: 100%;
+    height: 1px;
+    left: 0;
+}
+
+.horizontal-25 {
+    top: 25%;
+}
+
+.horizontal-50 {
+    top: 50%;
+}
+
+.horizontal-75 {
+    top: 75%;
+}
+
+/* Vertical lines */
+.vertical-25,
+.vertical-50,
+.vertical-75 {
+    height: 100%;
+    width: 1px;
+    top: 0;
+}
+
+.vertical-25 {
+    left: 25%;
+}
+
+.vertical-50 {
+    left: 50%;
+}
+
+.vertical-75 {
+    left: 75%;
+}
+
+/* Plus signs */
+.grid-plus {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    margin-top: -4px;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 10px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pos-25-25 {
+    top: 25%;
+    left: 25%;
+}
+
+.pos-25-50 {
+    top: 25%;
+    left: 50%;
+}
+
+.pos-25-75 {
+    top: 25%;
+    left: 75%;
+}
+
+.pos-50-25 {
+    top: 50%;
+    left: 25%;
+}
+
+.pos-50-50 {
+    top: 50%;
+    left: 50%;
+}
+
+.pos-50-75 {
+    top: 50%;
+    left: 75%;
+}

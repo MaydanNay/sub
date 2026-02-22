@@ -1,0 +1,381 @@
+.solutions {
+    padding-bottom: var(--spacing-xl);
+    background-color: #E86D84;
+    border-radius: 0px 0px 20px 20px;
+}
+
+/* Header Section */
+.solutions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    padding: 0px 30px;
+}
+
+.solutions-title {
+    font-family: var(--font-pixel);
+    font-size: 64px;
+    line-height: 1;
+    color: #000;
+    text-transform: uppercase;
+}
+
+.solutions-description {
+    max-width: 600px;
+    font-size: 20px;
+    color: #000;
+    position: relative;
+    font-family: var(--font-body);
+}
+
+.solutions-description .highlight {
+    background-color: #9FD2FF;
+    /* Cyan highlight from screenshot */
+    padding: 2px 4px;
+    font-weight: bold;
+}
+
+.emoji-face-img {
+    position: absolute;
+    right: 5%;
+    bottom: -90px;
+    width: 140px;
+    height: 140px;
+    transform: rotate(-15deg);
+}
+
+.solutions-eye-decor {
+    position: absolute;
+    left: -80px;
+    top: 600px;
+    width: 250px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Grid Layout */
+.solutions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 0px 10px;
+}
+
+@media (max-width: 1200px) {
+    .solutions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .solutions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card General Styles */
+.solution-card {
+    border-radius: 30px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    position: relative;
+    overflow: hidden;
+    /* min-height: 500px; */
+    transition: transform 0.3s ease;
+    z-index: 1;
+}
+
+.solution-card:hover {
+    transform: translateY(-10px);
+}
+
+/* Card Image Header */
+.card-image-header {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.card-bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    border-radius: 15px;
+}
+
+.gradient-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 15px;
+    height: 100%;
+    /* Gradient from black (left) to transparent (right/center) */
+    background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.6) 40%, rgba(0, 0, 0, 0) 100%);
+    z-index: 1;
+}
+
+.card-title-overlay {
+    position: absolute;
+    top: 40px;
+    left: 20px;
+    z-index: 2;
+    color: #fff;
+    font-family: 'Tektur', sans-serif;
+    font-weight: 800;
+    /* ExtraBold */
+    font-size: 24px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    max-width: 80%;
+}
+
+.card-tag-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 2;
+    background-color: #6c6c6c91;
+    backdrop-filter: blur(4px);
+    padding: 5px 10px 5px 5px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Increased gap */
+}
+
+.tag-label {
+    background-color: #333333;
+    padding: 3px 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    /* Color will be inherited from parent/specific class below */
+}
+
+/* Specific Tag Colors - Apply to both label and value */
+.tag-promo .tag-value,
+.tag-promo .tag-label {
+    color: #FFFF00;
+}
+
+.tag-loyalty .tag-value,
+.tag-loyalty .tag-label {
+    color: #FF69B4;
+}
+
+.tag-hr .tag-value,
+.tag-hr .tag-label {
+    color: #00FFFF;
+}
+
+.tag-ed .tag-value,
+.tag-ed .tag-label {
+    color: #FF4500;
+}
+
+/* Content Section */
+.card-content {
+    /* padding: 20px; */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Specific Card Colors */
+.card-blue {
+    background-color: #7DC3FF;
+}
+
+.card-lime {
+    background-color: #CBFF7D;
+}
+
+.card-pink {
+    background-color: #FFA7F8;
+}
+
+.card-dark {
+    background-color: #3B3B3B;
+    color: #fff;
+    /* Dark card has white text */
+}
+
+.card-dark .card-content,
+.card-dark .card-example {
+    color: #fff;
+}
+
+.card-description {
+    font-size: 13px;
+    margin: 15px 0px;
+    line-height: normal;
+    font-weight: 500;
+}
+
+.card-example {
+    background-color: rgb(75 75 75 / 40%);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-bottom: 20px;
+    line-height: normal;
+    /* align-items: center; */
+    display: flex;
+    height: 100px;
+}
+
+.card-blue .card-example {
+    color: #fff;
+}
+
+.card-lime .card-example {
+    color: #525252;
+}
+
+.card-pink .card-example {
+    color: #3C3C3C;
+}
+
+.card-dark .card-example {
+    color: #525252;
+    text-shadow: none;
+}
+
+.card-dark .card-example {
+    background-color: #232323;
+}
+
+
+.metric-row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.metric-name {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    /* Removing bottom margin as it's now flex row */
+    opacity: 1;
+    /* Request implies solid text, matching screenshot styles */
+    min-width: 100px;
+    /* Ensure alignment */
+}
+
+.metric-bar-container {
+    height: 10px;
+    /* Slightly thicker */
+    background-color: rgba(255, 255, 255, 0.3);
+    /* Lighter background for the track */
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0;
+    flex-grow: 1;
+    /* Take remaining space */
+}
+
+.card-dark .metric-bar-container {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.metric-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+}
+
+/* Specific Metric Bar Colors */
+.card-blue .metric-bar-fill {
+    background-color: #C7F8FF;
+}
+
+.card-lime .metric-bar-fill {
+    background-color: #393F43;
+}
+
+.card-pink .metric-bar-fill {
+    background-color: #895385;
+}
+
+.card-dark .metric-bar-fill {
+    background-color: #1C1C1C;
+}
+
+
+@media (max-width: 768px) {
+    .solutions-header {
+        flex-direction: column;
+    }
+
+    .solutions-title {
+        font-size: clamp(28px, 9vw, 36px);
+        text-align: center;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .emoji-face {
+        position: static;
+        margin-top: 10px;
+        text-align: right;
+        display: block;
+        width: 100%;
+    }
+
+    .emoji-face-img {
+        width: 60px;
+        right: 0;
+        bottom: -30px;
+    }
+
+    .solutions-eye-decor {
+        display: none;
+        /* Hide decorative eye on mobile to reduce clutter */
+    }
+
+    .solutions-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .solution-card {
+        height: auto;
+        min-height: 450px;
+    }
+
+    .card-image-header {
+        height: 180px;
+    }
+
+    .card-title-overlay {
+        font-size: 24px;
+    }
+
+
+    .card-description {
+        font-size: 1rem;
+    }
+
+    .card-metrics {
+        margin-top: 20px;
+    }
+
+    .metric-name {
+        font-size: 10px;
+    }
+}

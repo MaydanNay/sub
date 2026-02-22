@@ -1,0 +1,231 @@
+.process-section {
+    position: relative;
+    min-height: 100vh;
+    z-index: 20;
+    background-color: var(--dark-bg);
+    padding: 80px 0;
+    overflow: visible;
+}
+
+.process-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.process-header {
+    text-align: center;
+    margin-bottom: 64px;
+}
+
+.process-title {
+    font-family: var(--font-pixel);
+    font-size: clamp(24px, 5vw, 48px);
+    color: #fff;
+    margin-top: 16px;
+    text-transform: uppercase;
+}
+
+.process-timeline-wrapper {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Timeline vertical lines */
+.timeline-line-static {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: -80px;
+    /* Extend static line to touch footer */
+    width: 4px;
+    background-color: #333;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.timeline-line-active {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 4px;
+    height: calc(100% + 80px);
+    /* Target height including padding */
+    background-color: var(--primary-pink);
+    transform: translateX(-50%);
+    transform-origin: top;
+    z-index: 2;
+}
+
+
+.process-steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 96px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Individual Step Styling */
+.process-step-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+@media (min-width: 768px) {
+    .process-step-item {
+        flex-direction: row;
+    }
+
+    .process-step-item.is-even {
+        flex-direction: row-reverse;
+    }
+}
+
+.step-content-wrapper {
+    flex: 1;
+    width: 100%;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .step-content-wrapper.text-right {
+        text-align: right;
+    }
+
+    .step-content-wrapper.text-left {
+        text-align: left;
+    }
+}
+
+.step-card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    padding: 24px;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.step-card:hover {
+    border-color: var(--primary-pink);
+}
+
+.step-badge {
+    font-family: var(--font-body);
+    color: var(--secondary-blue);
+    font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.step-item-title {
+    font-family: var(--font-pixel);
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.step-item-desc {
+    font-family: var(--font-body);
+    color: #aaa;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Timeline Dot */
+.step-dot-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    background-color: #000;
+    border: 2px solid var(--primary-pink);
+    border-radius: 4px;
+    /* Slightly rounded as in design */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step-dot-inner {
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-pink);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+@media (max-width: 768px) {
+    .process-section {
+        padding: 60px 16px;
+    }
+
+    .process-steps {
+        flex-direction: column;
+        gap: 60px;
+        padding: 0;
+    }
+
+    .process-step {
+        width: 100%;
+        text-align: center;
+    }
+
+    .step-number {
+        font-size: 60px;
+        margin-bottom: 10px;
+    }
+
+    /* Footer Mobile */
+    .footer-content {
+        flex-direction: column;
+        gap: 40px;
+        text-align: center;
+        padding: 40px 16px;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px 16px;
+        text-align: center;
+    }
+}
+
+.step-empty-block {
+    flex: 1;
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .step-empty-block {
+        display: block;
+    }
+}

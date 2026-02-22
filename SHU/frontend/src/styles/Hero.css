@@ -1,0 +1,179 @@
+.hero {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 80px 0;
+    text-align: center;
+}
+
+.hero-flare {
+    position: absolute;
+    top: 10%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    background-color: rgba(230, 109, 122, 0.2);
+    /* primary-pink with 20% opacity */
+    filter: blur(120px);
+    border-radius: 50%;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    color: var(--text-color);
+    font-size: 45px;
+    margin-bottom: var(--spacing-md);
+}
+
+.hero-subtitle {
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-lg);
+    font-family: var(--font-pixel);
+}
+
+.hero-text {
+    max-width: 800px;
+    margin: 0 auto var(--spacing-xl);
+    font-size: 1.2rem;
+    color: #B2B2B2;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+    animation-delay: 3s;
+}
+
+.hero-btn {
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    background: var(--secondary-blue);
+    border: 4px solid #fff;
+    box-shadow: 8px 8px 0px 0px rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
+    animation-delay: 3.5s;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hero-btn:hover {
+    transform: translate(-2px, -2px);
+    background: var(--secondary-color);
+    box-shadow: 10px 10px 0px 0px rgba(255, 255, 255, 0.2);
+}
+
+.hero-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 100px 16px 40px;
+        height: auto;
+        min-height: 100svh;
+        position: relative;
+        justify-content: center;
+    }
+
+    .hero-content {
+        width: 100%;
+        max-width: 100%;
+        top: -100px;
+    }
+
+    .hero-title {
+        font-size: 16px;
+        line-height: 1.2;
+        margin-bottom: 20px;
+        letter-spacing: -1px;
+        word-break: break-all;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .hero-text {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        color: #ddd;
+        max-width: 100%;
+        padding: 0 10px;
+    }
+
+    .hero-text br {
+        display: none;
+        /* Avoid hardcoded breaks messing up mobile layout */
+    }
+
+    .hero-btn {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        display: block;
+        padding: 14px 20px;
+        font-size: 14px;
+        box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-flare {
+        width: 250px;
+        height: 250px;
+        top: 30%;
+        left: 50%;
+        opacity: 0.4;
+    }
+}

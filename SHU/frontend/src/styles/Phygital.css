@@ -1,0 +1,39 @@
+.phygital-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.phygital-item {
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--text-color);
+    background: #202020;
+    position: relative;
+}
+
+.blind-box {
+    border-color: var(--warning-color, #ffaa00);
+}
+
+.animation {
+    border-color: var(--secondary-color);
+}
+
+.phygital-title {
+    margin-bottom: var(--spacing-md);
+    color: #fff;
+}
+
+.phygital-list {
+    margin-top: var(--spacing-md);
+    padding-left: var(--spacing-lg);
+    color: #ccc;
+}
+
+.phygital-list li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.phygital-list strong {
+    color: var(--primary-color);
+}

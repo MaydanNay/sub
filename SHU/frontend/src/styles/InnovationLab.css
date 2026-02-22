@@ -1,0 +1,30 @@
+.innovation-lab {
+    background: linear-gradient(0deg, #111 0%, #220022 100%);
+    text-align: center;
+    border-bottom: var(--border-width) solid var(--primary-color);
+}
+
+.lab-content {
+    max-width: 800px;
+    margin: 0 auto;
+    border: 4px dashed var(--primary-color);
+    padding: var(--spacing-xl);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.lab-text {
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.lab-btn {
+    background: transparent;
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    box-shadow: none;
+}
+
+.lab-btn:hover {
+    background: var(--secondary-color);
+    color: #000;
+}

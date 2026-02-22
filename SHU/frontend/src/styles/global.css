@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Play:wght@300;400;500;600;700;800;900&family=Press+Start+2P&family=Tektur:wght@400;500;600;700;800;900&display=swap');
+@import './variables.css';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    overflow-x: clip;
+    /* Prevent horizontal scroll while keeping sticky working */
+    width: 100%;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+#root {
+    width: 100%;
+    position: relative;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-pixel);
+    /* margin-bottom: var(--spacing-md); */
+    /* line-height: 1.2; */
+    font-weight: 500;
+    line-height: normal;
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+button {
+    cursor: pointer;
+    font-family: var(--font-pixel);
+    font-size: 14px;
+    border: var(--border-width) solid var(--text-color);
+    background: var(--primary-color);
+    color: var(--text-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.5);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px rgba(255, 255, 255, 0.5);
+}
+
+.container {
+    /* max-width: 1200px;
+    margin: 0 auto; */
+    padding: 0 var(--spacing-md);
+}
+
+section {
+    padding: var(--spacing-xl) 0;
+}

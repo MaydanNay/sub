@@ -1,0 +1,129 @@
+.error-card {
+    position: absolute;
+    width: 400px;
+    max-width: 100%;
+
+    background-color: #e5e7eb;
+    border: 2px solid #ffffff;
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+    color: #000;
+
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+
+.error-window-header {
+    background-color: #1e40af;
+    color: white;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-family: var(--font-pixel);
+    font-size: 12px;
+    line-height: normal;
+}
+
+.error-header-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.error-close-btn {
+    background-color: #d1d5db;
+    color: black;
+    border: 1px solid #ffffff;
+    box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 1);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    font-family: var(--font-pixel);
+}
+
+.error-close-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+.error-close-btn:focus {
+    outline: none;
+}
+
+.error-window-body {
+    padding: 16px;
+    font-family: var(--font-body);
+    font-size: 18px;
+}
+
+.error-icon-container {
+    display: none;
+}
+
+.error-content {
+    width: 100%;
+}
+
+.error-main-title {
+    font-size: 15px;
+    margin-bottom: 0.5rem;
+    text-align: start;
+    color: #FF0000;
+    font-weight: bold;
+    font-family: var(--font-pixel);
+    text-transform: uppercase;
+}
+
+.error-message {
+    color: #1f2937;
+    /* text-gray-800 */
+    line-height: 1.4;
+}
+
+.error-ok-btn {
+    /* Ok button wasn't in the snippet but was in my previous code. 
+       I'll keep it but style it to match the close button or standard windows button. */
+    margin-top: 16px;
+    background-color: #d1d5db;
+    color: black;
+    border: 2px solid #ffffff;
+    border-bottom-color: #000;
+    border-right-color: #000;
+    box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 0.5);
+    padding: 4px 16px;
+    font-family: var(--font-pixel);
+    font-size: 14px;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    /* Align right or center? */
+}
+
+.error-ok-btn:active {
+    border: 2px solid #000;
+    border-bottom-color: #fff;
+    border-right-color: #fff;
+    transform: translateY(1px);
+}
+
+@media (max-width: 768px) {
+    .error-card {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100%;
+        margin-bottom: 20px;
+        transform: none !important;
+        /* Reset transform for mobile layout safety */
+        animation: none;
+        /* Simplify on mobile */
+    }
+}

@@ -1,0 +1,38 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+  <!-- Main Dirt Background -->
+  <rect width="32" height="32" fill="#A54C26"/>
+  
+  <!-- Dirt Highlights/Shadows (Noise) -->
+  <rect x="4" y="12" width="4" height="4" fill="#702B0D"/>
+  <rect x="20" y="16" width="4" height="4" fill="#702B0D"/>
+  <rect x="12" y="24" width="4" height="4" fill="#702B0D"/>
+  <rect x="28" y="28" width="4" height="4" fill="#702B0D"/>
+  <rect x="8" y="20" width="4" height="4" fill="#702B0D"/>
+  <rect x="24" y="10" width="2" height="2" fill="#702B0D"/>
+  <rect x="2" y="28" width="2" height="2" fill="#702B0D"/>
+  
+  <!-- Main Grass Top (Top 4 pixels) -->
+  <rect width="32" height="4" fill="#59B24F"/>
+  
+  <!-- Grass Highlights (Lighter) -->
+  <rect x="4" y="0" width="4" height="2" fill="#2BD44A"/>
+  <rect x="12" y="2" width="2" height="2" fill="#2BD44A"/>
+  <rect x="20" y="0" width="4" height="2" fill="#2BD44A"/>
+  <rect x="28" y="2" width="2" height="2" fill="#2BD44A"/>
+  
+  <!-- Grass Shadows (Darker) -->
+  <rect x="8" y="0" width="2" height="2" fill="#148529"/>
+  <rect x="24" y="2" width="2" height="2" fill="#148529"/>
+  <rect x="0" y="2" width="2" height="2" fill="#148529"/>
+  
+  <!-- Grass Drips (Extending down) -->
+  <rect x="0" y="4" width="4" height="4" fill="#59B24F"/>
+  <rect x="8" y="4" width="4" height="2" fill="#59B24F"/> <!-- Short drip -->
+  <rect x="12" y="4" width="4" height="6" fill="#59B24F"/> <!-- Long drip -->
+  <rect x="20" y="4" width="4" height="4" fill="#59B24F"/>
+  <rect x="28" y="4" width="4" height="2" fill="#59B24F"/> <!-- Short drip -->
+  
+  <!-- Drip Shadows/Details -->
+  <rect x="12" y="8" width="4" height="2" fill="#148529"/> <!-- Shadow at tip of long drip -->
+  <rect x="0" y="6" width="4" height="2" fill="#148529"/>
+</svg>

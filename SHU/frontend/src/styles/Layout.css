@@ -1,0 +1,108 @@
+.main-content {
+    position: relative;
+    z-index: 10;
+    margin-top: 100vh;
+    /* Push content below fixed hero */
+    isolation: isolate;
+}
+
+/* Pixel Transition Strip at the very top of the scrolling content */
+.pixel-transition {
+    position: absolute;
+    top: -310px;
+    /* 8 rows * 40px = 320px */
+    left: 0;
+    width: 100%;
+    /* height: auto; let content define height */
+    display: flex;
+    flex-direction: column;
+    /* Stack rows vertically */
+    flex-wrap: nowrap;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.pixel-row {
+    display: flex;
+    /* Row of pixels */
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+    justify-content: center;
+    /* Center horizontally if max-width issues */
+}
+
+.pixel-block {
+    width: 40px;
+    height: 40px;
+    background-color: #E86D84;
+    /* Match 2nd section color */
+    flex-shrink: 0;
+}
+
+.pixel-block.hidden {
+    visibility: hidden;
+    /* Or opacity: 0 */
+}
+
+/* Remove old nth-child rules as we handle visibility in JS now */
+/* .pixel-block:nth-child(3n) ... removed */
+
+/* 2nd Section Wrapper */
+.why-games-wrapper {
+    background-color: #E86D84;
+    padding-top: var(--spacing-xl);
+    position: relative;
+}
+
+/* Ensure WhyGames text is readable on the pink background */
+.why-games-wrapper .section-title {
+    color: #000000;
+    text-align: center;
+}
+
+.why-games-wrapper .section-subtitle {
+    color: #fff;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.why-games-wrapper .why-games p {
+    color: #000000;
+    font-size: 15px;
+    text-align: start;
+    line-height: normal;
+    margin: 10px 0px;
+}
+
+/* Card Styling override for this section */
+.why-games-wrapper .pixel-card {
+    background: #fff;
+    border: 4px solid #000;
+    box-shadow: 8px 8px 0px 0px #000;
+}
+
+.why-games-wrapper .card-title {
+    color: #E86D84;
+}
+
+.why-games-wrapper .card-text {
+    color: #000;
+}
+
+.why-games-wrapper .card-emoji {
+    text-shadow: none;
+}
+
+/* Remaining content background */
+.content-bg {
+    background-color: var(--bg-color);
+    position: relative;
+    z-index: 11;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-top: 0;
+    }
+}

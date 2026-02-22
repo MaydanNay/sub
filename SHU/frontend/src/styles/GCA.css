@@ -1,0 +1,454 @@
+.gca {
+    background: #CFF25F;
+    padding: var(--spacing-xl) var(--spacing-md);
+    border-radius: 20px;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 100px;
+    max-height: 500px;
+    height: auto;
+}
+
+.gca-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 50px;
+    gap: 30px;
+}
+
+.header-text-content {
+    flex: 1;
+    max-width: 60%;
+}
+
+.header-image-content {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.header-network-img {
+    max-width: 400px;
+    height: auto;
+    object-fit: contain;
+    max-height: 300px;
+}
+
+h2.section-title {
+    text-align: left;
+    padding: 0px 30px;
+    color: black;
+    margin-bottom: 20px;
+}
+
+p.section-subtitle {
+    color: black;
+    text-align: left;
+    padding: 0px 30px;
+    width: 100%;
+    /* max-width: 600px; - Let it fill the container width */
+    line-height: normal;
+}
+
+.gca-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.gca-card {
+    padding: 20px;
+    border: 3px solid #000;
+    border-radius: 20px;
+    position: relative;
+    min-height: 250px;
+    height: 100%;
+    gap: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 6px 6px 0px #000;
+}
+
+.gca-card::before {
+    display: none;
+}
+
+.gca-card-title {
+    color: #000;
+    font-family: var(--font-pixel);
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+/* Specific Card Styles from Screenshot */
+.style-card {
+    background-color: #E86D84;
+    /* Pink */
+}
+
+.specialists-card {
+    background-color: #FFD700;
+    /* Yellow */
+}
+
+.management-card {
+    background-color: #6CFFFF;
+    /* Blue */
+    overflow: hidden;
+    position: relative;
+}
+
+
+.card-icons {
+    background: #fff;
+    border-radius: 40px;
+    border: 3px solid #000;
+    padding: 4px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    /* margin-bottom: 25px; */
+}
+
+.style-item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 70px; */
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 3px solid transparent;
+}
+
+.style-item.active {
+    background-color: #CFF25F;
+    border-color: #000;
+    transform: scale(1.05);
+}
+
+.style-icon {
+    font-size: 32px;
+}
+
+.card-pill-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    top: -13px;
+}
+
+.card-pill {
+    background: #CFF25F;
+    border: 3px solid #000;
+    border-radius: 30px;
+    padding: 8px 30px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 800;
+    font-family: 'Play';
+    color: #000;
+    width: 78%;
+    position: relative;
+    box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.1);
+}
+
+.pill-pointer {
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 15px solid #000;
+    margin-bottom: -1px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 11;
+}
+
+
+.pill-pointer::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: -20px;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 16px solid #CFF25F;
+}
+
+/* Precise pointer positioning based on active style */
+.pointer-anime {
+    transform: translateX(-75px);
+}
+
+.pointer-pixel {
+    transform: translateX(0);
+}
+
+.pointer-other {
+    transform: translateX(75px);
+}
+
+.card-illustration {
+    border: 2px solid #000;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+/* Management Card Checkmark Background */
+.card-checkmark-bg {
+    position: absolute;
+    right: -20px;
+    bottom: -60px;
+    font-size: 350px;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.1);
+    transform: rotate(15deg);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.card-status {
+    position: relative;
+    z-index: 1;
+    background: #D4F265;
+    /* Slightly more yellow-green per screenshot vibe */
+    border: 3px solid #000;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 20px;
+    color: black;
+    font-weight: 800;
+    font-family: 'Play';
+    text-transform: uppercase;
+    text-align: center;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    /* Mimic "Project status: 100% DONE" look */
+}
+
+/* Retro TV Specialist Card Inner Styles */
+
+.retro-tv-monitor {
+    background: #311414;
+    padding: 10px;
+    border-radius: 12px;
+    border: 3px solid #000;
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.1),
+        0 0 0 2px #333;
+    position: relative;
+    border-bottom-width: 8px;
+    margin-top: auto;
+}
+
+.retro-tv-screen {
+    background: #c1c1c1;
+    /* Retro Pink Screen Base */
+    border-radius: 16px;
+    /* Increased radius for CRT look */
+    height: 100px;
+    /* Adjusted height for grid card */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    color: #000;
+    font-family: var(--font-pixel);
+    font-size: 18px;
+    text-align: center;
+    padding: 10px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+    /* Deeper inner shadow for depth */
+    animation: flicker 0.15s infinite;
+}
+
+/* Noise Effect */
+.retro-tv-screen::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Scanline Effect */
+.retro-tv-screen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(transparent 50%,
+            rgba(0, 0, 0, 0.2) 50%);
+    background-size: 100% 4px;
+    /* Scanline thickness */
+    pointer-events: none;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .gca {
+        padding: 40px 16px;
+        margin-bottom: 60px;
+        max-height: 10000px;
+    }
+
+    .gca-header {
+        flex-direction: column;
+        gap: 30px;
+        padding-bottom: 30px;
+        text-align: center;
+    }
+
+    .header-text-content {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .section-title{
+        text-align: left!important;
+        font-size: 30px!important;
+    }
+
+    /* h2.section-title {
+        font-size: clamp(24px, 8vw, 32px) !important;
+        text-align: center;
+        padding: 0;
+        margin-bottom: 15px;
+    } */
+
+    p.section-subtitle {
+        font-size: 16px;
+        text-align: center;
+        padding: 0;
+        line-height: 1.4;
+    }
+
+    .header-image-content {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .header-network-img {
+        max-width: 100%;
+        max-height: 250px;
+    }
+
+    .gca-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .gca-card {
+        min-height: auto;
+        padding: 25px;
+    }
+
+    .gca-card-title {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.97;
+    }
+
+    5% {
+        opacity: 0.95;
+    }
+
+    10% {
+        opacity: 0.9;
+    }
+
+    15% {
+        opacity: 0.95;
+    }
+
+    20% {
+        opacity: 0.99;
+    }
+
+    25% {
+        opacity: 0.95;
+    }
+
+    30% {
+        opacity: 0.9;
+    }
+
+    35% {
+        opacity: 0.96;
+    }
+
+    40% {
+        opacity: 0.98;
+    }
+
+    45% {
+        opacity: 0.95;
+    }
+
+    50% {
+        opacity: 0.99;
+    }
+
+    55% {
+        opacity: 0.93;
+    }
+
+    60% {
+        opacity: 0.9;
+    }
+
+    65% {
+        opacity: 0.96;
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    75% {
+        opacity: 0.97;
+    }
+
+    80% {
+        opacity: 0.95;
+    }
+
+    85% {
+        opacity: 0.92;
+    }
+
+    90% {
+        opacity: 0.98;
+    }
+
+    95% {
+        opacity: 0.95;
+    }
+
+    100% {
+        opacity: 0.98;
+    }
+}

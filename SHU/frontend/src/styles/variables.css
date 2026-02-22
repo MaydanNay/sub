@@ -1,0 +1,33 @@
+:root {
+  /* Colors */
+  --bg-color: #232323;
+  --text-color: #ffffff;
+  --primary-color: #E86D84;
+  --secondary-color: #9FD2FF;
+  --accent-color: #ffff00;
+  /* Yellow */
+  --success-color: #00ff00;
+  /* Lime Green */
+  --card-bg: #1a1a1a;
+
+  --primary-pink: #E66D7A;
+  --secondary-blue: #7BCFF6;
+  --dark-bg: #232323;
+  --neon-green: #39FF14;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 32px;
+  --spacing-xl: 64px;
+
+  /* Typography */
+  --font-pixel: 'Press Start 2P', cursive;
+  --font-body: 'Play', sans-serif;
+
+  /* Borders */
+  --border-width: 4px;
+  --border-radius: 0px;
+  /* Pixel art style usually has no border radius */
+}

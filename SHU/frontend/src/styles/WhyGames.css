@@ -1,0 +1,133 @@
+.why-games {
+    text-align: center;
+    position: relative;
+    min-height: 600px;
+    /* Ensure enough space for scattered cards */
+    flex-direction: column;
+    /* Stack title and cards vertically */
+    align-items: center;
+}
+
+.error-desktop {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    /* Give it specific height for absolute children */
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .why-games {
+        min-height: auto;
+        padding-bottom: var(--spacing-xl);
+    }
+
+    .error-desktop {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .why-games .section-title {
+        font-size: clamp(22px, 7vw, 32px) !important;
+        padding: 0 16px;
+        margin-bottom: 30px;
+        text-align: left;
+        font-size: 20px;
+    }
+
+    .why-games .section-title br {
+        display: none;
+    }
+}
+
+/* Success Message Styling */
+.success-message-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    max-width: 500px;
+    background-color: #fff;
+    border: 4px solid #000;
+    box-shadow: 12px 12px 0px rgba(184, 255, 101, 0.4);
+    font-family: var(--font-pixel);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.success-header {
+    background-color: #B8FF65;
+    padding: 8px 16px;
+    border-bottom: 4px solid #000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.success-header-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+}
+
+.success-content {
+    padding: 30px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.success-title {
+    font-size: 24px;
+    color: #000;
+    margin: 0;
+}
+
+.success-text {
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.success-cta-btn {
+    background-color: #B8FF65;
+    color: #000;
+    border: 2px solid #000;
+    padding: 12px 24px;
+    font-family: var(--font-pixel);
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 4px 4px 0px #000;
+    transition: all 0.2s ease;
+}
+
+.success-cta-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #000;
+}
+
+@media (max-width: 768px) {
+    .success-message-card {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none !important;
+        /* Override framer-motion inline style */
+        width: 100%;
+        margin: 30px auto 0;
+        display: block;
+    }
+
+    .success-title {
+        font-size: 20px;
+    }
+
+    .success-text {
+        font-size: 14px;
+    }
+}

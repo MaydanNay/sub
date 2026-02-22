@@ -1,0 +1,9 @@
+.typewriter-cursor {
+    display: inline-block;
+    width: 12px;
+    height: 1em;
+    /* Scales with font size */
+    background-color: var(--neon-green);
+    margin-left: 4px;
+    vertical-align: middle;
+}
