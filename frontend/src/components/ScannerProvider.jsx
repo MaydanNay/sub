@@ -11,29 +11,46 @@ const ScannerContext = createContext();
 export const useScanner = () => useContext(ScannerContext);
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
-const USER_PHONE = "7770000000";
-
 export const ScannerProvider = ({ children }) => {
     const { show } = useNotification();
-    const { fetchUser } = useUser();
+    const { userPhone, fetchUser } = useUser();
+    const [isActionPending, setIsActionPending] = useState(false);
+    const [isOpening, setIsOpening] = useState(false);
     const [scanMode, setScanMode] = useState(false);
     const [chest, setChest] = useState(null);
     const [prizes, setPrizes] = useState(null);
 
+    const scanTimeoutRef = React.useRef(null);
+
     const handleScan = () => {
+        if (isActionPending) return;
+        setIsActionPending(true);
         setScanMode(true);
-        setTimeout(() => {
+
+        scanTimeoutRef.current = setTimeout(() => {
             setScanMode(false);
             checkScan("MOCK_QR_DATA");
+            setIsActionPending(false);
         }, 2000);
     };
+
+    useEffect(() => {
+        return () => {
+            if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
+        };
+    }, []);
+
+    useEffect(() => {
+        // Auto-cleanup for handleScan if provider unmounts during simulation
+        // Though handleScan returns a cleanup, it's not captured by React unless used in useEffect
+    }, []);
 
     const checkScan = async (qrData) => {
         try {
             const res = await axios.post(`${API_URL}/transactions/scan`, {
                 qr_data: qrData,
-                user_phone: USER_PHONE
-            });
+                user_phone: userPhone
+            }, { timeout: 5000 });
             setChest(res.data.chest_type);
         } catch (e) {
             console.error(e);
@@ -42,25 +59,32 @@ export const ScannerProvider = ({ children }) => {
     };
 
     const openChest = async () => {
-        if (!chest) return;
+        if (!chest || isOpening) return;
+        setIsOpening(true);
         confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
         try {
-            const res = await axios.post(`${API_URL}/chests/open`, null, { params: { chest_type: chest, user_phone: USER_PHONE } });
+            const res = await axios.post(`${API_URL}/chests/open`, null, {
+                params: { chest_type: chest, user_phone: userPhone },
+                timeout: 5000
+            });
             setPrizes(res.data); // Store full response to handle coins/skins/coupons
             fetchUser(); // Sync coins globally after open
         } catch (e) {
             console.error(e);
             show("Ошибка открытия сундука", 'error');
             setChest(null);
+        } finally {
+            setIsOpening(false);
         }
     };
 
     // Confetti effect when prize triggers
     useEffect(() => {
+        let animationFrameId;
         if (prizes) {
             const end = Date.now() + 1000;
             const colors = ['#bb0000', '#ffffff'];
-            (function frame() {
+            const frame = () => {
                 confetti({
                     particleCount: 2,
                     angle: 60,
@@ -76,10 +100,16 @@ export const ScannerProvider = ({ children }) => {
                     colors: colors
                 });
                 if (Date.now() < end) {
-                    requestAnimationFrame(frame);
+                    animationFrameId = requestAnimationFrame(frame);
                 }
-            }());
+            };
+            frame();
         }
+        return () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
     }, [prizes]);
 
     const closeAll = () => {

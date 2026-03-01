@@ -150,6 +150,13 @@ export const getCurrentCharacter = (statusKey) => {
 };
 
 /**
+ * Get character by its numeric ID
+ */
+export const getCharacterById = (id) => {
+    return CHARACTERS.find(c => c.id === id) || null;
+};
+
+/**
  * Get the next character after the current one
  */
 export const getNextCharacter = (statusKey) => {

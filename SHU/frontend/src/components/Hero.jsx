@@ -3,7 +3,7 @@ import '../styles/Hero.css'
 import GridDetails from './GridDetails'
 import Typewriter from './Typewriter'
 
-const Hero = () => {
+const Hero = ({ onOpenModal }) => {
     return (
         <section className="hero">
             <GridDetails />
@@ -30,7 +30,7 @@ const Hero = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.4, ease: [0.22, 1, 0.36, 1] }}
-                    onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                    onClick={onOpenModal}
                 >
                     Узнать стоимость
                 </motion.button>

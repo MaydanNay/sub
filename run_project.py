@@ -15,9 +15,9 @@ def run_commands():
         python_exe = sys.executable
 
     if os.path.exists(venv_python):
-         backend_cmd = f'"{python_exe}" -m pip install -r backend/requirements.txt && "{python_exe}" -m uvicorn backend.main:app --reload --port 8000'
+         backend_cmd = f'"{python_exe}" -m uvicorn backend.main:app --reload --port 8001'
     else:
-         backend_cmd = f'"{python_exe}" -m uvicorn backend.main:app --reload --port 8000'
+         backend_cmd = f'"{python_exe}" -m uvicorn backend.main:app --reload --port 8001'
     
     frontend_cmd = f"cd frontend && npm install --legacy-peer-deps && npm run dev"
 
@@ -26,13 +26,13 @@ def run_commands():
         subprocess.Popen(f'start "Frontend Server" cmd /k "{frontend_cmd}"', shell=True, cwd=base_dir)
     else:
         import signal
-        subprocess.run("fuser -k 8000/tcp 2>/dev/null || true", shell=True, cwd=base_dir)
+        subprocess.run("fuser -k 8001/tcp 2>/dev/null || true", shell=True, cwd=base_dir)
         subprocess.run("fuser -k 5175/tcp 2>/dev/null || true", shell=True, cwd=base_dir)
         time.sleep(0.5)
         subprocess.Popen(backend_cmd, shell=True, cwd=base_dir, stdin=subprocess.DEVNULL)
         subprocess.Popen(frontend_cmd, shell=True, cwd=base_dir, stdin=subprocess.DEVNULL)
 
-    print("Backend: http://localhost:8000")
+    print("Backend: http://localhost:8001")
     print("Frontend: http://localhost:5175")
 
 if __name__ == "__main__":

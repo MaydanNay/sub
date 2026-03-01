@@ -1,49 +1,15 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { cn } from "../lib/utils";
-import { Button } from "./ui/Button";
-import { FormInput } from "./ui/FormInput";
-import { FormTextarea } from "./ui/FormTextarea";
+import RequestForm from "./RequestForm";
 import '../styles/Footer.css';
 
-const Footer = () => {
+const Footer = ({ onFormSuccess }) => {
     const footerRef = useRef(null);
     const { scrollYProgress } = useScroll({
         target: footerRef,
         offset: ["start end", "center center"],
     });
-
-    const [name, setName] = useState("");
-    const [contact, setContact] = useState("");
-    const [task, setTask] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState(null);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        setSubmitStatus(null);
-        try {
-            const res = await fetch("/api/notify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, contact, task }),
-            });
-            if (res.ok) {
-                setSubmitStatus("success");
-                setName("");
-                setContact("");
-                setTask("");
-            } else {
-                setSubmitStatus("error");
-            }
-        } catch (error) {
-            console.error(error);
-            setSubmitStatus("error");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
 
     // Animate background color from black to primary-pink
     // More delayed to keep wave visible against black background
@@ -115,55 +81,13 @@ const Footer = () => {
                         ЗАЯВКА НА КОНЦЕПТ
                     </div>
 
-                    <form className="footer-form" onSubmit={handleSubmit}>
-                        <div className="form-grid">
-                            <FormInput
-                                label="Как к вам обращаться?"
-                                type="text"
-                                placeholder="ИМЯ"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                style={{ backgroundColor: inputBg, color: inputTextColor }}
-                                labelStyle={{ color: labelColor }}
-                            />
-                            <FormInput
-                                label="Email / Телефон / Telegram"
-                                type="text"
-                                placeholder="КОНТАКТ ДЛЯ СВЯЗИ"
-                                value={contact}
-                                onChange={(e) => setContact(e.target.value)}
-                                style={{ backgroundColor: inputBg, color: inputTextColor }}
-                                labelStyle={{ color: labelColor }}
-                            />
-                        </div>
-                        <FormTextarea
-                            label="Задача (необязательно)"
-                            rows={3}
-                            placeholder="КРАТКО О ПРОЕКТЕ..."
-                            value={task}
-                            onChange={(e) => setTask(e.target.value)}
-                            style={{ backgroundColor: inputBg, color: inputTextColor }}
-                            labelStyle={{ color: labelColor }}
-                        />
-                        <div className="form-submit-wrapper">
-                            <motion.div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    variant="primary"
-                                    className="footer-submit-btn"
-                                    style={{ backgroundColor: btnBg }}
-                                >
-                                    {isSubmitting ? "ОТПРАВКА..." : submitStatus === "success" ? "ОТПРАВЛЕНО!" : "ПОЛУЧИТЬ БЕСПЛАТНЫЙ КОНЦЕПТ"}
-                                </Button>
-                                {submitStatus === "error" && (
-                                    <p style={{ color: "red", marginTop: "1rem", textAlign: "center" }}>
-                                        Произошла ошибка при отправке. Пожалуйста, попробуйте позже.
-                                    </p>
-                                )}
-                            </motion.div>
-                        </div>
-                    </form>
+                    <RequestForm
+                        inputBg={inputBg}
+                        inputTextColor={inputTextColor}
+                        labelColor={labelColor}
+                        btnBg={btnBg}
+                        onSuccess={onFormSuccess}
+                    />
                 </motion.div>
 
                 {/* social and copyright */}
@@ -171,9 +95,8 @@ const Footer = () => {
                     className="footer-social-grid"
                     style={{ color: socialColor }}
                 >
-                    <a href="#" className="footer-social-link">INSTAGRAM</a>
+                    <a href="https://www.instagram.com/shu.studio/" target="_blank" rel="noopener noreferrer" className="footer-social-link">INSTAGRAM</a>
                     <a href="#" className="footer-social-link">TELEGRAM</a>
-                    <a href="#" className="footer-social-link">BEHANCE</a>
                     <a href="#" className="footer-social-link">LINKEDIN</a>
                 </motion.div>
 

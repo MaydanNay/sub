@@ -14,7 +14,7 @@ const ShuBoomAR = () => {
     }, []);
 
     return (
-        <div className="h-screen w-full bg-black relative">
+        <div className="h-screen w-full bg-black relative font-montserrat">
             <Link to="/game/shuboom/collection" className="absolute top-4 left-4 z-10 text-white bg-black/50 p-3 rounded-full backdrop-blur-md">
                 <ArrowLeft className="w-6 h-6" />
             </Link>
@@ -22,7 +22,7 @@ const ShuBoomAR = () => {
             <model-viewer
                 src={modelUrl}
                 ios-src=""
-                poster="https://placehold.co/400/transparent/white?text=Loading..."
+                poster="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=60&w=400"
                 alt="A 3D model"
                 shadow-intensity="1"
                 camera-controls
@@ -32,7 +32,7 @@ const ShuBoomAR = () => {
                 style={{ width: '100%', height: '100%' }}
             >
                 <div className="absolute bottom-10 left-0 right-0 flex justify-center pointer-events-none">
-                    <button className="bg-white text-black px-6 py-3 rounded-full font-bold shadow-lg pointer-events-auto flex items-center gap-2 active:scale-95 transition-transform">
+                    <button className="bg-white text-black px-6 py-3 rounded-full font-bold shadow-lg pointer-events-auto flex items-center gap-2 active:scale-95 transition-transform font-montserrat">
                         <Camera className="w-5 h-5" /> Снять фото
                     </button>
                 </div>

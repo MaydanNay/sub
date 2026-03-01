@@ -47,6 +47,7 @@ class PrizeType(str, Enum):
     COUPON = "COUPON"
 
 class CharacterBase(BaseModel):
+    model_config = {"protected_namespaces": ()}
     name: str
     description: Optional[str] = None
     rarity: Rarity
@@ -86,10 +87,18 @@ class User(UserBase):
     daily_streak: int = 0
     last_bonus_date: Optional[datetime] = None
     pending_chest: Optional[str] = None
+    equipped_character_id: Optional[int] = None
+    skins: List[str] = []
+    coupons: List[int] = []
     collection: List[UserCollection] = []
 
     class Config:
         from_attributes = True
+
+class BuyRequest(BaseModel):
+    item_id: str
+    item_type: str  # 'skin' or 'promo'
+    cost: int
 
 class ScanRequest(BaseModel):
     qr_data: str
@@ -112,6 +121,10 @@ class ChestResult(BaseModel):
 class MergeRequest(BaseModel):
     character_id: int
 
+class EquipRequest(BaseModel):
+    character_id: Optional[int] = None
+    skin_id: Optional[str] = None
+
 # --- ShuBank Together Schemas ---
 
 class ShuBankUserState(BaseModel):
@@ -121,6 +134,12 @@ class ShuBankUserState(BaseModel):
     home_level: int
     shubank_name: str
     deposit_balance: Optional[float] = 0
+    inventory: List[str] = []
+    quests_completed: List[str] = []
+    current_skin_id: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 class ShuBankShopBuyRequest(BaseModel):
     item_id: str
@@ -133,6 +152,9 @@ class ShuBankPrideCreateRequest(BaseModel):
 class ShuBankMinigameSyncRequest(BaseModel):
     coins: int
 
+class ShuBankQuestCompleteRequest(BaseModel):
+    quest_id: str
+
 class BankTransactionWebhook(BaseModel):
     client_hash: str
     amount: float
@@ -142,3 +164,18 @@ class BankTransactionWebhook(BaseModel):
 class BankDepositUpdateWebhook(BaseModel):
     client_hash: str
     total_balance: float
+
+class LeadRequestBase(BaseModel):
+    name: str
+    contact: str
+    task: Optional[str] = None
+
+class LeadRequestCreate(LeadRequestBase):
+    pass
+
+class LeadRequest(LeadRequestBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

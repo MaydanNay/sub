@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, Boolean, ForeignKey, Enum, DateTime, JSON
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, ForeignKey, Enum, DateTime, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from .database import Base
 import enum
@@ -48,8 +48,12 @@ class User(Base):
     last_bonus_date = Column(DateTime, nullable=True)
     last_purchase_date = Column(DateTime, default=datetime.datetime.utcnow)
     pending_chest = Column(String, nullable=True) # Type of chest purchased but not yet opened
+    equipped_character_id = Column(Integer, ForeignKey("characters.id"), nullable=True)
+    skins = Column(JSON, default=[]) # List of skin IDs owned by the user
+    coupons = Column(JSON, default=[]) # List of promotion IDs owned by the user
     
     collection = relationship("UserCollection", back_populates="user")
+    equipped_character = relationship("Character")
 
 class Character(Base):
     __tablename__ = "characters"
@@ -73,6 +77,8 @@ class UserCollection(Base):
     level = Column(Integer, default=1)
     characteristics = Column(JSON, default={})
 
+    __table_args__ = (UniqueConstraint('user_id', 'character_id', 'level', name='_user_character_level_uc'),)
+
     user = relationship("User", back_populates="collection")
     character = relationship("Character")
 
@@ -85,3 +91,12 @@ class Quest(Base):
     type = Column(String) # DAILY, WEEKLY, GEO, PRODUCT
     condition = Column(JSON)
     reward_chest_type = Column(Enum(ChestType))
+
+class LeadRequest(Base):
+    __tablename__ = "lead_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    contact = Column(String)
+    task = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)

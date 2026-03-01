@@ -5,7 +5,7 @@ import { ArrowRight, Gift, Map, Camera } from 'lucide-react';
 
 const ShuBoomIntro = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-orange-400 to-red-500 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-b from-orange-400 to-red-500 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden font-montserrat">
 
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -31,8 +31,8 @@ const ShuBoomIntro = () => {
                 transition={{ duration: 0.5 }}
                 className="z-10 text-center max-w-md"
             >
-                <h1 className="text-6xl font-black mb-2 drop-shadow-lg tracking-tighter">ShuBoom</h1>
-                <p className="text-xl font-medium mb-8 opacity-90">Собери их всех!</p>
+                <h1 className="text-6xl font-black mb-2 drop-shadow-lg tracking-tighter font-montserrat">ShuBoom</h1>
+                <p className="text-xl font-medium mb-8 opacity-90 font-montserrat">Собери их всех!</p>
 
                 <div className="bg-white/20 backdrop-blur-md rounded-3xl p-6 mb-8 shadow-xl border border-white/30">
                     <div className="grid grid-cols-1 gap-4 text-left">
@@ -62,8 +62,8 @@ const Feature = ({ icon: Icon, title, desc }) => (
             <Icon className="w-6 h-6 text-white" />
         </div>
         <div>
-            <h3 className="font-bold text-lg leading-tight">{title}</h3>
-            <p className="text-sm opacity-80 leading-tight">{desc}</p>
+            <h3 className="font-bold text-lg leading-tight font-montserrat">{title}</h3>
+            <p className="text-sm opacity-80 leading-tight font-montserrat">{desc}</p>
         </div>
     </div>
 );

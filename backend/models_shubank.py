@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON, DECIMAL
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from .database import Base
@@ -18,8 +19,10 @@ class ShuBankUser(Base):
     transaction_count = Column(Integer, default=0)
     deposit_balance = Column(DECIMAL, default=0)
     quests_completed = Column(JSON, default=list) # List of quest IDs
-    last_active_at = Column(DateTime(timezone=True), onupdate=func.now())
+    last_active_at = Column(DateTime(timezone=True), server_default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    inventory = relationship("ShuBankInventory", back_populates="user")
 
 class ShuBankInventory(Base):
     __tablename__ = "shubank_inventory"
@@ -29,6 +32,8 @@ class ShuBankInventory(Base):
     item_id = Column(String(50))
     item_type = Column(String(20)) # 'skin', 'furniture', 'booster'
     is_equipped = Column(Boolean, default=False)
+
+    user = relationship("ShuBankUser", back_populates="inventory")
 
 class ShuBankPride(Base):
     __tablename__ = "shubank_prides"

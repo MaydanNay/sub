@@ -6,6 +6,12 @@
     isolation: isolate;
 }
 
+.main-content.thank-you-page {
+    margin-top: 0;
+    background-color: var(--bg-color);
+    min-height: 100vh;
+}
+
 /* Pixel Transition Strip at the very top of the scrolling content */
 .pixel-transition {
     position: absolute;

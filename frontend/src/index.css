@@ -1,16 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Play:wght@300;400;500;600;700;800;900&family=Press+Start+2P&family=Tektur:wght@400;500;600;700;800;900&display=swap');
+@import './styles/variables.css';
+@import './styles/RequestForm.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary-color: #4f46e5;
-  /* Default Indigo */
+  --primary-color: #E66D7A;
+  --shu-pink: #E66D7A;
+  --shu-blue: #7BCFF6;
+  --shu-bg: #232323;
+  --shu-card: #1a1a1a;
+  --font-pixel: 'Press Start 2P', cursive;
+  --font-body: 'Play', sans-serif;
+  --font-montserrat: 'Montserrat', sans-serif;
 }
 
-/* 3D Dice Styles */
+body {
+  @apply bg-[#232323] text-white font-shubody;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-shupixel;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.pixel-border {
+  @apply border-4 border-white;
+}
+
+.pixel-shadow {
+  @apply shadow-pixel;
+}
+
+.pixel-shadow-hover:hover {
+  @apply shadow-pixel-lg -translate-x-1 -translate-y-1;
+}
+
+.pixel-button {
+  @apply font-shupixel text-xs px-4 py-2 border-4 border-white bg-[#E66D7A] text-white shadow-pixel active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-sm transition-all;
+}
+
+/* 3D Dice Styles - Keeping these for compatibility */
 .scene {
   perspective: 600px;
 }
+
+/* ... rest of the existing file ... */
 
 .cube {
   position: relative;
@@ -126,4 +174,30 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateX(5px) rotate(1deg);
+  }
+
+  75% {
+    transform: translateX(-5px) rotate(-1deg);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }

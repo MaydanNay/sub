@@ -29,7 +29,7 @@ const ShuBankIntro = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-amber-100 overflow-x-hidden">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-montserrat selection:bg-amber-100 overflow-x-hidden">
             {/* Background Decorations */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-200/30 rounded-full blur-3xl opacity-70 animate-blob"></div>

@@ -1,6 +1,9 @@
-import React, { lazy, Suspense } from 'react'
+import React, { lazy, Suspense, useState } from 'react'
 import Header from './components/Header'
 import Hero from './components/Hero'
+import Modal from './components/ui/Modal'
+import RequestForm from './components/RequestForm'
+import ThankYou from './components/ThankYou'
 
 const WhyGames = lazy(() => import('./components/WhyGames'))
 const Solutions = lazy(() => import('./components/Solutions'))
@@ -13,9 +16,12 @@ const AdditionalSolutions = lazy(() => import('./components/AdditionalSolutions'
 const Process = lazy(() => import('./components/Process'))
 const Footer = lazy(() => import('./components/Footer'))
 
+import { Routes, Route, useNavigate } from 'react-router-dom'
+
 import './styles/Layout.css'
 
 function App() {
+  const navigate = useNavigate();
   // Generate pixels for the transition strip (Multi-row)
   const rows = 8; // Increased rows again for even deeper valley
   const pixelsPerRow = 50; // Increased width coverage
@@ -102,34 +108,76 @@ function App() {
     );
   });
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleFormSuccess = () => {
+    setIsModalOpen(false);
+    navigate('/thanks');
+    window.scrollTo(0, 0); // Scroll to top for the new page
+  };
+
   return (
-    <div className="app-container">
-      <Header />
-      <Hero />
+    <Routes>
+      <Route path="/" element={
+        <div className="app-container">
+          <Header />
+          <Hero onOpenModal={() => setIsModalOpen(true)} />
 
-      <main className="main-content">
-        {/* Pixel Transition Strip */}
-        <div className="pixel-transition">
-          {pixelGrid}
+          <main className="main-content">
+            {/* Pixel Transition Strip */}
+            <div className="pixel-transition">
+              {pixelGrid}
+            </div>
+
+            <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)' }} />}>
+              <div className="why-games-wrapper">
+                <WhyGames />
+              </div>
+
+              <div className="content-bg">
+                <Solutions />
+                <Separator />
+                <GCA />
+                <GameDev />
+                <AdditionalSolutions />
+                <Process />
+                <Footer onFormSuccess={handleFormSuccess} />
+              </div>
+            </Suspense>
+          </main>
+
+          {/* Main Request Modal */}
+          <Modal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title="ОСТАВИТЬ ЗАЯВКУ"
+          >
+            <RequestForm
+              inputBg="#1a1a1a"
+              inputTextColor="#ffffff"
+              labelColor="#666666"
+              btnBg="#E66D7A"
+              isModal={true}
+              onClose={() => setIsModalOpen(false)}
+              onSuccess={handleFormSuccess}
+            />
+          </Modal>
         </div>
+      } />
 
-        <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)' }} />}>
-          <div className="why-games-wrapper">
-            <WhyGames />
-          </div>
-
-          <div className="content-bg">
-            <Solutions />
-            <Separator />
-            <GCA />
-            <GameDev />
-            <AdditionalSolutions />
-            <Process />
-            <Footer />
-          </div>
-        </Suspense>
-      </main>
-    </div>
+      <Route path="/thanks" element={
+        <div className="app-container">
+          <Header />
+          <main className="main-content thank-you-page">
+            <ThankYou
+              onClose={() => navigate('/')}
+              isModal={false}
+              isFullPage={true}
+            />
+          </main>
+        </div>
+      } />
+    </Routes>
   )
 }
 
