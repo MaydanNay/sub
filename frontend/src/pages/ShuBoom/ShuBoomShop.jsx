@@ -300,7 +300,11 @@ const ShuBoomShop = () => {
                                 {prizes.prize_type === 'CHARACTER' ? (prizes.is_new ? 'НОВЫЙ ГЕРОЙ!' : 'ЕЩЕ ОДИН!') : 'УРА!'}
                             </h2>
                             <div className="w-64 h-64 rounded-[40px] bg-slate-100 shadow-2xl overflow-hidden mb-8 relative flex items-center justify-center">
-                                <img src={prizes.image_url} alt={prizes.title} className="w-full h-full object-contain p-4" />
+                                {prizes.image_url && prizes.image_url.includes('http') ? (
+                                    <img src={prizes.image_url} alt={prizes.title} className="w-full h-full object-contain p-4" />
+                                ) : (
+                                    <span className="text-[100px] drop-shadow-lg">{prizes.image_url}</span>
+                                )}
                                 {prizes.prize_type === 'CHARACTER' && (
                                     <div className="absolute top-4 right-4 bg-yellow-400 text-black text-[10px] font-black px-2 py-1 rounded-lg">
                                         {prizes.character.rarity}

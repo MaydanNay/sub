@@ -91,8 +91,10 @@ const PrizeDrawer = ({ prizes = [], colorClass = "text-indigo-600", itemBgClass 
                                     <div className={`w-10 h-10 rounded-full p-1 flex-shrink-0 ${isLoss ? 'bg-red-100' : itemBgClass}`}>
                                         {isLoss ? (
                                             <IconSad className="w-full h-full text-red-400" />
-                                        ) : prize.image_url ? (
+                                        ) : prize.image_url && prize.image_url.includes('http') ? (
                                             <img src={prize.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                                        ) : prize.image_url ? (
+                                            <span className="text-2xl drop-shadow-sm flex items-center justify-center w-full h-full">{prize.image_url}</span>
                                         ) : (
                                             <IconGift className={`w-full h-full ${colorClass.replace('text-', 'text-opacity-60 text-')}`} />
                                         )}

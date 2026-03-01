@@ -25,8 +25,15 @@ const DiceGame = () => {
         5: { x: 90, y: 0 },      // Bottom
     };
 
+    const rollTimeout = useRef(null);
+    const resultTimeout = useRef(null);
+
     useEffect(() => {
         fetchPrizes();
+        return () => {
+            if (rollTimeout.current) clearTimeout(rollTimeout.current);
+            if (resultTimeout.current) clearTimeout(resultTimeout.current);
+        };
     }, []);
 
     const fetchPrizes = async () => {
@@ -61,7 +68,7 @@ const DiceGame = () => {
         SoundManager.play('spin');
 
         // Simulate network/calc delay
-        setTimeout(async () => {
+        rollTimeout.current = setTimeout(async () => {
             try {
                 // Determine Win/Loss (30% chance to lose)
                 let isWin = Math.random() > 0.3;
@@ -98,7 +105,7 @@ const DiceGame = () => {
                 SoundManager.play('click');
 
                 // Show result
-                setTimeout(() => {
+                resultTimeout.current = setTimeout(() => {
                     if (isWin && prizeData) {
                         setResult({ type: 'win', ...prizeData });
                         SoundManager.play('win');
@@ -252,8 +259,10 @@ const DiceGame = () => {
                             <div className="mb-6 flex justify-center">
                                 <div className={`w-24 h-24 rounded-full p-1 shadow-inner flex items-center justify-center ${result.type === 'win' ? 'bg-purple-50' : 'bg-gray-100'}`}>
                                     {result.type === 'win' ? (
-                                        result.image_url ? (
+                                        result.image_url && result.image_url.includes('http') ? (
                                             <img src={result.image_url} alt="Win" className="w-full h-full rounded-full object-cover" />
+                                        ) : result.image_url ? (
+                                            <span className="text-6xl drop-shadow-md flex items-center justify-center w-full h-full">{result.image_url}</span>
                                         ) : <IconGift className="w-16 h-16 text-purple-500" />
                                     ) : (
                                         <IconSad className="w-16 h-16 text-gray-400 opacity-50" />

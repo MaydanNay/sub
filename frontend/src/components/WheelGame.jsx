@@ -19,10 +19,14 @@ const WheelGame = () => {
 
     const controls = useAnimation();
     const tickInterval = useRef(null);
+    const spinTimeout = useRef(null);
 
     useEffect(() => {
         fetchPromotions();
-        return () => stopTicking();
+        return () => {
+            stopTicking();
+            if (spinTimeout.current) clearTimeout(spinTimeout.current);
+        };
     }, []);
 
     const fetchPromotions = async () => {
@@ -150,7 +154,7 @@ const WheelGame = () => {
             stopTicking();
             SoundManager.play('click');
 
-            setTimeout(() => {
+            spinTimeout.current = setTimeout(() => {
                 setResult(targetItem);
                 setSpinning(false);
                 if (targetItem.type === 'win') {
@@ -238,8 +242,10 @@ const WheelGame = () => {
                                             <div className={`w-16 h-16 rounded-full flex-shrink-0 p-1 mr-4 border overflow-hidden flex items-center justify-center ${isLoss ? 'bg-gray-200 border-gray-300' : 'bg-gray-50 border-gray-200'}`}>
                                                 {item.type === 'loss' ? (
                                                     <IconSad className="w-10 h-10 text-gray-400" />
-                                                ) : item.image_url ? (
+                                                ) : item.image_url && item.image_url.includes('http') ? (
                                                     <img src={item.image_url} alt="icon" className="w-full h-full rounded-full object-cover" />
+                                                ) : item.image_url ? (
+                                                    <span className="text-3xl drop-shadow-sm flex items-center justify-center w-full h-full">{item.image_url}</span>
                                                 ) : (
                                                     <IconGift className="w-10 h-10 text-purple-500" />
                                                 )}
@@ -326,8 +332,10 @@ const WheelGame = () => {
                             <div className={`w-24 h-24 mx-auto rounded-full p-1 shadow-inner mb-6 flex items-center justify-center ${result.type === 'win' ? 'bg-indigo-50' : 'bg-gray-100'}`}>
                                 {result.type === 'loss' ? (
                                     <IconSad className="w-16 h-16 text-gray-400" />
-                                ) : result.image_url ? (
+                                ) : result.image_url && result.image_url.includes('http') ? (
                                     <img src={result.image_url} alt="Prize" className="w-full h-full rounded-full object-cover" />
+                                ) : result.image_url ? (
+                                    <span className="text-6xl drop-shadow-md flex items-center justify-center w-full h-full">{result.image_url}</span>
                                 ) : (
                                     <div className="p-4 w-full h-full">
                                         <IconGift className="w-full h-full" />

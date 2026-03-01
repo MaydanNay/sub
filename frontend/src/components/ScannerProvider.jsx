@@ -155,7 +155,14 @@ export const ScannerProvider = ({ children }) => {
                     <div className="fixed inset-0 bg-white z-[60] flex flex-col items-center justify-center p-8 text-center">
                         <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-600 mb-8">УРА!</h2>
                         <div className="w-64 h-64 rounded-[40px] bg-slate-100 shadow-2xl overflow-hidden mb-8 relative flex items-center justify-center">
-                            <img src={prizes.image_url || (prizes.character && prizes.character.image_2d)} alt={prizes.title} className="w-full h-full object-contain p-4" />
+                            {(() => {
+                                const imgUrl = prizes.image_url || (prizes.character && prizes.character.image_2d);
+                                if (imgUrl && imgUrl.includes('http')) {
+                                    return <img src={imgUrl} alt={prizes.title || (prizes.character && prizes.character.name)} className="w-full h-full object-contain p-4" />;
+                                } else {
+                                    return <span className="text-[100px] drop-shadow-lg">{imgUrl}</span>;
+                                }
+                            })()}
                         </div>
                         <h3 className="text-2xl font-black text-gray-800">{prizes.title || (prizes.character && prizes.character.name)}</h3>
                         <p className="text-gray-500 font-medium mb-8 uppercase tracking-widest text-xs">

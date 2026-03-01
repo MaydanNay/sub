@@ -176,7 +176,7 @@ const ScratchCard = () => {
                                             {card && (
                                                 card.type === 'loss' ?
                                                     <IconSad className="w-full h-full text-gray-300" /> :
-                                                    (card.image_url ? <img src={card.image_url} alt="" className="w-full h-full object-contain" /> : <IconGift className="w-full h-full text-indigo-500" />)
+                                                    (card.image_url && card.image_url.includes('http') ? <img src={card.image_url} alt="" className="w-full h-full object-contain" /> : card.image_url ? <span className="text-5xl drop-shadow-md">{card.image_url}</span> : <IconGift className="w-full h-full text-indigo-500" />)
                                             )}
                                         </div>
 

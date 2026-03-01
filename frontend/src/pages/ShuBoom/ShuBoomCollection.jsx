@@ -10,6 +10,7 @@ import BottomNav from './BottomNav';
 import axios from 'axios';
 import { useNotification } from '../../components/NotificationProvider';
 import moneyPng from './images/money.PNG';
+import { CHARACTERS } from './gameData';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 const ShuBoomCollection = () => {
@@ -19,6 +20,7 @@ const ShuBoomCollection = () => {
     const [collection, setCollection] = useState([]);
     const [loading, setLoading] = useState(true);
     const [localError, setLocalError] = useState(null);
+    const [actionLoading, setActionLoading] = useState(false);
 
     const fetchData = useCallback(async (signal) => {
         if (!userPhone) return;
@@ -57,23 +59,30 @@ const ShuBoomCollection = () => {
             .map(p => ({ ...p, type: 'coupon', name: p.title, img: p.image_url, desc: p.description, isEquipped: false })),
         ...(user?.skins || []).map(skinId => {
             const skinMap = {
-                'glasses': { name: 'Очки', img: 'https://cdn-icons-png.flaticon.com/512/1253/1253756.png' },
-                'hat': { name: 'Шляпа', img: 'https://cdn-icons-png.flaticon.com/512/2135/2135835.png' },
-                'cape': { name: 'Плащ', img: 'https://cdn-icons-png.flaticon.com/512/3531/3531744.png' }
+                'glasses': { name: 'Очки', img: '🕶️' },
+                'hat': { name: 'Шляпа', img: '🎩' },
+                'cape': { name: 'Плащ', img: '🦸' },
+                'flower': { name: 'Цветочек', img: '🌸' },
+                'butterfly': { name: 'Бабочка', img: '🦋' },
+                'crown': { name: 'Корона', img: '👑' }
             };
-            const skinInfo = skinMap[skinId] || { name: `Скин: ${skinId}`, img: `https://cdn-icons-png.flaticon.com/512/1253/1253756.png` };
+            const skinInfo = skinMap[skinId] || { name: `Скин: ${skinId}`, img: '👗' };
             return { id: skinId, type: 'skin_overlay', name: skinInfo.name, img: skinInfo.img, desc: 'Особый аксессуар', isEquipped: false };
         }),
-        ...collection.map(item => ({
-            id: item.character.id,
-            type: 'character',
-            name: item.character.name,
-            img: item.character.image_2d,
-            desc: `${item.character.rarity} • Lvl ${item.level} (x${item.quantity})`,
-            quantity: item.quantity,
-            level: item.level,
-            isEquipped: String(user?.equipped_character_id) === String(item?.character?.id)
-        }))
+        ...collection.map(item => {
+            const gameChar = CHARACTERS.find(c => c.name === item.character.name);
+            return {
+                id: item.character.id,
+                type: 'character',
+                name: item.character.name,
+                img: gameChar ? gameChar.avatar : item.character.image_2d,
+                isAsset: !!gameChar,
+                desc: `${item.character.rarity} • Lvl ${item.level} (x${item.quantity})`,
+                quantity: item.quantity,
+                level: item.level,
+                isEquipped: String(user?.equipped_character_id) === String(item?.character?.id)
+            };
+        })
     ];
 
     const handleRetry = () => {
@@ -84,23 +93,36 @@ const ShuBoomCollection = () => {
     };
 
     const handleSelect = async (item) => {
-        if (!userPhone || item.isEquipped) return;
+        if (!userPhone || item.isEquipped || actionLoading) return;
+        setActionLoading(true);
         try {
-            const res = await axios.post(`${API_URL}/user/equip?user_phone=${userPhone}`, {
-                character_id: item.type === 'character' ? item.id : null,
-                skin_id: item.type === 'skin_overlay' ? item.id : null
-            });
-            if (res.data.success) {
-                show(`${item.name} выбрано!`, 'success');
-                fetchGlobalUser();
+            if (item.type === 'coupon') {
+                const res = await axios.post(`${API_URL}/user/use_coupon?user_phone=${userPhone}&coupon_id=${item.id}`);
+                if (res.data.success) {
+                    show(`${item.name} успешно использован!`, 'success');
+                    fetchData();
+                    fetchGlobalUser();
+                }
+            } else {
+                const res = await axios.post(`${API_URL}/user/equip?user_phone=${userPhone}`, {
+                    character_id: item.type === 'character' ? item.id : null,
+                    skin_id: item.type === 'skin_overlay' ? item.id : null
+                });
+                if (res.data.success) {
+                    show(`${item.name} выбрано!`, 'success');
+                    fetchGlobalUser();
+                }
             }
         } catch (err) {
-            show("Ошибка выбора", 'error');
+            show("Ошибка", 'error');
+        } finally {
+            setActionLoading(false);
         }
     };
 
     const handleMerge = async (characterId) => {
-        if (!userPhone) return;
+        if (!userPhone || actionLoading) return;
+        setActionLoading(true);
         try {
             const res = await axios.post(`${API_URL}/collection/merge?user_phone=${userPhone}`, { character_id: characterId });
             if (res.data.success) {
@@ -111,6 +133,8 @@ const ShuBoomCollection = () => {
             }
         } catch (err) {
             show(err.response?.data?.detail || "Ошибка слияния", 'error');
+        } finally {
+            setActionLoading(false);
         }
     };
 
@@ -146,7 +170,11 @@ const ShuBoomCollection = () => {
                                     {item.isEquipped ? 'ИСПОЛЬЗУЕТСЯ' : item.type === 'coupon' ? 'КУПОН' : item.type === 'skin_overlay' ? 'СКИН' : 'ПЕРСОНАЖ'}
                                 </div>
                                 <div className={`w-16 h-16 rounded-xl shrink-0 overflow-hidden flex items-center justify-center ${item.type === 'character' ? 'bg-slate-50' : 'bg-orange-50'}`}>
-                                    <img src={item.img} alt={item.name} className={`w-full h-full ${item.type === 'character' ? 'object-contain p-2 opacity-80' : 'object-cover'}`} />
+                                    {item.img && (typeof item.img === 'string' && (item.img.includes('http') || item.isAsset)) ? (
+                                        <img src={item.img} alt={item.name} className={`w-full h-full ${item.type === 'character' ? 'object-contain p-2 opacity-80' : 'object-cover'}`} />
+                                    ) : (
+                                        <span className="text-4xl drop-shadow-md">{item.img}</span>
+                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0 pr-16 font-montserrat">
                                     <h3 className="font-bold text-gray-800 text-sm font-montserrat">{item.name}</h3>
@@ -154,14 +182,15 @@ const ShuBoomCollection = () => {
                                     <div className="flex gap-2 mt-2">
                                         <button
                                             onClick={() => handleSelect(item)}
-                                            disabled={item.isEquipped}
-                                            className={`text-[10px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${item.isEquipped ? 'bg-green-500 text-white' : item.type === 'coupon' ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                            disabled={item.isEquipped || actionLoading}
+                                            className={`text-[10px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${item.isEquipped ? 'bg-green-500 text-white' : item.type === 'coupon' ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-600'} ${actionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                             {item.isEquipped ? 'ВЫБРАНО' : item.type === 'coupon' ? 'ИСПОЛЬЗОВАТЬ' : 'ВЫБРАТЬ'}
                                         </button>
-                                        {item.type === 'skin' && item.quantity >= 3 && item.level === 1 && (
+                                        {item.type === 'character' && item.quantity >= 3 && item.level === 1 && (
                                             <button
                                                 onClick={() => handleMerge(item.id)}
-                                                className="bg-purple-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform shadow-md"
+                                                disabled={actionLoading}
+                                                className={`bg-purple-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform shadow-md ${actionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
                                                 МЕРДЖ (3)
                                             </button>

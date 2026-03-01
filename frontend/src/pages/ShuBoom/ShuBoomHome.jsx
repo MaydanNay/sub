@@ -23,6 +23,7 @@ const ShuBoomHome = () => {
     const currentChar = user
         ? (user.equipped_character_id ? getCharacterById(user.equipped_character_id) : getCurrentCharacter(user.current_status))
         : null;
+    const isEquipped = !!user?.equipped_character_id;
     const sublevel = user ? (user.current_sublevel || 0) : 0;
 
     const [isClaiming, setIsClaiming] = useState(false);
@@ -86,10 +87,12 @@ const ShuBoomHome = () => {
                     <div className="pt-6 px-6 relative z-10 transition-all duration-300">
                         <div className="flex justify-between items-start">
                             <div className="flex flex-col">
-                                <div className="text-white/80 text-[11px] font-bold uppercase tracking-wider mb-0.5 font-montserrat">Твой Статус</div>
+                                <div className="text-white/80 text-[11px] font-bold uppercase tracking-wider mb-0.5 font-montserrat">
+                                    {isEquipped ? 'Твой Персонаж' : 'Твой Статус'}
+                                </div>
                                 <h1 className="text-3xl font-black text-white leading-tight drop-shadow-md font-montserrat">{currentChar?.name}</h1>
                                 <div className="mt-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold inline-flex items-center gap-1.5 w-fit border border-white/10">
-                                    <span>Уровень {sublevel + 1}</span>
+                                    <span>Этап пути: {sublevel + 1}</span>
                                 </div>
                             </div>
 

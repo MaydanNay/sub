@@ -40,9 +40,9 @@ def startup_event():
     # Seed Promotions
     if db.query(models.Promotion).count() == 0:
         promotions = [
-            {"title": "Скидка 10%", "description": "Получите скидку 10% на следующую покупку.", "image_url": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=200"},
-            {"title": "Бесплатная доставка", "description": "Бесплатная доставка при заказе от 3000 руб.", "image_url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=200"},
-            {"title": "1+1", "description": "Купи один товар, получи второй такой же бесплатно.", "image_url": "https://images.unsplash.com/photo-1549463595-b44c09ed8370?auto=format&fit=crop&q=80&w=200"},
+            {"title": "Скидка 10%", "description": "Получите скидку 10% на следующую покупку.", "image_url": "🏷️"},
+            {"title": "Бесплатная доставка", "description": "Бесплатная доставка при заказе от 3000 руб.", "image_url": "🚚"},
+            {"title": "1+1", "description": "Купи один товар, получи второй такой же бесплатно.", "image_url": "🎁"},
              # ... (keep existing if needed, or focused on game)
         ]
         for p in promotions:
@@ -53,13 +53,13 @@ def startup_event():
     if db.query(models.Character).count() != 7: # Reset or initial seed
         db.query(models.Character).delete()
         chars = [
-            {"name": "Искатель", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Seeker&backgroundColor=f59e0b", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
-            {"name": "Романтик", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Romantic&backgroundColor=ec4899", "model_3d": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"},
-            {"name": "Ценитель", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Connoisseur&backgroundColor=8b5cf6", "model_3d": "https://modelviewer.dev/shared-assets/models/Horse.glb"},
-            {"name": "Эстет", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Aesthete&backgroundColor=06b6d4", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
-            {"name": "Мечтатель", "rarity": "RARE", "drop_weight": 0.2, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Dreamer&backgroundColor=6366f1", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
-            {"name": "Философ", "rarity": "LEGENDARY", "drop_weight": 0.1, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Philosopher&backgroundColor=10b981", "model_3d": "https://modelviewer.dev/shared-assets/models/AlphaBlendModeTest.glb"},
-            {"name": "Футурист", "rarity": "LEGENDARY", "drop_weight": 0.05, "image_2d": "https://api.dicebear.com/7.x/notionists/svg?seed=Futurist&backgroundColor=eab308", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
+            {"name": "Искатель", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "🔍", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
+            {"name": "Романтик", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "💜", "model_3d": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"},
+            {"name": "Ценитель", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "🍷", "model_3d": "https://modelviewer.dev/shared-assets/models/Horse.glb"},
+            {"name": "Эстет", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "🎨", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
+            {"name": "Мечтатель", "rarity": "RARE", "drop_weight": 0.2, "image_2d": "🌙", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
+            {"name": "Философ", "rarity": "LEGENDARY", "drop_weight": 0.1, "image_2d": "📚", "model_3d": "https://modelviewer.dev/shared-assets/models/AlphaBlendModeTest.glb"},
+            {"name": "Футурист", "rarity": "LEGENDARY", "drop_weight": 0.05, "image_2d": "🚀", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
         ]
         for c in chars:
             db_char = models.Character(**c)
@@ -195,6 +195,18 @@ def equip_card(request: schemas.EquipRequest, user_phone: str, db: Session = Dep
         raise HTTPException(status_code=400, detail="Equip failed (not owned?)")
         
     return {"success": True, "equipped_character_id": user.equipped_character_id}
+
+@app.post("/api/v1/user/use_coupon")
+def use_coupon(coupon_id: int, user_phone: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_phone(db, user_phone)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    result = crud.use_coupon_logic(db, user.id, coupon_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Coupon use failed or not owned")
+        
+    return {"success": True}
 
 @app.post("/api/v1/user/daily_reward")
 def claim_daily_reward(user_phone: str, db: Session = Depends(get_db)):
