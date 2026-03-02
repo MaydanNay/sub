@@ -107,6 +107,14 @@
     z-index: 11;
 }
 
+/* App-level overflow clamp for mobile */
+.app-container {
+    overflow-x: clip;
+    /* clip does NOT break position:sticky, unlike hidden */
+    width: 100%;
+    max-width: 100vw;
+}
+
 @media (max-width: 768px) {
     .main-content {
         margin-top: 0;

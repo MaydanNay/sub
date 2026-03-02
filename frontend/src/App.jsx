@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Loader } from 'lucide-react';
 import BusinessValueControl from './components/BusinessValueControl';
 import MobileContainer from './components/MobileContainer';
@@ -87,24 +87,28 @@ const PageLoader = () => (
     </div>
 );
 
-function App() {
+function AppInner() {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [isSuccess, setIsSuccess] = React.useState(false);
+    const navigate = useNavigate();
 
     const openModal = () => {
-        setIsSuccess(false);
         setIsModalOpen(true);
     };
     const closeModal = () => setIsModalOpen(false);
 
+    const handleFormSuccess = () => {
+        closeModal();
+        navigate('/thanks');
+    };
+
     return (
-        <Router>
+        <>
             <ScrollToTop />
             <React.Suspense fallback={<PageLoader />}>
                 <Routes>
                     {/* Catalog and Modal Logic */}
                     <Route path="/" element={<Catalog openModal={openModal} />} />
-                    <Route path="/thanks" element={<div className="min-h-screen bg-shu-bg"><ThankYou isFullPage={true} isModal={false} onClose={() => window.location.href = '/'} /></div>} />
+                    <Route path="/thanks" element={<div className="min-h-screen bg-shu-bg"><ThankYou isFullPage={true} isModal={false} onClose={() => navigate('/')} /></div>} />
 
                     {/* ShuBoom Routes */}
                     {/* ShuBoom Routes */}
@@ -201,20 +205,24 @@ function App() {
                 <Modal
                     isOpen={isModalOpen}
                     onClose={closeModal}
-                    title={isSuccess ? "ЗАЯВКА ОТПРАВЛЕНА" : "ОСТАВИТЬ ЗАЯВКУ"}
+                    title="ОСТАВИТЬ ЗАЯВКУ"
                 >
-                    {isSuccess ? (
-                        <ThankYou onClose={closeModal} />
-                    ) : (
-                        <RequestForm
-                            onSuccess={() => setIsSuccess(true)}
-                            onClose={closeModal}
-                            isModal={true}
-                        />
-                    )}
+                    <RequestForm
+                        onSuccess={handleFormSuccess}
+                        onClose={closeModal}
+                        isModal={true}
+                    />
                 </Modal>
             </React.Suspense>
             <BusinessValueControl />
+        </>
+    )
+}
+
+function App() {
+    return (
+        <Router>
+            <AppInner />
         </Router>
     )
 }

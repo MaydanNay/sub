@@ -100,13 +100,27 @@ const Catalog = ({ openModal }) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto uppercase font-shubody tracking-widest leading-relaxed mb-12"
+                        className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto uppercase font-shubody tracking-widest leading-relaxed mb-7"
                     >
                         Все игровые механики SHU.STUDIO <br className="hidden md:block" /> в одном каталоге.
                     </motion.p>
 
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.35 }}
+                        className="flex justify-center mb-12"
+                    >
+                        <button
+                            onClick={openModal}
+                            className="font-shupixel text-[10px] md:text-xs uppercase tracking-widest px-8 py-4 bg-shu-pink text-black border-2 border-shu-pink hover:bg-transparent hover:text-shu-pink shadow-pixel-sm hover:shadow-pixel active:translate-x-1 active:translate-y-1 transition-all duration-200"
+                        >
+                            Оставить заявку
+                        </button>
+                    </motion.div>
+
                     {/* Category Navigation - Restored boxy look */}
-                    <nav className="flex flex-wrap justify-center gap-4 mb-16" role="tablist">
+                    <nav className="flex flex-nowrap overflow-x-auto scrollbar-hide justify-start md:flex-wrap md:justify-center gap-4 pb-1 -mx-4 px-4 md:mx-0 md:px-0" role="tablist">
                         {categories.map((category) => (
                             <button
                                 key={category.id}
@@ -115,7 +129,7 @@ const Catalog = ({ openModal }) => {
                                     localStorage.setItem('catalog_active_category', category.id);
                                 }}
                                 className={cn(
-                                    "relative px-6 py-4 font-shupixel text-[10px] md:text-xs uppercase transition-all duration-300",
+                                    "relative flex-shrink-0 px-6 py-4 font-shupixel text-[10px] md:text-xs uppercase transition-all duration-300",
                                     "border-2",
                                     activeCategory === category.id
                                         ? "bg-shu-pink border-shu-pink text-black shadow-pixel-sm translate-x-1 translate-y-1"

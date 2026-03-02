@@ -2,6 +2,9 @@
     padding-bottom: var(--spacing-xl);
     background-color: #E86D84;
     border-radius: 0px 0px 20px 20px;
+    overflow: hidden;
+    /* Prevent eye-decor from leaking outside */
+    position: relative;
 }
 
 /* Header Section */
