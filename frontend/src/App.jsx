@@ -79,6 +79,12 @@ const ShuQazHome = React.lazy(() => import('./pages/ShuQaz/ShuQazHome'));
 const ShuQazDictionary = React.lazy(() => import('./pages/ShuQaz/ShuQazDictionary'));
 const ShuQazTraining = React.lazy(() => import('./pages/ShuQaz/ShuQazTraining'));
 
+const ShuRunIntro = React.lazy(() => import('./pages/ShuRun/ShuRunIntro'));
+const ShuRunHome = React.lazy(() => import('./pages/ShuRun/ShuRunHome'));
+const ShuRunMarathon = React.lazy(() => import('./pages/ShuRun/ShuRunMarathon'));
+const ShuRunLeaderboard = React.lazy(() => import('./pages/ShuRun/ShuRunLeaderboard'));
+const ShuRunProfile = React.lazy(() => import('./pages/ShuRun/ShuRunProfile'));
+
 const ThankYou = React.lazy(() => import('./components/ThankYou'));
 
 const PageLoader = () => (
@@ -198,6 +204,13 @@ function AppInner() {
                         <Route path="/game/shuqaz" element={<ShuQazHome />} />
                         <Route path="/game/shuqaz/dictionary" element={<ShuQazDictionary />} />
                         <Route path="/game/shuqaz/train" element={<ShuQazTraining />} />
+
+                        {/* ShuRun: Virtual Marathons */}
+                        <Route path="/game/shurun" element={<ShuRunIntro />} />
+                        <Route path="/game/shurun/home" element={<ShuRunHome />} />
+                        <Route path="/game/shurun/run" element={<ShuRunMarathon />} />
+                        <Route path="/game/shurun/board" element={<ShuRunLeaderboard />} />
+                        <Route path="/game/shurun/me" element={<ShuRunProfile />} />
                     </Route>
 
                     <Route path="/game/:gameId" element={<GamePage />} />
