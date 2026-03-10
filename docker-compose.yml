@@ -17,8 +17,10 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-shurun_user}:${POSTGRES_PASSWORD:-shurun_password}@db:5432/${POSTGRES_DB:-shurun_db}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://127.0.0.1,http://localhost:80}
+      - BOT_URL=http://bot:3001/api/notify
     depends_on:
       - db
+      - bot
     ports:
       - "${BACKEND_PORT:-8000}:8000"
 
@@ -29,6 +31,14 @@ services:
       - backend
     ports:
       - "${FRONTEND_PORT:-3000}:80"
+
+  bot:
+    build: ./SHU/bot
+    restart: always
+    env_file:
+      - ./SHU/bot/.env
+    ports:
+      - "3001:3001"
 
 volumes:
   postgres_data:

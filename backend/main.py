@@ -94,7 +94,14 @@ def read_promotions(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
 
 @app.post("/api/notify", response_model=schemas.LeadRequest)
 def create_notify_request(lead: schemas.LeadRequestCreate, db: Session = Depends(get_db)):
-    return crud.create_lead_request(db, lead)
+    db_lead = crud.create_lead_request(db, lead)
+    # Try to notify the bot
+    try:
+        bot_url = os.getenv("BOT_URL", "http://bot:3001/api/notify")
+        requests.post(bot_url, json=lead.dict(), timeout=5)
+    except Exception as e:
+        print(f"Failed to notify bot: {e}")
+    return db_lead
 
 # --- ShuBoom Endpoints ---
 
@@ -415,6 +422,7 @@ def equip_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str =
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+@app.post("/api/v1/shubank/pride/create")
 def create_pride(request: schemas.ShuBankPrideCreateRequest, db: Session = Depends(get_db)):
     try:
         pride = models_shubank.ShuBankPride(
