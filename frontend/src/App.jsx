@@ -5,6 +5,7 @@ import BusinessValueControl from './components/BusinessValueControl';
 import MobileContainer from './components/MobileContainer';
 import ScrollToTop from './components/ScrollToTop';
 import { ShuBankProvider } from './components/ShuBankProvider';
+import { UserProvider } from './components/UserProvider';
 
 // Lazy load components to optimize initial bundle size
 const Catalog = React.lazy(() => import('./pages/Catalog'));
@@ -239,7 +240,9 @@ function AppInner() {
 function App() {
     return (
         <Router>
-            <AppInner />
+            <UserProvider>
+                <AppInner />
+            </UserProvider>
         </Router>
     )
 }

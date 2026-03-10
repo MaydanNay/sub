@@ -288,14 +288,14 @@ def buy_chest(chest_type: str, user_phone: str, db: Session = Depends(get_db)):
 # --- ShuBank Together Endpoints (Tech Spec 1.0) ---
 
 @app.get("/api/v1/shubank/state", response_model=schemas.ShuBankUserState)
-def get_shubank_state(db: Session = Depends(get_db)):
+def get_shubank_state(user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
     try:
         user = db.query(models_shubank.ShuBankUser).filter(
-            models_shubank.ShuBankUser.bank_client_id == "demo_client_hash"
+            models_shubank.ShuBankUser.bank_client_id == user_phone
         ).with_for_update().first()
         
         if not user:
-            user = models_shubank.ShuBankUser(bank_client_id="demo_client_hash", energy=50, coins=100)
+            user = models_shubank.ShuBankUser(bank_client_id=user_phone, energy=50, coins=100)
             db.add(user)
             db.commit()
             db.refresh(user)
@@ -352,8 +352,7 @@ def get_shubank_state(db: Session = Depends(get_db)):
         )
 
 @app.post("/api/v1/shubank/shop/buy")
-def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, db: Session = Depends(get_db)):
-    user = db.query(models_shubank.ShuBankUser).filter(models_shubank.ShuBankUser.bank_client_id == "demo_client_hash").first()
+def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
     # Tech Spec 1.0 Prices
     prices = {
         'skin_1': 1000, 'skin_2': 1500, 'skin_3': 2000,
@@ -366,7 +365,7 @@ def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, db: Session = Depen
     try:
         # Use with_for_update() to prevent race conditions during purchase
         user = db.query(models_shubank.ShuBankUser).filter(
-            models_shubank.ShuBankUser.bank_client_id == "demo_client_hash"
+            models_shubank.ShuBankUser.bank_client_id == user_phone
         ).with_for_update().first()
         
         if not user:
@@ -392,10 +391,10 @@ def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, db: Session = Depen
         raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
 
 @app.post("/api/v1/shubank/inventory/equip")
-def equip_shubank_item(request: schemas.ShuBankShopBuyRequest, db: Session = Depends(get_db)):
+def equip_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
     try:
         user = db.query(models_shubank.ShuBankUser).filter(
-            models_shubank.ShuBankUser.bank_client_id == "demo_client_hash"
+            models_shubank.ShuBankUser.bank_client_id == user_phone
         ).with_for_update().first()
         
         if not user:
@@ -431,11 +430,11 @@ def create_pride(request: schemas.ShuBankPrideCreateRequest, db: Session = Depen
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/shubank/minigame/sync")
-def sync_minigame_coins(request: schemas.ShuBankMinigameSyncRequest, db: Session = Depends(get_db)):
+def sync_minigame_coins(request: schemas.ShuBankMinigameSyncRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
     try:
         # Prevent simultaneous coin updates
         user = db.query(models_shubank.ShuBankUser).filter(
-            models_shubank.ShuBankUser.bank_client_id == "demo_client_hash"
+            models_shubank.ShuBankUser.bank_client_id == user_phone
         ).with_for_update().first()
         
         if not user:
@@ -451,10 +450,10 @@ def sync_minigame_coins(request: schemas.ShuBankMinigameSyncRequest, db: Session
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/shubank/quest/complete")
-def complete_quest(request: schemas.ShuBankQuestCompleteRequest, db: Session = Depends(get_db)):
+def complete_quest(request: schemas.ShuBankQuestCompleteRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
     try:
         user = db.query(models_shubank.ShuBankUser).filter(
-            models_shubank.ShuBankUser.bank_client_id == "demo_client_hash"
+            models_shubank.ShuBankUser.bank_client_id == user_phone
         ).with_for_update().first()
         
         if not user:
@@ -567,27 +566,28 @@ def webhook_deposit(request: schemas.BankDepositUpdateWebhook, db: Session = Dep
 def get_shurun_runs(user_phone: str, db: Session = Depends(get_db)):
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # Auto-create for demo convenience if user doesn't exist
+        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
     return crud.get_user_runs(db, user.id)
 
 @app.post("/api/v1/shurun/runs", response_model=schemas.ShuRunRun)
 def save_shurun_run(run: schemas.ShuRunRunBase, user_phone: str, db: Session = Depends(get_db)):
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
     return crud.create_user_run(db, user.id, run)
 
 @app.get("/api/v1/shurun/orders", response_model=List[schemas.ShuRunOrder])
 def get_shurun_orders(user_phone: str, db: Session = Depends(get_db)):
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
     return crud.get_user_orders(db, user.id)
 
 @app.post("/api/v1/shurun/orders", response_model=schemas.ShuRunOrder)
 def save_shurun_order(order: schemas.ShuRunOrderBase, user_phone: str, db: Session = Depends(get_db)):
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
     return crud.create_user_order(db, user.id, order)
 
