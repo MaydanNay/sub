@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { storage } from '../utils/storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import PrizeDrawer from '../components/PrizeDrawer';
@@ -10,7 +11,7 @@ const MysteryBoxPlay = () => {
     const [isOpening, setIsOpening] = useState(false);
     const [isOpened, setIsOpened] = useState(false);
     const [reward, setReward] = useState(null);
-    const [coins, setCoins] = useState(() => parseInt(localStorage.getItem('map_coins')) || 500);
+    const [coins, setCoins] = useState(() => parseInt(storage.get('map_coins')) || 500);
 
     const rewards = [
         { title: 'iPhone 15 Pro', icon: '📱', rarity: 'legendary', prob: 0.01 },

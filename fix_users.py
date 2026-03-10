@@ -1,32 +1,47 @@
-import sqlite3
+import os
+from sqlalchemy import create_engine, text
+from backend.database import SQLALCHEMY_DATABASE_URL, SessionLocal
+from backend import models
 
-db_path = "sql_app.db"
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
-
-# 1. Ensure promotions are committed (redundant but safe)
-# (Done in main.py fix)
-
-# 2. Find all users
-cursor.execute("SELECT id, phone FROM users")
-users = cursor.fetchall()
-
-# 3. Get starter character ID
-cursor.execute("SELECT id FROM characters WHERE name = 'Искатель'")
-starter_char_row = cursor.fetchone()
-
-if starter_char_row:
-    starter_id = starter_char_row[0]
-    for user_id, phone in users:
-        # Check if user has any character
-        cursor.execute("SELECT count(*) FROM user_collections WHERE user_id = ?", (user_id,))
-        count = cursor.fetchone()[0]
+def fix_users():
+    print(f"Connecting to {SQLALCHEMY_DATABASE_URL} for user fix...")
+    db = SessionLocal()
+    
+    try:
+        # 1. Get starter character
+        starter_char = db.execute(text("SELECT id FROM characters WHERE name = 'Искатель'")).fetchone()
+        if not starter_char:
+            print("Starter character 'Искатель' not found. Skipping.")
+            return
         
-        if count == 0:
-            print(f"Granting starter character to user {phone}...")
-            cursor.execute("INSERT INTO user_collections (user_id, character_id, quantity, level, characteristics) VALUES (?, ?, 1, 1, '{}')", (user_id, starter_id))
-            cursor.execute("UPDATE users SET equipped_character_id = ? WHERE id = ?", (starter_id, user_id))
+        starter_id = starter_char[0]
+        
+        # 2. Find all users
+        users = db.execute(text("SELECT id, phone FROM users")).fetchall()
+        
+        for user_id, phone in users:
+            # Check if user has any character in collection
+            count = db.execute(text("SELECT count(*) FROM user_collections WHERE user_id = :u"), {"u": user_id}).scalar()
+            
+            if count == 0:
+                print(f"Granting starter character to user {phone}...")
+                db.execute(
+                    text("INSERT INTO user_collections (user_id, character_id, quantity, level, characteristics) VALUES (:u, :c, 1, 1, '{}')"),
+                    {"u": user_id, "c": starter_id}
+                )
+                db.execute(
+                    text("UPDATE users SET equipped_character_id = :c WHERE id = :u"),
+                    {"u": user_id, "c": starter_id}
+                )
+        
+        db.commit()
+        print("User synchronization complete.")
+        
+    except Exception as e:
+        print(f"Error during user fix: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
-conn.commit()
-conn.close()
-print("Migration complete.")
+if __name__ == "__main__":
+    fix_users()

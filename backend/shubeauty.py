@@ -1,6 +1,7 @@
+# SHU Beauty minigame router
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .database import SessionLocal
+from database import SessionLocal
 from pydantic import BaseModel
 import random
 

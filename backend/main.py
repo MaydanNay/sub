@@ -1,10 +1,14 @@
+# Main entry point for ShuRun API
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from . import crud, models, schemas, models_shubank, shubeauty
-from .database import SessionLocal, engine
+import crud, models, schemas, models_shubank, shubeauty
+from database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
 import random
 from datetime import datetime, timezone
+from typing import List
+
+import os
 
 models.Base.metadata.create_all(bind=engine)
 models_shubank.Base.metadata.create_all(bind=engine)
@@ -13,14 +17,21 @@ app = FastAPI()
 
 app.include_router(shubeauty.router)
 
+# CORS Configuration
+allowed_origins = [
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+    "http://localhost:3000",
+]
+
+# Allow additional origins via environment variable (comma-separated)
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    allowed_origins.extend([o.strip() for o in env_origins.split(",") if o.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-        "http://localhost:3000",
-        # TODO: add production domain, e.g. "https://yourdomain.com"
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,21 +61,20 @@ def startup_event():
         db.commit()
 
     # Seed Characters (ShuBoom) - 7 Status-based characters
-    if db.query(models.Character).count() != 7: # Reset or initial seed
-        db.query(models.Character).delete()
-        chars = [
-            {"name": "Искатель", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "🔍", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
-            {"name": "Романтик", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "💜", "model_3d": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"},
-            {"name": "Ценитель", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "🍷", "model_3d": "https://modelviewer.dev/shared-assets/models/Horse.glb"},
-            {"name": "Эстет", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "🎨", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
-            {"name": "Мечтатель", "rarity": "RARE", "drop_weight": 0.2, "image_2d": "🌙", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
-            {"name": "Философ", "rarity": "LEGENDARY", "drop_weight": 0.1, "image_2d": "📚", "model_3d": "https://modelviewer.dev/shared-assets/models/AlphaBlendModeTest.glb"},
-            {"name": "Футурист", "rarity": "LEGENDARY", "drop_weight": 0.05, "image_2d": "🚀", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
-        ]
-        for c in chars:
+    chars = [
+        {"name": "Искатель", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "🔍", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
+        {"name": "Романтик", "rarity": "COMMON", "drop_weight": 0.5, "image_2d": "💜", "model_3d": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"},
+        {"name": "Ценитель", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "🍷", "model_3d": "https://modelviewer.dev/shared-assets/models/Horse.glb"},
+        {"name": "Эстет", "rarity": "RARE", "drop_weight": 0.3, "image_2d": "🎨", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
+        {"name": "Мечтатель", "rarity": "RARE", "drop_weight": 0.2, "image_2d": "🌙", "model_3d": "https://modelviewer.dev/shared-assets/models/Astronaut.glb"},
+        {"name": "Философ", "rarity": "LEGENDARY", "drop_weight": 0.1, "image_2d": "📚", "model_3d": "https://modelviewer.dev/shared-assets/models/AlphaBlendModeTest.glb"},
+        {"name": "Футурист", "rarity": "LEGENDARY", "drop_weight": 0.05, "image_2d": "🚀", "model_3d": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"},
+    ]
+    for c in chars:
+        if not db.query(models.Character).filter(models.Character.name == c["name"]).first():
             db_char = models.Character(**c)
             db.add(db_char)
-        db.commit()
+    db.commit()
 
     db.close()
 
@@ -550,3 +560,34 @@ def webhook_deposit(request: schemas.BankDepositUpdateWebhook, db: Session = Dep
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+# --- ShuRun Endpoints ---
+
+@app.get("/api/v1/shurun/runs", response_model=List[schemas.ShuRunRun])
+def get_shurun_runs(user_phone: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_phone(db, user_phone)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return crud.get_user_runs(db, user.id)
+
+@app.post("/api/v1/shurun/runs", response_model=schemas.ShuRunRun)
+def save_shurun_run(run: schemas.ShuRunRunBase, user_phone: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_phone(db, user_phone)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return crud.create_user_run(db, user.id, run)
+
+@app.get("/api/v1/shurun/orders", response_model=List[schemas.ShuRunOrder])
+def get_shurun_orders(user_phone: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_phone(db, user_phone)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return crud.get_user_orders(db, user.id)
+
+@app.post("/api/v1/shurun/orders", response_model=schemas.ShuRunOrder)
+def save_shurun_order(order: schemas.ShuRunOrderBase, user_phone: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_phone(db, user_phone)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return crud.create_user_order(db, user.id, order)
+

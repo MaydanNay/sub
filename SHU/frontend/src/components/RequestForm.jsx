@@ -5,7 +5,7 @@ import { FormInput } from "./ui/FormInput";
 import { FormTextarea } from "./ui/FormTextarea";
 import ThankYou from "./ThankYou";
 
-const RequestForm = ({ inputBg, inputTextColor, labelColor, btnBg, isModal = false, onClose, onSuccess }) => {
+const RequestForm = ({ inputBg, inputTextColor, labelColor, btnBg, isModal = false, onClose, onSuccess, submitText = "ПОЛУЧИТЬ БЕСПЛАТНЫЙ КОНЦЕПТ" }) => {
     const [name, setName] = useState("");
     const [contact, setContact] = useState("");
     const [task, setTask] = useState("");
@@ -117,7 +117,7 @@ const RequestForm = ({ inputBg, inputTextColor, labelColor, btnBg, isModal = fal
                         className="footer-submit-btn"
                         style={{ backgroundColor: btnBg }}
                     >
-                        {isSubmitting ? "ОТПРАВКА..." : submitStatus === "success" ? "ОТПРАВЛЕНО!" : "ПОЛУЧИТЬ БЕСПЛАТНЫЙ КОНЦЕПТ"}
+                        {isSubmitting ? "ОТПРАВКА..." : submitStatus === "success" ? "ОТПРАВЛЕНО!" : submitText}
                     </Button>
                     {submitStatus === "error" && (
                         <p style={{ color: "red", marginTop: "1rem", textAlign: "center" }}>

@@ -1,56 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Polyline, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Circle, Rectangle, useMap } from 'react-leaflet';
 import { Play, Square, ChevronLeft, Trophy, Flag, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import useShuRunStore, { formatTime } from './useShuRunStore';
-import 'leaflet/dist/leaflet.css';
+import useShuRunStore, { formatTime, GRID_SIZE } from './useShuRunStore';
 
-// Center map on Almaty
-const ALMATY_CENTER = [43.2565, 76.9286];
-
-// Fake route for visualization (Almaty area)
-const MOCK_ROUTE = [
-    [43.2565, 76.9286],
-    [43.2580, 76.9310],
-    [43.2600, 76.9340],
-    [43.2620, 76.9370],
-    [43.2640, 76.9350],
-    [43.2660, 76.9320],
-    [43.2650, 76.9290],
-    [43.2630, 76.9260],
-    [43.2610, 76.9240],
-    [43.2590, 76.9260],
-    [43.2570, 76.9280],
-    [43.2565, 76.9286],
-];
-
-// Runner dot that follows partial route based on progress
-function RunnerMarker({ progress }) {
+// Runner dot that follows the latest REAL path point
+function RunnerMarker({ path }) {
     const map = useMap();
-    const totalPoints = MOCK_ROUTE.length;
-    const idx = Math.min(Math.floor(progress * (totalPoints - 1)), totalPoints - 2);
-    const t = (progress * (totalPoints - 1)) - idx;
-    const lat = MOCK_ROUTE[idx][0] + (MOCK_ROUTE[idx + 1][0] - MOCK_ROUTE[idx][0]) * t;
-    const lng = MOCK_ROUTE[idx][1] + (MOCK_ROUTE[idx + 1][1] - MOCK_ROUTE[idx][1]) * t;
+    const lastPoint = path[path.length - 1];
+
     useEffect(() => {
-        if (progress > 0.1) map.panTo([lat, lng], { animate: true, duration: 0.5 });
-    }, [lat, lng]);
+        if (lastPoint) {
+            map.panTo(lastPoint, { animate: true, duration: 0.5 });
+        }
+    }, [lastPoint]);
+
+    if (!lastPoint) return null;
+
     return (
         <Circle
-            center={[lat, lng]}
-            radius={25}
+            center={lastPoint}
+            radius={10}
             pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.9, weight: 2 }}
         />
     );
 }
 
-const FinishScreen = ({ run, marathon, onClose }) => (
+const FinishScreen = ({ run, marathon, onClose, navigate }) => (
     <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md"
+        className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md font-montserrat"
     >
         <div className="bg-slate-900 border border-emerald-500/30 rounded-3xl p-8 w-full max-w-sm text-center shadow-[0_0_60px_rgba(16,185,129,0.2)]">
             <motion.div
@@ -60,7 +42,7 @@ const FinishScreen = ({ run, marathon, onClose }) => (
             >
                 🏅
             </motion.div>
-            <h2 className="text-3xl font-black text-white mb-1">Финиш!</h2>
+            <h2 className="text-3xl font-bold text-white mb-1 font-montserrat">Финиш!</h2>
             <p className="text-emerald-400 font-bold text-sm mb-6">
                 {marathon ? marathon.title : 'Свободный бег'} завершён
             </p>
@@ -73,56 +55,102 @@ const FinishScreen = ({ run, marathon, onClose }) => (
                 ].map((s, i) => (
                     <div key={i} className="bg-slate-800 rounded-2xl p-3">
                         <div className="text-xl mb-1">{s.icon}</div>
-                        <div className="text-white font-black text-xs leading-tight">{s.value}</div>
+                        <div className="text-white font-bold text-xs leading-tight">{s.value}</div>
                         <div className="text-[8px] text-slate-500 font-bold uppercase mt-0.5">{s.label}</div>
                     </div>
                 ))}
             </div>
 
             {marathon && run.km >= marathon.distance && (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3 mb-5 flex items-center gap-3">
-                    <Flag className="w-5 h-5 text-emerald-400 shrink-0" />
-                    <p className="text-emerald-300 text-sm font-bold text-left leading-tight">
-                        Марафон выполнен! Медаль будет отправлена по почте.
-                    </p>
+                <div className="space-y-3">
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3 flex items-center gap-3">
+                        <Flag className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <p className="text-emerald-300 text-xs font-bold text-left leading-tight">
+                            {marathon.type === 'art' && run.artAccuracy > 80
+                                ? `Шедевр! Точность ${run.artAccuracy}%. Медаль художника твоя!`
+                                : 'Марафон выполнен! Теперь ты можешь заказать физическую медаль.'
+                            }
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => navigate(`/game/shurun/delivery?marathonId=${marathon.id}`)}
+                        className="w-full bg-gradient-to-r from-amber-400 to-amber-600 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2"
+                    >
+                        Заказать медаль 🎖️
+                    </button>
+
+                    <button
+                        onClick={onClose}
+                        className="w-full bg-slate-800 text-slate-400 font-bold py-3 rounded-2xl text-xs"
+                    >
+                        Позже, в рейтинг
+                    </button>
                 </div>
             )}
 
-            <button
-                onClick={onClose}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black py-4 rounded-2xl shadow-lg"
-            >
-                В рейтинг
-            </button>
+            {(!marathon || run.km < marathon.distance) && (
+                <button
+                    onClick={onClose}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-4 rounded-2xl shadow-lg"
+                >
+                    В рейтинг
+                </button>
+            )}
         </div>
     </motion.div>
 );
+const ALMATY_CENTER = [43.238946, 76.889709];
 
 export default function ShuRunMarathon() {
     const navigate = useNavigate();
     const {
-        isRunning, currentKm, elapsedSeconds,
-        startRun, stopRun, resetRun, selectedMarathon
+        isRunning, currentKm, elapsedSeconds, path, isGpsReady, gpsError,
+        capturedZones, artPath, artAccuracy, startRun, stopRun, resetRun, selectedMarathon
     } = useShuRunStore();
 
     const [finished, setFinished] = useState(false);
     const [finishData, setFinishData] = useState(null);
+    const [lastZoneCount, setLastZoneCount] = useState(0);
+    const [showZoneToast, setShowZoneToast] = useState(false);
     const marathon = selectedMarathon;
     const targetKm = marathon?.distance ?? 5;
     const progress = Math.min(currentKm / targetKm, 1);
 
-    // Auto-finish when target reached
+    // Auto-finish and Resumption logic
     useEffect(() => {
+        // If we are already running (e.g. page refresh), re-init intervals
+        if (isRunning) {
+            startRun();
+        }
+
         if (isRunning && currentKm >= targetKm) {
             const run = stopRun();
             setFinishData(run);
             setFinished(true);
             confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 }, colors: ['#10b981', '#f59e0b', '#3b82f6'] });
         }
-    }, [currentKm, isRunning]);
+    }, [currentKm, isRunning, startRun]);
 
-    // Clean up on unmount
-    useEffect(() => () => { if (isRunning) stopRun(); }, []);
+    // Zone capture notification
+    useEffect(() => {
+        if (isRunning && capturedZones.length > lastZoneCount) {
+            setShowZoneToast(true);
+            setLastZoneCount(capturedZones.length);
+            setTimeout(() => setShowZoneToast(false), 3000);
+
+            // Optional: light haptic/sound effect could go here
+        }
+    }, [capturedZones.length, isRunning]);
+
+    // Clean up only watchId on unmount to save battery, but keep interval if desired
+    // Actually, it's better to keep intervals for notifications/sync, but clear it if needed.
+    // For now, let's just make sure we don't STOP the run on unmount.
+    useEffect(() => () => {
+        // We do NOT stopRun() here because we want it to persist across navigation.
+        // But we might want to clearWatch to save battery when not viewing map.
+        // For simplicity in this demo, we'll keep it running.
+    }, []);
 
     const handleStart = () => {
         resetRun();
@@ -141,7 +169,7 @@ export default function ShuRunMarathon() {
         navigate('/game/shurun/board');
     };
 
-    const currentSegment = MOCK_ROUTE.slice(0, Math.max(2, Math.ceil(progress * MOCK_ROUTE.length)));
+    const currentPath = path;
 
     return (
         <div className="h-screen w-full flex flex-col bg-slate-950 font-montserrat overflow-hidden relative">
@@ -159,16 +187,41 @@ export default function ShuRunMarathon() {
                         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                         attribution="&copy; OpenStreetMap"
                     />
-                    {/* Full route (dim) */}
-                    <Polyline positions={MOCK_ROUTE} pathOptions={{ color: '#10b981', opacity: 0.2, weight: 4, dashArray: '8 8' }} />
-                    {/* Covered path */}
-                    {isRunning || progress > 0 ? (
+                    {/* GPS Art Template (Ghost Line) */}
+                    {artPath.length > 1 && (
                         <Polyline
-                            positions={currentSegment}
-                            pathOptions={{ color: '#10b981', opacity: 0.9, weight: 5 }}
+                            positions={artPath}
+                            pathOptions={{ color: '#white', opacity: 0.3, weight: 6, dashArray: '10 10' }}
                         />
-                    ) : null}
-                    {isRunning && <RunnerMarker progress={progress} />}
+                    )}
+
+                    {/* Real Path visualization */}
+                    {path.length > 1 && (
+                        <Polyline
+                            positions={path}
+                            pathOptions={{ color: '#10b981', opacity: 0.9, weight: 5, smoothFactor: 1.5 }}
+                        />
+                    )}
+
+                    {/* Captured Territory Zones */}
+                    {capturedZones.map((zone) => (
+                        <Rectangle
+                            key={zone.id}
+                            bounds={[
+                                [zone.lat, zone.lng],
+                                [zone.lat + GRID_SIZE, zone.lng + GRID_SIZE]
+                            ]}
+                            pathOptions={{
+                                color: '#10b981',
+                                fillColor: '#10b981',
+                                fillOpacity: 0.3,
+                                weight: 1,
+                                dashArray: '4'
+                            }}
+                        />
+                    ))}
+
+                    {path.length > 0 && <RunnerMarker path={path} />}
                 </MapContainer>
 
                 {/* Back button */}
@@ -183,9 +236,44 @@ export default function ShuRunMarathon() {
                 {marathon && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full border border-white/10 shadow-lg flex items-center gap-2">
                         <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-xs font-black">{marathon.title}</span>
+                        <span className="text-xs font-bold">{marathon.title}</span>
                     </div>
                 )}
+
+                {/* GPS Error Overlay */}
+                {gpsError && (
+                    <div className="absolute inset-0 z-[500] bg-black/60 backdrop-blur-md flex items-center justify-center p-6 text-center">
+                        <div className="bg-slate-900 border border-rose-500/30 rounded-3xl p-6 shadow-2xl">
+                            <div className="text-4xl mb-3">📡❌</div>
+                            <h3 className="text-xl font-bold text-white mb-2 font-montserrat">Ошибка GPS</h3>
+                            <p className="text-slate-400 text-sm mb-6">
+                                {gpsError === "User denied Geolocation"
+                                    ? "Пожалуйста, разрешите доступ к геопозиции в настройках браузера."
+                                    : gpsError}
+                            </p>
+                            <button
+                                onClick={() => { resetRun(); startRun(); }}
+                                className="w-full bg-slate-800 text-white font-bold py-3 rounded-xl border border-white/10"
+                            >
+                                Попробовать снова
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Zone Captured Toast */}
+                <AnimatePresence>
+                    {showZoneToast && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50, scale: 0.8 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.5 }}
+                            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[500] bg-emerald-500 text-white px-4 py-3 rounded-2xl font-bold text-xs shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center gap-2 border border-white/20"
+                        >
+                            <Flag className="w-4 h-4" /> РАЙОН ЗАХВАЧЕН! +1
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* HUD panel */}
@@ -207,8 +295,11 @@ export default function ShuRunMarathon() {
                             />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-2xl font-black text-white leading-none">{currentKm.toFixed(2)}</span>
+                            <span className="text-2xl font-bold text-white leading-none">{currentKm.toFixed(2)}</span>
                             <span className="text-[10px] text-emerald-400 font-bold">/ {targetKm} км</span>
+                            {!isGpsReady && isRunning && (
+                                <span className="absolute -bottom-6 text-[8px] text-amber-400 animate-pulse font-bold uppercase">Поиск GPS...</span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -217,12 +308,16 @@ export default function ShuRunMarathon() {
                 <div className="grid grid-cols-3 gap-3 mb-5">
                     {[
                         { icon: '⏱️', label: 'Время', value: formatTime(elapsedSeconds) },
-                        { icon: '⚡', label: 'Темп', value: isRunning && currentKm > 0.01 ? `${Math.floor(elapsedSeconds / currentKm / 60)}:${String(Math.floor((elapsedSeconds / currentKm) % 60)).padStart(2, '0')}` : '—' },
-                        { icon: '🎯', label: 'Осталось', value: `${Math.max(0, targetKm - currentKm).toFixed(2)} км` },
+                        { icon: '🚩', label: 'Районы', value: capturedZones.length },
+                        {
+                            icon: selectedMarathon?.type === 'art' ? '🎨' : '🎯',
+                            label: selectedMarathon?.type === 'art' ? 'Точность' : 'Осталось',
+                            value: selectedMarathon?.type === 'art' ? `${Math.round(artAccuracy)}%` : `${Math.max(0, targetKm - currentKm).toFixed(2)} км`
+                        },
                     ].map((s, i) => (
                         <div key={i} className="bg-slate-900 border border-white/10 rounded-2xl p-3 text-center">
                             <div className="text-lg">{s.icon}</div>
-                            <div className="text-white font-black text-sm leading-tight">{s.value}</div>
+                            <div className="text-white font-bold text-sm leading-tight">{s.value}</div>
                             <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">{s.label}</div>
                         </div>
                     ))}
@@ -233,7 +328,7 @@ export default function ShuRunMarathon() {
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={handleStart}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xl py-4 rounded-2xl flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xl py-4 rounded-2xl flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
                     >
                         <Play className="w-6 h-6" />
                         Старт
@@ -242,7 +337,7 @@ export default function ShuRunMarathon() {
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={handleStop}
-                        className="w-full bg-rose-600 text-white font-black text-xl py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg"
+                        className="w-full bg-rose-600 text-white font-bold text-xl py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg"
                     >
                         <Zap className="w-6 h-6 animate-pulse" />
                         Финиш
@@ -254,7 +349,7 @@ export default function ShuRunMarathon() {
             {/* Finish modal */}
             <AnimatePresence>
                 {finished && finishData && (
-                    <FinishScreen run={finishData} marathon={marathon} onClose={handleFinishClose} />
+                    <FinishScreen run={finishData} marathon={marathon} onClose={handleFinishClose} navigate={navigate} />
                 )}
             </AnimatePresence>
         </div>

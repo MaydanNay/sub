@@ -1,8 +1,9 @@
+import { storage } from './storage';
 class SoundManager {
     constructor() {
         this.ctx = null;
         this.initialized = false;
-        this.muted = localStorage.getItem('game_muted') === 'true';
+        this.muted = storage.get('game_muted') === 'true';
     }
 
     init() {
@@ -18,7 +19,7 @@ class SoundManager {
 
     setMuted(mute) {
         this.muted = mute;
-        localStorage.setItem('game_muted', mute);
+        storage.set('game_muted', mute);
     }
 
     // Generic tone generator

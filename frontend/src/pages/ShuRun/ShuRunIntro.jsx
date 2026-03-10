@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Medal, Trophy, ChevronRight, Zap } from 'lucide-react';
+import ShuRunAuth from './ShuRunAuth';
+import useShuRunStore from './useShuRunStore';
 
 const FEATURES = [
     {
@@ -26,6 +28,16 @@ const FEATURES = [
 
 const ShuRunIntro = () => {
     const navigate = useNavigate();
+    const user = useShuRunStore(s => s.user);
+    const [isAuthOpen, setIsAuthOpen] = React.useState(false);
+
+    const handleStartClick = () => {
+        if (user?.isAuthenticated) {
+            navigate('/game/shurun/home');
+        } else {
+            setIsAuthOpen(true);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-between p-6 pb-10 relative overflow-hidden font-montserrat">
@@ -79,11 +91,11 @@ const ShuRunIntro = () => {
 
                 <div className="flex items-center justify-center gap-2 mb-2">
                     <div className="w-8 h-[2px] bg-emerald-400" />
-                    <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.3em]">SHU.STUDIO</span>
+                    <span className="text-emerald-400 text-xs font-bold uppercase tracking-[0.3em]">SHU.STUDIO</span>
                     <div className="w-8 h-[2px] bg-emerald-400" />
                 </div>
 
-                <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 drop-shadow-lg">
+                <h1 className="text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 drop-shadow-lg font-montserrat">
                     ShuRun
                 </h1>
                 <p className="text-slate-400 font-bold mt-2 text-sm tracking-wide">
@@ -127,8 +139,8 @@ const ShuRunIntro = () => {
                 <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate('/game/shurun/home')}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg py-4 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 transition-all"
+                    onClick={handleStartClick}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 transition-all"
                 >
                     <Zap className="w-5 h-5" />
                     Начать бегать
@@ -138,6 +150,12 @@ const ShuRunIntro = () => {
                     Бесплатно · Без ограничений по городу
                 </p>
             </motion.div>
+
+            <ShuRunAuth
+                isOpen={isAuthOpen}
+                onClose={() => setIsAuthOpen(false)}
+                onShowCatalog={() => window.location.href = 'https://app.shustudio.kz'}
+            />
         </div>
     );
 };

@@ -1,6 +1,7 @@
+# Database models for ShuRun
 from sqlalchemy import Column, Integer, String, Text, Float, Boolean, ForeignKey, Enum, DateTime, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
-from .database import Base
+from database import Base
 import enum
 import datetime
 
@@ -100,3 +101,39 @@ class LeadRequest(Base):
     contact = Column(String)
     task = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class ShuRunRun(Base):
+    __tablename__ = "shurun_runs"
+
+    id = Column(String, primary_key=True)  # Using string IDs like 'run_123'
+    user_id = Column(Integer, ForeignKey("users.id"))
+    marathon_id = Column(String, index=True)
+    km = Column(Float)
+    seconds = Column(Integer)
+    date = Column(String)
+    pace = Column(String)
+    art_accuracy = Column(Integer, nullable=True)
+    reward_claimed = Column(Boolean, default=False)
+    path = Column(JSON, default=[])  # List of [lat, lng]
+    captured_zones_count = Column(Integer, default=0)
+
+    user = relationship("User")
+
+class ShuRunOrder(Base):
+    __tablename__ = "shurun_orders"
+
+    id = Column(String, primary_key=True) # Using string IDs like 'ord_123'
+    user_id = Column(Integer, ForeignKey("users.id"))
+    marathon_id = Column(String, index=True)
+    marathon_title = Column(String)
+    date = Column(String)
+    status = Column(String, default="pending")
+    
+    # Courier / Delivery data
+    address = Column(String)
+    city = Column(String)
+    postal_code = Column(String)
+    phone = Column(String)
+
+    user = relationship("User")
+

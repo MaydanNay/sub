@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import Player from '../entities/Player';
+import { storage } from '../../../../utils/storage';
 
 export default class MainScene extends Phaser.Scene {
     constructor() {
@@ -9,7 +10,7 @@ export default class MainScene extends Phaser.Scene {
     create() {
         // Game State
         this.score = 0;
-        this.highScore = parseInt(localStorage.getItem('shalam_highscore')) || 0;
+        this.highScore = parseInt(storage.get('shalam_highscore')) || 0;
         this.gameTime = 0;
         this.level = 1;
         this.maxTime = 90; // TЗ: 90 seconds per level
@@ -391,7 +392,7 @@ export default class MainScene extends Phaser.Scene {
         if (this.score > this.highScore) {
             this.highScore = this.score;
             this.highScoreText.setText('High: ' + this.highScore);
-            localStorage.setItem('shalam_highscore', this.highScore);
+            storage.set('shalam_highscore', this.highScore);
         }
     }
 

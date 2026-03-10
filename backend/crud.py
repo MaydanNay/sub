@@ -1,6 +1,7 @@
+# CRUD operations for ShuRun
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
-from . import models, schemas
+import models, schemas
 import random
 import datetime
 
@@ -448,3 +449,33 @@ def create_lead_request(db: Session, lead: schemas.LeadRequestCreate):
     db.commit()
     db.refresh(db_lead)
     return db_lead
+
+# --- ShuRun CRUD ---
+
+def get_user_runs(db: Session, user_id: int):
+    return db.query(models.ShuRunRun).filter(models.ShuRunRun.user_id == user_id).order_by(models.ShuRunRun.date.desc()).all()
+
+def create_user_run(db: Session, user_id: int, run: schemas.ShuRunRunBase):
+    db_run = models.ShuRunRun(**run.dict(), user_id=user_id)
+    db.add(db_run)
+    db.commit()
+    db.refresh(db_run)
+    return db_run
+
+def get_user_orders(db: Session, user_id: int):
+    return db.query(models.ShuRunOrder).filter(models.ShuRunOrder.user_id == user_id).order_by(models.ShuRunOrder.date.desc()).all()
+
+def create_user_order(db: Session, user_id: int, order: schemas.ShuRunOrderBase):
+    db_order = models.ShuRunOrder(**order.dict(), user_id=user_id)
+    db.add(db_order)
+    
+    # Mark the corresponding run as reward claimed if applicable
+    db.query(models.ShuRunRun).filter(
+        models.ShuRunRun.user_id == user_id,
+        models.ShuRunRun.marathon_id == order.marathon_id
+    ).update({"reward_claimed": True})
+    
+    db.commit()
+    db.refresh(db_order)
+    return db_order
+

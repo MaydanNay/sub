@@ -1,3 +1,4 @@
+# Pydantic schemas for ShuRun API
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from enum import Enum
@@ -179,3 +180,35 @@ class LeadRequest(LeadRequestBase):
 
     class Config:
         from_attributes = True
+
+class ShuRunRunBase(BaseModel):
+    id: str
+    marathon_id: str
+    km: float
+    seconds: int
+    date: str
+    pace: str
+    art_accuracy: Optional[int] = None
+    reward_claimed: bool = False
+    path: List[List[float]] = []
+    captured_zones_count: int = 0
+
+class ShuRunRun(ShuRunRunBase):
+    class Config:
+        from_attributes = True
+
+class ShuRunOrderBase(BaseModel):
+    id: str
+    marathon_id: str
+    marathon_title: str
+    date: str
+    status: str
+    address: str
+    city: str
+    postal_code: str
+    phone: str
+
+class ShuRunOrder(ShuRunOrderBase):
+    class Config:
+        from_attributes = True
+

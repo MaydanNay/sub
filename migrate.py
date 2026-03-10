@@ -1,33 +1,38 @@
-import sqlite3
 import os
+from sqlalchemy import create_engine, text
+from backend.database import SQLALCHEMY_DATABASE_URL
 
-db_paths = ["sql_app.db", "backend/sql_app.db"]
-
-for db_path in db_paths:
-    if os.path.exists(db_path):
-        print(f"Migrating {db_path}...")
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+def run_migrations():
+    print(f"Connecting to {SQLALCHEMY_DATABASE_URL}...")
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    
+    with engine.connect() as conn:
+        # PostgreSQL handled differently than SQLite for 'ADD COLUMN IF NOT EXISTS'
+        is_postgres = SQLALCHEMY_DATABASE_URL.startswith("postgresql")
         
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN equipped_character_id INTEGER REFERENCES characters(id)")
-            print(f"Added equipped_character_id to {db_path}")
-        except sqlite3.OperationalError as e:
-            print(f"Skipped equipped_character_id for {db_path}: {e}")
-            
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN skins TEXT DEFAULT '[]'")
-            print(f"Added skins to {db_path}")
-        except sqlite3.OperationalError as e:
-            print(f"Skipped skins for {db_path}: {e}")
+        migrations = [
+            ("users", "equipped_character_id", "INTEGER REFERENCES characters(id)"),
+            ("users", "skins", "TEXT DEFAULT '[]'"),
+            ("users", "coupons", "TEXT DEFAULT '[]'")
+        ]
+        
+        for table, column, col_type in migrations:
+            try:
+                if is_postgres:
+                    # check if column exists in postgres
+                    check_sql = text(f"SELECT column_name FROM information_schema.columns WHERE table_name='{table}' AND column_name='{column}'")
+                    exists = conn.execute(check_sql).fetchone()
+                    if not exists:
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
+                        conn.commit()
+                        print(f"Added {column} to {table}")
+                else:
+                    # SQLite simple alter
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
+                    conn.commit()
+                    print(f"Added {column} to {table}")
+            except Exception as e:
+                print(f"Skipped {column} for {table}: {e}")
 
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN coupons TEXT DEFAULT '[]'")
-            print(f"Added coupons to {db_path}")
-        except sqlite3.OperationalError as e:
-            print(f"Skipped coupons for {db_path}: {e}")
-            
-        conn.commit()
-        conn.close()
-    else:
-        print(f"File {db_path} not found.")
+if __name__ == "__main__":
+    run_migrations()

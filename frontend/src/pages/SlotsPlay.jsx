@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../utils/storage';
 import SoundManager from '../utils/SoundManager';
 import {
     IconCherry, IconLemon, IconOrange, IconGrape, IconWatermelon, IconStar, IconDiamond, IconSeven
@@ -12,7 +13,7 @@ const SlotsPlay = () => {
     const [spinning, setSpinning] = useState([false, false, false]);
     const [result, setResult] = useState(null);
     const [coins, setCoins] = useState(() => {
-        const saved = localStorage.getItem('slots_coins');
+        const saved = storage.get('slots_coins');
         return saved ? parseInt(saved) : 100;
     });
     const [bet, setBet] = useState(10);
@@ -29,7 +30,7 @@ const SlotsPlay = () => {
     ];
 
     useEffect(() => {
-        localStorage.setItem('slots_coins', coins.toString());
+        storage.set('slots_coins', coins.toString());
     }, [coins]);
 
     const spin = () => {
@@ -97,7 +98,7 @@ const SlotsPlay = () => {
 
     const resetGame = () => {
         setCoins(100);
-        localStorage.setItem('slots_coins', '100');
+        storage.set('slots_coins', '100');
         SoundManager.play('click');
     };
 

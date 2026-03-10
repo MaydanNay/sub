@@ -1,11 +1,8 @@
-cd frontend
-npm install
-npm run dev
-
-python run_project.py
-
-
-
 git add .
 git commit -m "."
 git push -u origin main
+
+
+docker-compose down
+docker-compose up --build -d
+docker-compose logs -f

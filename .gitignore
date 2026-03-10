@@ -23,6 +23,12 @@ pyvenv.cfg
 
 # Database
 sql_app.db
+sql_app.db-wal
+sql_app.db-shm
+shubank.db
+
+# Virtual environments
+pdfenv/
 
 # Environment variables
 .env

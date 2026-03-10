@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { IconArrowLeft } from '../components/GameIcons';
 import { useUser } from '../components/UserProvider';
 import axios from 'axios';
+import { storage } from '../utils/storage';
 // --- IMAGES ---
 import imgRice from './ShuShi/images/ingredients/rice.PNG';
 import imgNori from './ShuShi/images/ingredients/nori.PNG';
@@ -128,8 +129,7 @@ const ShuShiPlay = () => {
     // State
     const [gameState, setGameState] = useState('intro'); // intro, memorize, playing, result, cooldown, mistake
     const [streak, setStreak] = useState(() => {
-        const saved = localStorage.getItem(`shushi_streak_${userPhone || 'guest'}`);
-        return saved ? parseInt(saved, 10) : 0;
+        return parseInt(storage.get(`shushi_streak_${userPhone || 'guest'}`)) || 0;
     });
     const [lives, setLives] = useState(3);
     const [currentRoll, setCurrentRoll] = useState(null);
@@ -161,13 +161,13 @@ const ShuShiPlay = () => {
     // Persist Streak
     useEffect(() => {
         if (userPhone) {
-            localStorage.setItem(`shushi_streak_${userPhone}`, streak.toString());
+            storage.set(`shushi_streak_${userPhone}`, streak.toString());
         }
     }, [streak, userPhone]);
 
     // Initial Load - Check Cooldown
     useEffect(() => {
-        const savedCooldown = localStorage.getItem(`shushi_cooldown_${userPhone || 'guest'}`);
+        const savedCooldown = storage.get(`shushi_cooldown_${userPhone || 'guest'}`);
         if (savedCooldown) {
             const end = parseInt(savedCooldown, 10);
             if (Date.now() < end) {
@@ -175,7 +175,7 @@ const ShuShiPlay = () => {
                 setGameState('cooldown');
                 setLives(0);
             } else {
-                localStorage.removeItem(`shushi_cooldown_${userPhone || 'guest'}`);
+                storage.remove(`shushi_cooldown_${userPhone || 'guest'}`);
             }
         }
     }, [userPhone]);
@@ -190,7 +190,7 @@ const ShuShiPlay = () => {
                     setGameState('intro');
                     setCooldownEnd(null);
                     setLives(3);
-                    localStorage.removeItem(`shushi_cooldown_${userPhone || 'guest'}`);
+                    storage.remove(`shushi_cooldown_${userPhone || 'guest'}`);
                     clearInterval(interval);
                 } else {
                     setTick(t => t + 1); // Trigger re-render for countdown
@@ -296,9 +296,9 @@ const ShuShiPlay = () => {
             setLastReward(reward);
             // Save reward to local storage
             const myRewardsKey = `shushi_rewards_${userPhone || 'guest'}`;
-            const myRewards = JSON.parse(localStorage.getItem(myRewardsKey) || '[]');
+            const myRewards = JSON.parse(storage.get(myRewardsKey) || '[]');
             myRewards.push({ ...reward, date: Date.now() });
-            localStorage.setItem(myRewardsKey, JSON.stringify(myRewards));
+            storage.set(myRewardsKey, JSON.stringify(myRewards));
         } else {
             setLastReward(null);
         }
@@ -333,7 +333,7 @@ const ShuShiPlay = () => {
             setStreak(0); // Reset streak on full lose
             // Set cooldown
             const end = Date.now() + COOLDOWN_TIME;
-            localStorage.setItem(`shushi_cooldown_${userPhone || 'guest'}`, end.toString());
+            storage.set(`shushi_cooldown_${userPhone || 'guest'}`, end.toString());
             setCooldownEnd(end);
             setGameState('cooldown');
         }
@@ -345,7 +345,7 @@ const ShuShiPlay = () => {
 
         setTimeout(() => {
             setNotification(null);
-            localStorage.removeItem(`shushi_cooldown_${userPhone || 'guest'}`);
+            storage.remove(`shushi_cooldown_${userPhone || 'guest'}`);
             setCooldownEnd(null);
             setGameState('intro');
             setLives(3);

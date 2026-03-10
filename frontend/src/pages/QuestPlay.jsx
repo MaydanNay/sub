@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../utils/storage';
 
 const QuestPlay = () => {
     const navigate = useNavigate();
@@ -40,7 +41,7 @@ const QuestPlay = () => {
     ];
 
     const [currentStep, setCurrentStep] = useState(() => {
-        const saved = localStorage.getItem('quest_step');
+        const saved = storage.get('quest_step');
         return saved ? parseInt(saved) : 0;
     });
 
@@ -57,7 +58,7 @@ const QuestPlay = () => {
         if (currentStep >= QUESTS.length) {
             setIsFinished(true);
         } else {
-            localStorage.setItem('quest_step', currentStep.toString());
+            storage.set('quest_step', currentStep.toString());
         }
     }, [currentStep]);
 
@@ -124,7 +125,7 @@ const QuestPlay = () => {
         setCurrentStep(0);
         setProgress(0);
         setIsFinished(false);
-        localStorage.removeItem('quest_step');
+        storage.remove('quest_step');
     };
 
     return (

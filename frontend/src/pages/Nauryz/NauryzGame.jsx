@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../utils/storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconArrowLeft, IconSettings, IconLightning, IconShoppingBag, IconBook, IconPlus } from '../../components/GameIcons';
 import Board from './components/Board';
@@ -17,23 +18,23 @@ const NauryzGame = () => {
 
     // State
     const [board, setBoard] = useState(() => {
-        const saved = localStorage.getItem('nauryz_board');
+        const saved = storage.get('nauryz_board');
         return saved ? JSON.parse(saved) : Array(INITIAL_BOARD_SIZE).fill(null);
     });
 
     // Discovered Items State
     const [discoveredItems, setDiscoveredItems] = useState(() => {
-        const saved = localStorage.getItem('nauryz_discovered');
+        const saved = storage.get('nauryz_discovered');
         return saved ? JSON.parse(saved) : ['flour', 'milk', 'water']; // Default discovered
     });
 
     const [energy, setEnergy] = useState(() => {
-        const saved = parseInt(localStorage.getItem('nauryz_energy') || '10', 10);
+        const saved = parseInt(storage.get('nauryz_energy') || '10', 10);
         return Math.min(10, saved); // Enforce max 10
     });
 
     const [coins, setCoins] = useState(() => {
-        return parseInt(localStorage.getItem('nauryz_coins') || '500', 10);
+        return parseInt(storage.get('nauryz_coins') || '500', 10);
     });
 
     const [isScanModalOpen, setIsScanModalOpen] = useState(false);
@@ -69,10 +70,10 @@ const NauryzGame = () => {
 
     // Persistence
     useEffect(() => {
-        localStorage.setItem('nauryz_board', JSON.stringify(board));
-        localStorage.setItem('nauryz_energy', energy.toString());
-        localStorage.setItem('nauryz_coins', coins.toString());
-        localStorage.setItem('nauryz_discovered', JSON.stringify(discoveredItems));
+        storage.set('nauryz_board', JSON.stringify(board));
+        storage.set('nauryz_energy', energy.toString());
+        storage.set('nauryz_coins', coins.toString());
+        storage.set('nauryz_discovered', JSON.stringify(discoveredItems));
     }, [board, energy, coins, discoveredItems]);
 
     // Helpers

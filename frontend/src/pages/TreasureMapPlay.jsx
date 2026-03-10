@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PrizeDrawer from '../components/PrizeDrawer';
 import ThemeCustomizer from '../components/ThemeCustomizer';
 import { IconMap, IconTrophy, IconStar, IconHeart, IconCoin } from '../components/GameIcons';
+import { storage } from '../utils/storage';
 
 const TreasureMapPlay = () => {
     const navigate = useNavigate();
@@ -15,10 +16,10 @@ const TreasureMapPlay = () => {
         { id: 5, x: 80, y: 50, status: 'locked', title: 'Пещера Золота', icon: '💎', reward: 'Скидка 50%' },
     ]);
     const [activePoint, setActivePoint] = useState(null);
-    const [coins, setCoins] = useState(() => parseInt(localStorage.getItem('map_coins')) || 0);
+    const [coins, setCoins] = useState(() => parseInt(storage.get('map_coins')) || 0);
 
     useEffect(() => {
-        localStorage.setItem('map_coins', coins);
+        storage.set('map_coins', coins);
     }, [coins]);
 
     const handlePointClick = (point) => {

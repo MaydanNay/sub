@@ -1,16 +1,17 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Trophy, User } from 'lucide-react';
+import { Home, Trophy, User, Layout } from 'lucide-react';
 
 const NAV_ITEMS = [
     { to: '/game/shurun/home', icon: Home, label: 'Главная' },
+    { to: '/game/shurun/feed', icon: Layout, label: 'Лента' },
     { to: '/game/shurun/board', icon: Trophy, label: 'Рейтинг' },
     { to: '/game/shurun/me', icon: User, label: 'Профиль' },
 ];
 
 const BottomNav = () => (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
-        <div className="w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-4 py-3 pb-5">
+        <div className="w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-4 py-3 font-montserrat">
             {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
                 <NavLink
                     key={to}

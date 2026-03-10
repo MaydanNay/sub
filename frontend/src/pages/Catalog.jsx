@@ -5,11 +5,13 @@ import {
     IconLightning, IconChart, IconBrain,
     IconDice, IconWheel, IconTicket, IconTarget, IconSlotMachine, IconChest,
     IconCoffee, IconPuzzle, IconMap,
-    IconQuestion, IconCards, IconZap,
+    IconQuestion, IconCards, IconZap, IconTrophy,
     IconDownload, IconSushi, IconJerboa, IconFlower, IconGift, IconStar
 } from '../components/GameIcons';
 import Header from '../components/Header';
 import { cn } from '../utils/cn';
+import { storage } from '../utils/storage';
+
 
 // Asset Preloading
 import shuBankIcon from './ShuBank/images/pers/0.PNG';
@@ -18,7 +20,7 @@ import shuShiIcon from './ShuShi/images/dishes/1.PNG';
 
 const Catalog = ({ openModal }) => {
     const [activeCategory, setActiveCategory] = useState(() => {
-        return localStorage.getItem('catalog_active_category') || 'startups';
+        return storage.get('catalog_active_category', 'startups');
     });
 
     const categories = [
@@ -26,7 +28,19 @@ const Catalog = ({ openModal }) => {
             id: 'startups',
             title: 'Стартапы',
             fullTitle: 'Стартап-проекты',
-            description: 'Специальные проекты для наших партнеров и стартапов',
+            description: 'Инновационные решения и новые игровые механики',
+            icon: IconZap,
+            color: 'from-emerald-400 to-teal-600',
+            textColor: 'text-emerald-600',
+            games: [
+                { id: 'shurun', title: 'ShuRun', description: 'Виртуальные марафоны', icon: IconTrophy, color: 'from-emerald-500 to-teal-600', status: 'active', goal: 'Спорт' },
+            ]
+        },
+        {
+            id: 'corporate',
+            title: 'Крупные',
+            fullTitle: 'Крупные проекты',
+            description: 'Специальные проекты для наших крупных партнеров',
             icon: IconStar,
             color: 'from-pink-400 to-rose-600',
             textColor: 'text-pink-600',
@@ -109,11 +123,11 @@ const Catalog = ({ openModal }) => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.35 }}
-                        className="flex justify-center mb-12"
+                        className="flex flex-col sm:flex-row justify-center gap-4 mb-12"
                     >
                         <button
                             onClick={openModal}
-                            className="font-shupixel text-[10px] md:text-xs uppercase tracking-widest px-8 py-4 bg-shu-pink text-black border-2 border-shu-pink hover:bg-transparent hover:text-shu-pink shadow-pixel-sm hover:shadow-pixel active:translate-x-1 active:translate-y-1 transition-all duration-200"
+                            className="font-shupixel text-[10px] md:text-xs uppercase tracking-widest px-10 py-5 bg-transparent text-shu-pink border-2 border-shu-pink hover:bg-shu-pink hover:text-black shadow-pixel-sm hover:shadow-pixel active:translate-x-1 active:translate-y-1 transition-all duration-200"
                         >
                             Оставить заявку
                         </button>
@@ -126,7 +140,7 @@ const Catalog = ({ openModal }) => {
                                 key={category.id}
                                 onClick={() => {
                                     setActiveCategory(category.id);
-                                    localStorage.setItem('catalog_active_category', category.id);
+                                    storage.set('catalog_active_category', category.id);
                                 }}
                                 className={cn(
                                     "relative flex-shrink-0 px-6 py-4 font-shupixel text-[10px] md:text-xs uppercase transition-all duration-300",
@@ -238,3 +252,4 @@ const Catalog = ({ openModal }) => {
 };
 
 export default Catalog;
+

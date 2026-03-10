@@ -1,8 +1,9 @@
+# ShuBank Together models
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from .database import Base
+from database import Base
 import uuid
 
 class ShuBankUser(Base):

@@ -99,14 +99,14 @@ export const LEADERBOARD_MARATHON = [
 ];
 
 export const ACHIEVEMENTS = [
-    { id: 'first_run', emoji: '🎯', title: 'Первая пробежка', desc: 'Сделай первый шаг', unlocked: true },
-    { id: 'km10', emoji: '📍', title: '10 км пройдено', desc: 'Суммарно 10 км', unlocked: true },
-    { id: 'marathon', emoji: '🏅', title: 'Финишёр', desc: 'Завершить любой марафон', unlocked: false },
-    { id: 'week_streak', emoji: '🔥', title: '7 дней подряд', desc: 'Бегай неделю подряд', unlocked: false },
-    { id: 'fast_5k', emoji: '⚡', title: 'Быстрый 5К', desc: '5 км быстрее 25 минут', unlocked: false },
-    { id: 'territory', emoji: '🗺️', title: 'Завоеватель', desc: 'Захвати 5 районов', unlocked: false },
-    { id: 'gps_art', emoji: '🎨', title: 'GPS-Художник', desc: 'Создай маршрут-рисунок', unlocked: false },
-    { id: 'steps_100k', emoji: '👟', title: '100K шагов', desc: 'Пройди 100 000 шагов', unlocked: false },
+    { id: 'first_run', emoji: '🎯', title: 'Первая пробежка', desc: 'Сделай первый шаг' },
+    { id: 'km10', emoji: '📍', title: '10 км пройдено', desc: 'Суммарно 10 км' },
+    { id: 'marathon', emoji: '🏅', title: 'Финишёр', desc: 'Завершить любой марафон' },
+    { id: 'week_streak', emoji: '🔥', title: '7 дней подряд', desc: 'Бегай неделю подряд' },
+    { id: 'fast_5k', emoji: '⚡', title: 'Быстрый 5К', desc: '5 км быстрее 25 минут' },
+    { id: 'territory', emoji: '🗺️', title: 'Завоеватель', desc: 'Захвати 5 районов' },
+    { id: 'gps_art', emoji: '🎨', title: 'GPS-Художник', desc: 'Создай маршрут-рисунок' },
+    { id: 'steps_100k', emoji: '👟', title: '100K шагов', desc: 'Пройди 100 000 шагов' },
 ];
 
 export const MY_MEDALS = [

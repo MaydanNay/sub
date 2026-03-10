@@ -84,6 +84,8 @@ const ShuRunHome = React.lazy(() => import('./pages/ShuRun/ShuRunHome'));
 const ShuRunMarathon = React.lazy(() => import('./pages/ShuRun/ShuRunMarathon'));
 const ShuRunLeaderboard = React.lazy(() => import('./pages/ShuRun/ShuRunLeaderboard'));
 const ShuRunProfile = React.lazy(() => import('./pages/ShuRun/ShuRunProfile'));
+const ShuRunFeed = React.lazy(() => import('./pages/ShuRun/ShuRunFeed'));
+const ShuRunDelivery = React.lazy(() => import('./pages/ShuRun/ShuRunDelivery'));
 
 const ThankYou = React.lazy(() => import('./components/ThankYou'));
 
@@ -132,7 +134,7 @@ function AppInner() {
                         <Route path="/game/nauryz/play" element={<NauryzGame />} />
                     </Route>
 
-                    <Route path="/" element={<Catalog />} />
+
                     <Route path="/game/barista" element={<CoffeeMaker />} />
                     <Route path="/game/barista/play" element={<CoffeeMakerPlay />} />
                     <Route path="/game/scratch" element={<ScratchCard />} />
@@ -211,6 +213,8 @@ function AppInner() {
                         <Route path="/game/shurun/run" element={<ShuRunMarathon />} />
                         <Route path="/game/shurun/board" element={<ShuRunLeaderboard />} />
                         <Route path="/game/shurun/me" element={<ShuRunProfile />} />
+                        <Route path="/game/shurun/feed" element={<ShuRunFeed />} />
+                        <Route path="/game/shurun/delivery" element={<ShuRunDelivery />} />
                     </Route>
 
                     <Route path="/game/:gameId" element={<GamePage />} />

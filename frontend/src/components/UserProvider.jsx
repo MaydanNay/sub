@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { storage } from '../utils/storage';
 
 const UserContext = createContext();
 
@@ -18,10 +19,10 @@ export const UserProvider = ({ children }) => {
 
     // Initialize or get guest ID
     useEffect(() => {
-        let id = localStorage.getItem(GUEST_KEY);
+        let id = storage.get(GUEST_KEY);
         if (!id) {
             id = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-            localStorage.setItem(GUEST_KEY, id);
+            storage.set(GUEST_KEY, id);
         }
         setUserPhone(id);
     }, []);

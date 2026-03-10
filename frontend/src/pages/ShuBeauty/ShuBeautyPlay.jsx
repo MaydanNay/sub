@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../utils/storage';
 import {
     IconTrophy, IconList, IconGift, IconCoin, IconArrowLeft,
     IconZap, IconTarget, IconUsers
@@ -79,7 +80,7 @@ const ShuBeautyPlay = () => {
     const scrollRef = useRef(null);
 
     const [stats, setStats] = useState(() => {
-        const saved = localStorage.getItem('shubeauty_stats');
+        const saved = storage.get('shubeauty_stats');
         const defaultStats = {
             position: 0,
             rolls: 50,
@@ -107,7 +108,7 @@ const ShuBeautyPlay = () => {
     const [petalIntensity, setPetalIntensity] = useState(1);
 
     useEffect(() => {
-        localStorage.setItem('shubeauty_stats', JSON.stringify(stats));
+        storage.set('shubeauty_stats', JSON.stringify(stats));
 
         // Asset Preloading
         const assets = [bgPng, pandaPng, iceBlockPng, giftPng, lipstickPng, mascaraPng, creamPng, perfumePng];

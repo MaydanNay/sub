@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { cn } from "../lib/utils";
 import '../styles/Header.css';
 
-const Header = () => {
+const Header = ({ onOpenSurvey }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -37,7 +37,7 @@ const Header = () => {
                 <div className="header-actions">
                     <button
                         className="cta-button desktop-only"
-                        onClick={() => window.open('https://app.shustudio.kz', '_blank', 'noopener,noreferrer')}
+                        onClick={onOpenSurvey}
                     >
                         НАЧАТЬ ИГРУ
                     </button>
@@ -70,7 +70,10 @@ const Header = () => {
                     ))}
                     <button
                         className="cta-button mobile-cta"
-                        onClick={() => window.open('https://app.shustudio.kz', '_blank', 'noopener,noreferrer')}
+                        onClick={() => {
+                            toggleMenu();
+                            onOpenSurvey?.();
+                        }}
                     >
                         НАЧАТЬ ИГРУ
                     </button>

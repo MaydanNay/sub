@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../utils/storage';
 
 const PuzzlePlay = () => {
     const navigate = useNavigate();
@@ -8,17 +9,17 @@ const PuzzlePlay = () => {
     const PIECE_PRICE = 50;
 
     const [coins, setCoins] = useState(() => {
-        const saved = localStorage.getItem('puzzle_coins');
+        const saved = storage.get('puzzle_coins');
         return saved ? parseInt(saved) : 100;
     });
 
     const [inventory, setInventory] = useState(() => {
-        const saved = localStorage.getItem('puzzle_inventory');
+        const saved = storage.get('puzzle_inventory');
         return saved ? JSON.parse(saved) : [];
     });
 
     const [placedPieces, setPlacedPieces] = useState(() => {
-        const saved = localStorage.getItem('puzzle_placed');
+        const saved = storage.get('puzzle_placed');
         return saved ? JSON.parse(saved) : [];
     });
 
@@ -27,9 +28,9 @@ const PuzzlePlay = () => {
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
 
     useEffect(() => {
-        localStorage.setItem('puzzle_coins', coins.toString());
-        localStorage.setItem('puzzle_inventory', JSON.stringify(inventory));
-        localStorage.setItem('puzzle_placed', JSON.stringify(placedPieces));
+        storage.set('puzzle_coins', coins.toString());
+        storage.set('puzzle_inventory', JSON.stringify(inventory));
+        storage.set('puzzle_placed', JSON.stringify(placedPieces));
 
         if (placedPieces.length === TOTAL_PIECES) {
             setIsWon(true);
@@ -73,8 +74,8 @@ const PuzzlePlay = () => {
         setInventory([]);
         setPlacedPieces([]);
         setIsWon(false);
-        localStorage.removeItem('puzzle_inventory');
-        localStorage.removeItem('puzzle_placed');
+        storage.remove('puzzle_inventory');
+        storage.remove('puzzle_placed');
     };
 
     return (
@@ -123,8 +124,8 @@ const PuzzlePlay = () => {
                                 <div
                                     key={i}
                                     className={`relative rounded-2xl overflow-hidden transition-all duration-700 aspect-square ${placedPieces.includes(i)
-                                            ? 'bg-gradient-to-br from-indigo-500/20 to-purple-600/20 shadow-inner'
-                                            : 'bg-black/40 border-2 border-dashed border-white/10'
+                                        ? 'bg-gradient-to-br from-indigo-500/20 to-purple-600/20 shadow-inner'
+                                        : 'bg-black/40 border-2 border-dashed border-white/10'
                                         }`}
                                 >
                                     <AnimatePresence>
@@ -187,8 +188,8 @@ const PuzzlePlay = () => {
                             onClick={buyPiece}
                             disabled={coins < PIECE_PRICE}
                             className={`flex-1 p-4 rounded-[2rem] shadow-2xl flex flex-col items-center gap-1 border border-white/10 transition-all ${coins < PIECE_PRICE
-                                    ? 'bg-slate-900/50 opacity-50 grayscale cursor-not-allowed'
-                                    : 'bg-gradient-to-br from-indigo-500 to-purple-700'
+                                ? 'bg-slate-900/50 opacity-50 grayscale cursor-not-allowed'
+                                : 'bg-gradient-to-br from-indigo-500 to-purple-700'
                                 }`}
                         >
                             <span className="text-2xl">🎁</span>

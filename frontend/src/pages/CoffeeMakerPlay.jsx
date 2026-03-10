@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../utils/storage';
 
 const CoffeeMakerPlay = () => {
     const navigate = useNavigate();
     // Game State
     const [stats, setStats] = useState(() => {
-        const saved = localStorage.getItem('coffee_maker_stats');
+        const saved = storage.get('coffee_maker_stats');
         return saved ? JSON.parse(saved) : {
             money: 50,
             reputation: 50,
@@ -59,7 +60,7 @@ const CoffeeMakerPlay = () => {
     ];
 
     useEffect(() => {
-        localStorage.setItem('coffee_maker_stats', JSON.stringify(stats));
+        storage.set('coffee_maker_stats', JSON.stringify(stats));
     }, [stats]);
 
     useEffect(() => {
