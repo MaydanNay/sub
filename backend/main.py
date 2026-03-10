@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from typing import List
 
 import os
+import requests
 
 models.Base.metadata.create_all(bind=engine)
 models_shubank.Base.metadata.create_all(bind=engine)
