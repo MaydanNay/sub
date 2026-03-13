@@ -92,7 +92,7 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                             <span className="text-gray-500 font-shupixel text-[9px] uppercase tracking-widest">{currentStepData?.title}</span>
                         </div>
 
-                        <h2 className="text-2xl font-shupixel text-white mb-8 tracking-tight uppercase leading-tight">
+                        <h2 className="text-2xl font-shupixel text-white mb-8 tracking-tight uppercase leading-relaxed md:leading-tight">
                             {currentStepData?.question}
                         </h2>
 
@@ -129,7 +129,7 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                         <div className="w-20 h-20 bg-shu-pink/10 border-2 border-shu-pink flex items-center justify-center mx-auto mb-6 shadow-pixel">
                             <Send className="w-10 h-10 text-shu-pink" />
                         </div>
-                        <h2 className="text-3xl font-shupixel text-white mb-4 tracking-tight uppercase">Отлично! Твой профиль готов.</h2>
+                        <h2 className="text-3xl font-shupixel text-white mb-4 tracking-tight uppercase leading-relaxed">Отлично!</h2>
                         <p className="text-gray-400 text-sm mb-10 max-w-md mx-auto leading-relaxed">
                             Мы уже знаем, какая геймификация подойдёт именно тебе. Оставь контакт — и мы пришлём персональный вариант + каталог игр.
                         </p>
@@ -146,7 +146,7 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                                 onClick={onOpenCatalog}
                                 className="w-full py-5 font-shupixel text-[10px] uppercase border-2 border-white text-white hover:bg-white hover:text-black transition-all shadow-pixel-sm hover:shadow-pixel"
                             >
-                                Посмотреть каталог игр
+                                Каталог игр
                             </button>
                         </div>
                     </motion.div>

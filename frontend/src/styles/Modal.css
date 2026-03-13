@@ -10,7 +10,7 @@
     justify-content: center;
     z-index: 20000;
     backdrop-filter: blur(8px);
-    padding: 16px;
+    padding: 20px 24px;
 }
 
 .modal-content {
@@ -71,5 +71,33 @@
 @media (min-width: 768px) {
     .modal-body .form-grid {
         grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+        padding: 40px 16px !important;
+    }
+
+    .modal-content {
+        margin-bottom: 40px;
+    }
+
+    .survey-question {
+        line-height: 1.8 !important;
+        font-size: 14px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .survey-step-title {
+        line-height: 1.6 !important;
+    }
+
+    .survey-step-container {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
     }
 }

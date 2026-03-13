@@ -99,9 +99,10 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                         transition={{ duration: 0.2 }}
                         style={{ display: 'flex', flexDirection: 'column' }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                        <div className="survey-step-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span
+                                    className="survey-step-badge"
                                     style={{
                                         backgroundColor: 'var(--primary-pink)',
                                         color: '#000',
@@ -109,12 +110,22 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                                         fontSize: '10px',
                                         padding: '4px 8px',
                                         border: '2px solid #000',
-                                        boxShadow: '2px 2px 0px #000'
+                                        boxShadow: '2px 2px 0px #000',
+                                        lineHeight: '1.2'
                                     }}
                                 >
                                     ШАГ {step}
                                 </span>
-                                <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '8px', color: '#888', textTransform: 'uppercase' }}>
+                                <span 
+                                    className="survey-step-title"
+                                    style={{ 
+                                        fontFamily: 'var(--font-pixel)', 
+                                        fontSize: '8px', 
+                                        color: '#888', 
+                                        textTransform: 'uppercase',
+                                        lineHeight: '1.4'
+                                    }}
+                                >
                                     {currentStepData?.title}
                                 </span>
                             </div>
@@ -134,10 +145,11 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                         </div>
 
                         <h2
+                            className="survey-question"
                             style={{
                                 fontFamily: 'var(--font-pixel)',
                                 fontSize: '16px',
-                                lineHeight: '1.5',
+                                lineHeight: '1.6',
                                 marginBottom: '24px',
                                 color: '#fff',
                                 textTransform: 'uppercase'
@@ -222,7 +234,7 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                         >
                             <Send className="w-8 h-8" style={{ color: 'var(--primary-pink)' }} />
                         </div>
-                        <h2 style={{ fontFamily: 'var(--font-pixel)', fontSize: '18px', color: '#fff', marginBottom: '12px', textTransform: 'uppercase' }}>Отлично! Твой профиль готов.</h2>
+                        <h2 style={{ fontFamily: 'var(--font-pixel)', fontSize: '18px', lineHeight: '1.6', color: '#fff', marginBottom: '12px', textTransform: 'uppercase' }}>Отлично!</h2>
                         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#aaa', marginBottom: '24px', lineHeight: '1.6' }}>
                             Мы уже знаем, какая геймификация подойдёт именно тебе. Оставь контакт — и мы пришлём персональный вариант + каталог игр.
                         </p>
@@ -244,7 +256,7 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                                 isModal={true}
                                 onSuccess={onFinish}
                                 onClose={onOpenCatalog}
-                                submitText="ПОЛУЧИТЬ ПОДБОРКУ (ОТПРАВИТЬ ЗАЯВКУ)"
+                                submitText="Отправить"
                             />
                         </div>
 
@@ -278,7 +290,7 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                             }}
                         >
                             <List className="w-4 h-4" />
-                            ПОСМОТРЕТЬ КАТАЛОГ ИГР (ПЕРЕЙТИ В КАТАЛОГ)
+                            КАТАЛОГ ИГР
                         </button>
                     </motion.div>
                 )}

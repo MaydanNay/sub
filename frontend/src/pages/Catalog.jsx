@@ -18,10 +18,17 @@ import shuBankIcon from './ShuBank/images/pers/0.PNG';
 import shuBoomIcon from './ShuBoom/images/pers_1_v2.PNG';
 import shuShiIcon from './ShuShi/images/dishes/1.PNG';
 
+import telegramIcon from '../image/telegram.svg';
+import whatsappIcon from '../image/whatsapp.png';
+import phoneIcon from '../image/telephone.png';
+import instagramIcon from '../image/instagram.svg';
+import linkedinIcon from '../image/linkedin.png';
+
 const Catalog = ({ openModal }) => {
     const [activeCategory, setActiveCategory] = useState(() => {
         return storage.get('catalog_active_category', 'startups');
     });
+    const [showNumber, setShowNumber] = useState(false);
 
     const categories = [
         {
@@ -231,9 +238,44 @@ const Catalog = ({ openModal }) => {
 
             {/* Footer sync with landing */}
             <footer className="py-20 border-t-2 border-white/5 text-center relative z-10">
-                <div className="mb-8">
-                    <span className="font-shupixel text-[18px] text-shu-pink selection:bg-white tracking-tighter">SHU STUDIO</span>
+                <div className="mb-8 flex flex-wrap justify-center gap-8 items-center">
+                    <a href="https://www.instagram.com/shu.studio/" target="_blank" rel="noopener noreferrer" className="group">
+                        <img src={instagramIcon} alt="INST" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                    </a>
+                    <a href="https://t.me/irkibayev" target="_blank" rel="noopener noreferrer" className="group">
+                        <img src={telegramIcon} alt="TG" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                    </a>
+                    <a href="https://wa.me/77769960222" target="_blank" rel="noopener noreferrer" className="group">
+                        <img src={whatsappIcon} alt="WP" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                    </a>
+                    <a href="https://www.linkedin.com/in/sh%C5%AB-studio-4a13143b2?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer" className="group">
+                        <img src={linkedinIcon} alt="LINK" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                    </a>
+                    
+                    <div className="relative flex items-center">
+                        <button 
+                            onClick={() => setShowNumber(!showNumber)}
+                            className="group focus:outline-none"
+                        >
+                            <img src={phoneIcon} alt="TEL" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                        </button>
+                        <AnimatePresence>
+                            {showNumber && (
+                                <motion.div 
+                                    initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                                    className="absolute left-full ml-4 px-3 py-1 bg-shu-pink text-black font-shupixel text-[10px] whitespace-nowrap shadow-pixel-sm z-50 pointer-events-none"
+                                >
+                                    +7 776 996 02 22
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
+                <p className="font-shupixel text-[9px] text-gray-500 uppercase tracking-widest mb-4 opacity-80">
+                    Проспект Мангилик Ел, 55/8, в павильоне C 4.6 (территория EXPO)
+                </p>
                 <p className="font-shupixel text-[10px] text-gray-600 uppercase tracking-[0.2em]">
                     &copy; {new Date().getFullYear()} Creative Tech Solutions &bull; Almaty &bull; KZ
                 </p>

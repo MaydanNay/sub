@@ -24,7 +24,7 @@ const RequestForm = ({ inputBg, inputTextColor, labelColor, btnBg, isModal = fal
         setIsSubmitting(true);
         setSubmitStatus(null);
         try {
-            const res = await fetch("/api/notify", {
+            const res = await fetch("/api/v1/notify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, contact, task }),

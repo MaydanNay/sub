@@ -93,7 +93,7 @@ def read_promotions(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
     # Add explicit order_by to avoid random test failures or unpredictable order
     return db.query(models.Promotion).order_by(models.Promotion.id).offset(skip).limit(limit).all()
 
-@app.post("/api/notify", response_model=schemas.LeadRequest)
+@app.post("/api/v1/notify", response_model=schemas.LeadRequest)
 def create_notify_request(lead: schemas.LeadRequestCreate, db: Session = Depends(get_db)):
     db_lead = crud.create_lead_request(db, lead)
     # Try to notify the bot

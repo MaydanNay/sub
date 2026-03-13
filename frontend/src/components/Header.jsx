@@ -8,10 +8,11 @@ const Header = ({ onCtaClick }) => {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
     const navLinks = [
-        { href: 'https://shustudio.kz/#why-games', label: 'ПРОБЛЕМЫ' },
+        { href: 'https://shustudio.kz/#why-games', label: 'РЕШЕНИЯ' },
         { href: 'https://shustudio.kz/#solutions', label: 'УСЛУГИ' },
         { href: 'https://shustudio.kz/#ecosystem', label: 'ЭКОСИСТЕМА' },
         { href: 'https://shustudio.kz/#process', label: 'ПРОЦЕСС' },
+        { href: 'https://app.shustudio.kz', label: 'КАТАЛОГ ИГР' },
     ];
 
     return (

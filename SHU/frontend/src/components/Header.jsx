@@ -8,10 +8,11 @@ const Header = ({ onOpenSurvey }) => {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
     const navLinks = [
-        { href: '#why-games', label: 'ПРОБЛЕМЫ' },
+        { href: '#why-games', label: 'РЕШЕНИЯ' },
         { href: '#solutions', label: 'УСЛУГИ' },
         { href: '#ecosystem', label: 'ЭКОСИСТЕМА' },
         { href: '#process', label: 'ПРОЦЕСС' },
+        { href: 'https://app.shustudio.kz', label: 'КАТАЛОГ ИГР' },
     ];
 
     return (
