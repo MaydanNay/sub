@@ -124,7 +124,10 @@ function App() {
       <Route path="/" element={
         <div className="app-container">
           <Header onOpenSurvey={() => setIsSurveyOpen(true)} />
-          <Hero onOpenModal={() => setIsModalOpen(true)} />
+          <Hero 
+            onOpenModal={() => setIsModalOpen(true)} 
+            onOpenSurvey={() => setIsSurveyOpen(true)} 
+          />
 
           <main className="main-content">
             {/* Pixel Transition Strip */}

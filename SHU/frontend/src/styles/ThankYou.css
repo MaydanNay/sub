@@ -58,6 +58,14 @@
     gap: 24px;
     display: flex;
     align-items: center;
+    flex-wrap: nowrap !important; /* Force single line */
+}
+
+.thank-you-social .social-text {
+    font-size: 14px;
+    color: #888;
+    max-width: 280px;
+    margin-bottom: 20px;
 }
 
 .phone-wrapper {
@@ -111,12 +119,21 @@
     transform: scale(1.1);
 }
 
-
 @media (max-width: 768px) {
     .phone-reveal {
         left: 50%;
         bottom: calc(100% + 12px);
         transform: translateX(-50%);
+    }
+
+    .thank-you-icons {
+        gap: 16px; /* Reduced gap for mobile */
+    }
+}
+
+@media (max-width: 380px) {
+    .thank-you-icons {
+        gap: 12px; /* Even smaller gap for very small screens */
     }
 }
 

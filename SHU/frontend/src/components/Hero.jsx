@@ -3,7 +3,7 @@ import '../styles/Hero.css'
 import GridDetails from './GridDetails'
 import Typewriter from './Typewriter'
 
-const Hero = ({ onOpenModal }) => {
+const Hero = ({ onOpenModal, onOpenSurvey }) => {
     return (
         <section className="hero">
             <GridDetails />
@@ -25,15 +25,25 @@ const Hero = ({ onOpenModal }) => {
                     Создаем механики, которые привлекают новых покупателей,<br />
                     возвращают старых и делают работу команды интереснее.
                 </motion.p>
-                <motion.button
-                    className="hero-btn"
+                <motion.div 
+                    className="hero-buttons"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.4, ease: [0.22, 1, 0.36, 1] }}
-                    onClick={onOpenModal}
                 >
-                    Узнать стоимость
-                </motion.button>
+                    <button
+                        className="hero-btn start-game-btn"
+                        onClick={onOpenSurvey}
+                    >
+                        Начать игру
+                    </button>
+                    <button
+                        className="hero-btn"
+                        onClick={onOpenModal}
+                    >
+                        Узнать стоимость
+                    </button>
+                </motion.div>
             </div>
         </section>
     )

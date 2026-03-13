@@ -4,10 +4,10 @@ import { Button } from "./ui/Button";
 import { FormInput } from "./ui/FormInput";
 import { FormTextarea } from "./ui/FormTextarea";
 
-const RequestForm = ({ inputBg, inputTextColor, labelColor, btnBg, isModal = false, onClose, onSuccess }) => {
+const RequestForm = ({ inputBg, inputTextColor, labelColor, btnBg, isModal = false, onClose, onSuccess, submitText = "ПОЛУЧИТЬ БЕСПЛАТНЫЙ КОНЦЕПТ", initialTask = "" }) => {
     const [name, setName] = useState("");
     const [contact, setContact] = useState("");
-    const [task, setTask] = useState("");
+    const [task, setTask] = useState(initialTask);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState(null);
     const [validationError, setValidationError] = useState("");

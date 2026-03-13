@@ -257,6 +257,16 @@ const LandingSurvey = ({ onFinish, onOpenCatalog }) => {
                                 onSuccess={onFinish}
                                 onClose={onOpenCatalog}
                                 submitText="Отправить"
+                                initialTask={(() => {
+                                    const summary = Object.entries(answers)
+                                        .map(([stepId, optionId]) => {
+                                            const stepData = steps.find(s => s.id === parseInt(stepId));
+                                            const option = stepData?.options.find(o => o.id === optionId);
+                                            return `${stepData?.title}: ${option?.title}`;
+                                        })
+                                        .join('\n');
+                                    return `РЕЗУЛЬТАТЫ ОПРОСА:\n${summary}`;
+                                })()}
                             />
                         </div>
 
