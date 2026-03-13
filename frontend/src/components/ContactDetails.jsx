@@ -11,11 +11,11 @@ import linkedinIcon from '../image/linkedin.png';
 const ContactDetails = () => {
     const [showNumber, setShowNumber] = useState(false);
 
-    const iconStyle = "w-10 h-10 object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300 transform hover:scale-110";
+    const iconStyle = "w-8 h-8 object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300 transform hover:scale-110";
 
     return (
-        <div className="contact-details-content flex flex-col items-center gap-8 py-4">
-            <div className="social-icons-row flex flex-wrap justify-center gap-8 items-center">
+        <div className="contact-details-content flex flex-col items-center gap-6 py-4">
+            <div className="social-icons-row flex flex-wrap justify-center gap-6 items-center">
                 <a href="https://www.instagram.com/shu.studio/" target="_blank" rel="noopener noreferrer">
                     <img src={instagramIcon} alt="INST" className={iconStyle} />
                 </a>
@@ -32,7 +32,7 @@ const ContactDetails = () => {
                 <div className="relative flex items-center">
                     <button 
                         onClick={() => setShowNumber(!showNumber)}
-                        className="focus:outline-none"
+                        className="group focus:outline-none"
                     >
                         <img src={phoneIcon} alt="TEL" className={iconStyle} />
                     </button>
@@ -42,7 +42,7 @@ const ContactDetails = () => {
                                 initial={{ opacity: 0, x: -10, scale: 0.9 }}
                                 animate={{ opacity: 1, x: 0, scale: 1 }}
                                 exit={{ opacity: 0, x: -10, scale: 0.9 }}
-                                className="absolute left-full ml-4 px-3 py-1 bg-[#E66D7A] text-black font-shupixel text-[10px] whitespace-nowrap shadow-pixel-sm z-50"
+                                className="absolute left-full ml-4 px-3 py-1 bg-[#E66D7A] text-black font-shupixel text-[10px] whitespace-nowrap shadow-pixel-sm z-50 pointer-events-none"
                             >
                                 +7 776 996 02 22
                             </motion.div>
@@ -52,10 +52,10 @@ const ContactDetails = () => {
             </div>
 
             <div className="text-center space-y-4">
-                <p className="font-shupixel text-[10px] text-gray-400 uppercase tracking-widest max-w-sm leading-relaxed">
+                <p className="font-shupixel text-[9px] text-gray-500 uppercase tracking-widest max-w-sm leading-relaxed">
                     Проспект Мангилик Ел, 55/8, в павильоне C 4.6 (территория EXPO)
                 </p>
-                <p className="font-shupixel text-[9px] text-gray-500 uppercase tracking-[0.2em]">
+                <p className="font-shupixel text-[10px] text-gray-600 uppercase tracking-[0.2em]">
                     Creative Tech Solutions • Almaty • KZ
                 </p>
             </div>

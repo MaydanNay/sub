@@ -76,7 +76,7 @@
 
 @media (max-width: 768px) {
     .modal-overlay {
-        align-items: flex-start !important;
+        align-items: center !important;
         overflow-y: auto !important;
         padding: 40px 16px !important;
     }
