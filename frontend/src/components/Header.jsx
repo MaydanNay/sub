@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { cn } from "../utils/cn";
 import '../styles/Header.css';
 
-const Header = ({ onCtaClick }) => {
+const Header = ({ onCtaClick, onOpenContacts }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -12,6 +12,7 @@ const Header = ({ onCtaClick }) => {
         { href: 'https://shustudio.kz/#solutions', label: 'УСЛУГИ' },
         { href: 'https://shustudio.kz/#ecosystem', label: 'ЭКОСИСТЕМА' },
         { href: 'https://shustudio.kz/#process', label: 'ПРОЦЕСС' },
+        { href: '#contacts', label: 'КОНТАКТЫ' },
         { href: 'https://app.shustudio.kz', label: 'КАТАЛОГ ИГР' },
     ];
 
@@ -29,7 +30,17 @@ const Header = ({ onCtaClick }) => {
                 {/* Desktop Navigation */}
                 <nav className="header-nav desktop-only">
                     {navLinks.map((link) => (
-                        <a key={link.href} href={link.href} className="nav-link">
+                        <a 
+                            key={link.href} 
+                            href={link.href} 
+                            className="nav-link"
+                            onClick={(e) => {
+                                if (link.href === '#contacts') {
+                                    e.preventDefault();
+                                    onOpenContacts?.();
+                                }
+                            }}
+                        >
                             {link.label}
                         </a>
                     ))}
@@ -64,7 +75,13 @@ const Header = ({ onCtaClick }) => {
                             key={link.href}
                             href={link.href}
                             className="mobile-nav-link"
-                            onClick={toggleMenu}
+                            onClick={(e) => {
+                                if (link.href === '#contacts') {
+                                    e.preventDefault();
+                                    onOpenContacts?.();
+                                }
+                                toggleMenu();
+                            }}
                         >
                             {link.label}
                         </a>

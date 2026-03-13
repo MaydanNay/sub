@@ -24,7 +24,7 @@ import phoneIcon from '../image/telephone.png';
 import instagramIcon from '../image/instagram.svg';
 import linkedinIcon from '../image/linkedin.png';
 
-const Catalog = ({ openModal }) => {
+const Catalog = ({ openModal, openContactsModal }) => {
     const [activeCategory, setActiveCategory] = useState(() => {
         return storage.get('catalog_active_category', 'startups');
     });
@@ -105,7 +105,7 @@ const Catalog = ({ openModal }) => {
 
     return (
         <div className="min-h-screen bg-shu-bg text-white font-shubody selection:bg-shu-pink/30">
-            <Header onCtaClick={openModal} />
+            <Header onCtaClick={openModal} onOpenContacts={openContactsModal} />
 
             {/* Asset Preloading */}
             <div className="hidden">

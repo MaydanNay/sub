@@ -5,6 +5,7 @@ import Modal from './components/ui/Modal'
 import RequestForm from './components/RequestForm'
 import ThankYou from './components/ThankYou'
 import LandingSurvey from './components/LandingSurvey'
+import ContactDetails from './components/ContactDetails'
 
 const WhyGames = lazy(() => import('./components/WhyGames'))
 const Solutions = lazy(() => import('./components/Solutions'))
@@ -111,10 +112,12 @@ function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSurveyOpen, setIsSurveyOpen] = useState(false);
+  const [isContactsOpen, setIsContactsOpen] = useState(false);
 
   const handleFormSuccess = () => {
     setIsModalOpen(false);
     setIsSurveyOpen(false);
+    setIsContactsOpen(false);
     navigate('/thanks');
     window.scrollTo(0, 0); // Scroll to top for the new page
   };
@@ -123,7 +126,10 @@ function App() {
     <Routes>
       <Route path="/" element={
         <div className="app-container">
-          <Header onOpenSurvey={() => setIsSurveyOpen(true)} />
+          <Header 
+            onOpenSurvey={() => setIsSurveyOpen(true)} 
+            onOpenContacts={() => setIsContactsOpen(true)}
+          />
           <Hero 
             onOpenModal={() => setIsModalOpen(true)} 
             onOpenSurvey={() => setIsSurveyOpen(true)} 
@@ -180,12 +186,21 @@ function App() {
               onOpenCatalog={() => setIsSurveyOpen(false)}
             />
           </Modal>
+
+          {/* Contacts Modal */}
+          <Modal
+            isOpen={isContactsOpen}
+            onClose={() => setIsContactsOpen(false)}
+            title="КОНТАКТЫ"
+          >
+            <ContactDetails />
+          </Modal>
         </div>
       } />
 
       <Route path="/thanks" element={
         <div className="app-container">
-          <Header />
+          <Header onOpenContacts={() => setIsContactsOpen(true)} />
           <main className="main-content thank-you-page">
             <ThankYou
               onClose={() => navigate('/')}

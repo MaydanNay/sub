@@ -98,12 +98,15 @@ const PageLoader = () => (
 
 function AppInner() {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [isContactsOpen, setIsContactsOpen] = React.useState(false);
     const navigate = useNavigate();
 
-    const openModal = () => {
-        setIsModalOpen(true);
+    const openModal = () => setIsModalOpen(true);
+    const openContactsModal = () => setIsContactsOpen(true);
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setIsContactsOpen(false);
     };
-    const closeModal = () => setIsModalOpen(false);
 
     const handleFormSuccess = () => {
         closeModal();
@@ -116,7 +119,7 @@ function AppInner() {
             <React.Suspense fallback={<PageLoader />}>
                 <Routes>
                     {/* Catalog and Modal Logic */}
-                    <Route path="/" element={<Catalog openModal={openModal} />} />
+                    <Route path="/" element={<Catalog openModal={openModal} openContactsModal={openContactsModal} />} />
                     <Route path="/thanks" element={<div className="min-h-screen bg-shu-bg"><ThankYou isFullPage={true} isModal={false} onClose={() => navigate('/')} /></div>} />
 
                     {/* ShuBoom Routes */}
@@ -231,6 +234,14 @@ function AppInner() {
                         isModal={true}
                     />
                 </Modal>
+
+                <Modal
+                    isOpen={isContactsOpen}
+                    onClose={closeModal}
+                    title="КОНТАКТЫ"
+                >
+                    <ContactDetails />
+                </Modal>
             </React.Suspense>
             <BusinessValueControl />
         </>
@@ -249,5 +260,6 @@ function App() {
 
 const Modal = React.lazy(() => import('./components/ui/Modal'));
 const RequestForm = React.lazy(() => import('./components/RequestForm'));
+const ContactDetails = React.lazy(() => import('./components/ContactDetails'));
 
 export default App

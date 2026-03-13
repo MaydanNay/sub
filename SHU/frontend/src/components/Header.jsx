@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { cn } from "../lib/utils";
 import '../styles/Header.css';
 
-const Header = ({ onOpenSurvey }) => {
+const Header = ({ onOpenSurvey, onOpenContacts }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -12,6 +12,7 @@ const Header = ({ onOpenSurvey }) => {
         { href: '#solutions', label: 'УСЛУГИ' },
         { href: '#ecosystem', label: 'ЭКОСИСТЕМА' },
         { href: '#process', label: 'ПРОЦЕСС' },
+        { href: '#contacts', label: 'КОНТАКТЫ' },
         { href: 'https://app.shustudio.kz', label: 'КАТАЛОГ ИГР' },
     ];
 
@@ -29,7 +30,17 @@ const Header = ({ onOpenSurvey }) => {
                 {/* Desktop Navigation */}
                 <nav className="header-nav desktop-only">
                     {navLinks.map((link) => (
-                        <a key={link.href} href={link.href} className="nav-link">
+                        <a 
+                            key={link.href} 
+                            href={link.href} 
+                            className="nav-link"
+                            onClick={(e) => {
+                                if (link.href === '#contacts') {
+                                    e.preventDefault();
+                                    onOpenContacts?.();
+                                }
+                            }}
+                        >
                             {link.label}
                         </a>
                     ))}
@@ -64,7 +75,13 @@ const Header = ({ onOpenSurvey }) => {
                             key={link.href}
                             href={link.href}
                             className="mobile-nav-link"
-                            onClick={toggleMenu}
+                            onClick={(e) => {
+                                if (link.href === '#contacts') {
+                                    e.preventDefault();
+                                    onOpenContacts?.();
+                                }
+                                toggleMenu();
+                            }}
                         >
                             {link.label}
                         </a>
