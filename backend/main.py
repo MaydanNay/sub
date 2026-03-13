@@ -109,6 +109,7 @@ def create_notify_request(lead: schemas.LeadRequestCreate, db: Session = Depends
 @app.post("/api/v1/auth/login", response_model=schemas.User)
 def login(phone: str = "7770000000", db: Session = Depends(get_db)):
     # Mock login: Get or Create
+    phone = phone.strip()
     user = crud.get_user_by_phone(db, phone)
     if not user:
         try:
@@ -123,6 +124,7 @@ def login(phone: str = "7770000000", db: Session = Depends(get_db)):
 
 @app.get("/api/v1/user/{phone}", response_model=schemas.User)
 def get_user_profile(phone: str, db: Session = Depends(get_db)):
+    phone = phone.strip()
     user = crud.get_user_by_phone(db, phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -159,6 +161,7 @@ def scan_receipt(request: schemas.ScanRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/shop/buy_item")
 def buy_item(request: schemas.BuyRequest, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -171,6 +174,7 @@ def buy_item(request: schemas.BuyRequest, user_phone: str, db: Session = Depends
 
 @app.post("/api/v1/chests/open", response_model=schemas.ChestResult)
 def open_chest(chest_type: str, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -185,6 +189,7 @@ def open_chest(chest_type: str, user_phone: str, db: Session = Depends(get_db)):
 
 @app.get("/api/v1/collection/{phone}", response_model=list[schemas.UserCollection])
 def get_collection(phone: str, db: Session = Depends(get_db)):
+    phone = phone.strip()
     user = crud.get_user_by_phone(db, phone)
     if not user:
          raise HTTPException(status_code=404, detail="User not found")
@@ -192,6 +197,7 @@ def get_collection(phone: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/collection/merge")
 def merge_cards(request: schemas.MergeRequest, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -204,6 +210,7 @@ def merge_cards(request: schemas.MergeRequest, user_phone: str, db: Session = De
 
 @app.post("/api/v1/user/equip")
 def equip_card(request: schemas.EquipRequest, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -216,6 +223,7 @@ def equip_card(request: schemas.EquipRequest, user_phone: str, db: Session = Dep
 
 @app.post("/api/v1/user/use_coupon")
 def use_coupon(coupon_id: int, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -228,6 +236,7 @@ def use_coupon(coupon_id: int, user_phone: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/user/daily_reward")
 def claim_daily_reward(user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -246,6 +255,7 @@ def claim_daily_reward(user_phone: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/user/roadmap/advance")
 def advance_roadmap(user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -257,6 +267,7 @@ def advance_roadmap(user_phone: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/user/quests/complete")
 def complete_quest_shuboom(quest_id: str, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -268,6 +279,7 @@ def complete_quest_shuboom(quest_id: str, user_phone: str, db: Session = Depends
 
 @app.post("/api/v1/shop/buy_chest")
 def buy_chest(chest_type: str, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -573,6 +585,7 @@ def webhook_deposit(request: schemas.BankDepositUpdateWebhook, db: Session = Dep
 
 @app.get("/api/v1/shurun/runs", response_model=List[schemas.ShuRunRun])
 def get_shurun_runs(user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         # Auto-create for demo convenience if user doesn't exist
@@ -581,6 +594,7 @@ def get_shurun_runs(user_phone: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/shurun/runs", response_model=schemas.ShuRunRun)
 def save_shurun_run(run: schemas.ShuRunRunBase, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
@@ -588,6 +602,7 @@ def save_shurun_run(run: schemas.ShuRunRunBase, user_phone: str, db: Session = D
 
 @app.get("/api/v1/shurun/orders", response_model=List[schemas.ShuRunOrder])
 def get_shurun_orders(user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
@@ -595,6 +610,7 @@ def get_shurun_orders(user_phone: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/shurun/orders", response_model=schemas.ShuRunOrder)
 def save_shurun_order(order: schemas.ShuRunOrderBase, user_phone: str, db: Session = Depends(get_db)):
+    user_phone = user_phone.strip()
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
