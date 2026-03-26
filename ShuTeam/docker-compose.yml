@@ -1,0 +1,18 @@
+services:
+  crm-backend:
+    build: ./backend
+    restart: always
+    environment:
+      - DATABASE_URL=sqlite:///./crm.db
+    ports:
+      - "8001:8000"
+
+  crm-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: ../frontend-dockerfile
+    restart: always
+    depends_on:
+      - crm-backend
+    ports:
+      - "3002:80"

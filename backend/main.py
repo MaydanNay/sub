@@ -616,3 +616,4 @@ def save_shurun_order(order: schemas.ShuRunOrderBase, user_phone: str, db: Sessi
         user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
     return crud.create_user_order(db, user.id, order)
 
+
