@@ -1,0 +1,179 @@
+.pay-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 5000;
+}
+
+.pay-modal {
+  background: #E6E6D7;
+  width: 100%;
+  max-width: 430px;
+  border-radius: 40px 40px 0 0;
+  padding: 30px 25px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: slideBottomUp 0.3s ease-out;
+}
+
+.pay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.pay-header h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #141414;
+}
+
+.pay-header p {
+  font-size: 13px;
+  color: rgba(20,20,20,0.5);
+}
+
+.pay-close {
+  background: rgba(20,20,20,0.1);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pay-amount {
+  font-size: 42px;
+  font-weight: 800;
+  color: #141414;
+  text-align: center;
+}
+
+.pay-methods {
+  display: flex;
+  gap: 10px;
+}
+
+.pay-method {
+  flex: 1;
+  background: #C6C6BE;
+  border-radius: 20px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 12px;
+  font-weight: 600;
+  color: #141414;
+}
+
+.pay-method.active {
+  background: #141414;
+  color: #E6E6D7;
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-form input {
+  background: rgba(0,0,0,0.06);
+  border: none;
+  border-radius: 15px;
+  padding: 12px 15px;
+  font-size: 15px;
+  color: #141414;
+  outline: none;
+  font-family: inherit;
+}
+
+.card-row {
+  display: flex;
+  gap: 10px;
+}
+
+.card-row input { flex: 1; }
+
+.pay-note {
+  font-size: 11px;
+  color: rgba(20,20,20,0.4);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pay-btn {
+  background: #141414;
+  color: #E6E6D7;
+  border: none;
+  padding: 16px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.refund-note {
+  background: none;
+  border: none;
+  color: rgba(20,20,20,0.4);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+/* Успех */
+.pay-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.pay-success h3 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #141414;
+}
+
+.pay-success p {
+  font-size: 14px;
+  color: rgba(20,20,20,0.5);
+}
+
+.qr-image {
+  width: 160px;
+  height: 160px;
+  border-radius: 20px;
+  border: 3px solid #141414;
+}
+
+.qr-note {
+  font-size: 12px;
+  color: rgba(20,20,20,0.5);
+}
+
+.qr-discount {
+  background: rgba(119,188,121,0.15);
+  border: 1px solid #77BC79;
+  border-radius: 15px;
+  padding: 10px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #141414;
+}

@@ -242,7 +242,7 @@ const Catalog = ({ openModal, openContactsModal }) => {
                     <a href="https://www.instagram.com/shu.studio/" target="_blank" rel="noopener noreferrer" className="group">
                         <img src={instagramIcon} alt="INST" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                     </a>
-                    <a href="https://t.me/irkibayev" target="_blank" rel="noopener noreferrer" className="group">
+                    <a href="https://t.me/malikatakira" target="_blank" rel="noopener noreferrer" className="group">
                         <img src={telegramIcon} alt="TG" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                     </a>
                     <a href="https://wa.me/77769960222" target="_blank" rel="noopener noreferrer" className="group">
@@ -251,9 +251,9 @@ const Catalog = ({ openModal, openContactsModal }) => {
                     <a href="https://www.linkedin.com/in/sh%C5%AB-studio-4a13143b2?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer" className="group">
                         <img src={linkedinIcon} alt="LINK" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                     </a>
-                    
+
                     <div className="relative flex items-center">
-                        <button 
+                        <button
                             onClick={() => setShowNumber(!showNumber)}
                             className="group focus:outline-none"
                         >
@@ -261,13 +261,13 @@ const Catalog = ({ openModal, openContactsModal }) => {
                         </button>
                         <AnimatePresence>
                             {showNumber && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, x: -10, scale: 0.9 }}
                                     animate={{ opacity: 1, x: 0, scale: 1 }}
                                     exit={{ opacity: 0, x: -10, scale: 0.9 }}
                                     className="absolute left-full ml-4 px-3 py-1 bg-shu-pink text-black font-shupixel text-[10px] whitespace-nowrap shadow-pixel-sm z-50 pointer-events-none"
                                 >
-                                    +7 776 996 02 22
+                                    +7 702 223 67 11
                                 </motion.div>
                             )}
                         </AnimatePresence>

@@ -1,0 +1,359 @@
+/* Хедер и вкладки — переиспользуем классы из CommunityDetail.css */
+/* Дополнительные стили только для элементов профиля */
+
+.profile-big-avatar {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #77BC79, #4a9e4c);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #141414;
+  flex-shrink: 0;
+}
+
+/* Фильтр по клубам */
+.prof-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.prof-filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(230,230,215,0.2);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: rgba(230,230,215,0.6);
+  transition: all 0.18s;
+}
+
+.prof-filter-chip.active {
+  border-color: transparent;
+}
+
+section.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Под-вкладки расписания */
+.sub-tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 14px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 20px;
+  padding: 4px;
+}
+
+.sub-tab {
+  flex: 1;
+  padding: 9px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: rgba(20,20,20,0.45);
+  transition: all 0.18s;
+}
+
+.sub-tab.active {
+  background: #141414;
+  color: #E6E6D7;
+}
+
+/* Карточки событий */
+.prof-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prof-event-card {
+  background: var(--card-bg);
+  border-radius: 22px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #141414;
+}
+
+.prof-event-card.hist { opacity: 0.9; }
+
+.pec-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pec-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.pec-cost {
+  font-size: 13px;
+  font-weight: 700;
+  color: #77BC79;
+  white-space: nowrap;
+}
+
+.pec-date-small {
+  font-size: 12px;
+  color: rgba(20,20,20,0.4);
+  white-space: nowrap;
+}
+
+.pec-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  color: rgba(20,20,20,0.5);
+}
+
+.pec-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pec-mat-label {
+  font-size: 12px;
+  color: rgba(20,20,20,0.5);
+  margin-bottom: 6px;
+}
+.pec-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pec-nothing {
+  font-size: 13px;
+  color: #77BC79;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pec-join-btn {
+  background: #141414;
+  color: #E6E6D7;
+  border: none;
+  padding: 11px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.pec-media-btn {
+  background: rgba(0,0,0,0.07);
+  border: none;
+  padding: 9px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: #141414;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+/* Community chip */
+.prof-comm-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Ранги */
+.prof-ranks-row {
+  display: flex;
+  gap: 8px;
+}
+
+.prof-rank-card {
+  flex: 1;
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 12px 10px;
+  text-align: center;
+  color: #141414;
+}
+
+.prof-rank-icon { font-size: 24px; margin-bottom: 5px; }
+.prof-rank-name { font-size: 11px; color: rgba(20,20,20,0.45); font-weight: 600; }
+.prof-rank-val { font-size: 14px; font-weight: 800; margin: 3px 0; }
+.prof-rank-sub { font-size: 10px; color: rgba(20,20,20,0.4); }
+
+/* Челленджи */
+.prof-challenges {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.prof-challenge-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pci-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pci-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #141414;
+}
+
+.pci-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: #77BC79;
+}
+
+.pci-progress {
+  background: rgba(0,0,0,0.08);
+  border-radius: 6px;
+  height: 7px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.pci-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #77BC79, #4a9e4c);
+  border-radius: 6px;
+  transition: width 0.4s;
+}
+
+.pci-type {
+  font-size: 11px;
+  color: rgba(20,20,20,0.4);
+}
+
+/* Бейджи */
+.prof-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.prof-badge {
+  background: rgba(0,0,0,0.05);
+  border-radius: 16px;
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.prof-badge-icon { font-size: 28px; }
+.prof-badge-name { font-size: 12px; font-weight: 700; color: #141414; }
+.prof-badge-comm { font-size: 10px; color: rgba(20,20,20,0.4); }
+
+/* ── МЕНЮ НАСТРОЕК ── */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: none;
+  border: none;
+  width: 100%;
+  padding: 13px 8px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.settings-item:hover { background: rgba(0,0,0,0.05); }
+
+.si-icon {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.si-icon.green { background: rgba(119,188,121,0.15); color: #4a9e4c; }
+.si-icon.blue  { background: rgba(96,165,250,0.15);  color: #3b82f6; }
+.si-icon.purple{ background: rgba(167,139,250,0.15); color: #7c3aed; }
+.si-icon.gray  { background: rgba(0,0,0,0.06);       color: #555; }
+.si-icon.red   { background: rgba(220,50,50,0.1);    color: #c53030; }
+
+.si-text { flex: 1; }
+.si-label { font-size: 15px; font-weight: 600; color: #141414; }
+.si-sub   { font-size: 12px; color: rgba(20,20,20,0.4); margin-top: 2px; }
+
+.si-arrow { color: rgba(20,20,20,0.3); }
+
+.settings-item.danger .si-label { color: #c53030; }
+
+.settings-divider {
+  height: 1px;
+  background: rgba(20,20,20,0.08);
+  margin: 6px 0;
+}
+
+/* Редактирование профиля */
+.edit-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.edit-photo-btn {
+  background: rgba(0,0,0,0.07);
+  border: none;
+  padding: 9px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: #141414;
+}

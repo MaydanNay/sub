@@ -1,0 +1,229 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background-color: var(--bg-color);
+  min-height: 100%;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.1;
+  padding: 50px 20px 20px 30px;
+  color: #E6E6D7;
+}
+
+.dashboard-content {
+  background-color: var(--list-container-bg);
+  border-radius: 30px;
+  padding: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 15px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.tab {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 10px 5px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-main);
+}
+
+.tab.active {
+  color: #141414;
+  border-bottom: 2px solid #141414;
+}
+
+.event-full-card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-m);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  color: #141414;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.event-type { color: #77BC79; }
+.event-tag { color: #5B8AB5; }
+
+.event-full-card h2 { font-size: 24px; font-weight: 700; }
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.materials-box {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  border-radius: 20px;
+}
+
+.materials-box h4 { font-size: 14px; margin-bottom: 8px; }
+
+.materials-box ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.materials-box li::before {
+  content: "•";
+  color: #77BC79;
+  margin-right: 10px;
+}
+
+.action-btn {
+  background-color: #141414;
+  color: #E6E6D7;
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-main);
+  width: 100%;
+}
+
+/* ── Список сообществ ── */
+.dashboard-header {
+  padding: 50px 20px 10px 25px;
+}
+
+.dashboard-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  padding: 0;
+  color: #E6E6D7;
+}
+
+.sched-sub-main {
+  font-size: 14px;
+  color: rgba(230,230,215,0.5);
+  margin-top: 4px;
+}
+
+.joined-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Карточка сообщества — стиль community-card-new */
+.joined-card {
+  background-color: #C6C6BE;
+  border-radius: var(--radius-m);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.joined-card:active { transform: scale(0.98); }
+
+.joined-main h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #141414;
+  margin-bottom: 6px;
+}
+
+.joined-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: rgba(20,20,20,0.5);
+}
+
+.joined-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Хедер внутри расписания сообщества */
+.sched-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 50px 20px 10px;
+}
+
+.sched-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 0;
+  color: #E6E6D7;
+}
+
+.sched-back-btn {
+  background: rgba(230,230,215,0.15);
+  border: none;
+  color: #E6E6D7;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sched-sub {
+  font-size: 12px;
+  color: rgba(230,230,215,0.45);
+  margin-top: 2px;
+}
+
+.events-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.event-tag.past { color: rgba(20,20,20,0.35); }
+
+.ev-cost-row {
+  font-size: 13px;
+  color: rgba(20,20,20,0.6);
+}
+
+.sched-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 0;
+  color: rgba(20,20,20,0.4);
+}
+
+.sched-empty-icon { font-size: 40px; }
+.sched-empty p { font-size: 15px; font-weight: 500; }

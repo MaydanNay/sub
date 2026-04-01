@@ -1,18 +1,54 @@
 services:
+  crm-db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: shunteam
+      POSTGRES_PASSWORD: shunteampass
+      POSTGRES_DB: shunteam
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - shunteam-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shunteam"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   crm-backend:
     build: ./backend
     restart: always
     environment:
-      - DATABASE_URL=sqlite:///./crm.db
+      - DATABASE_URL=postgresql://shunteam:shunteampass@crm-db:5432/shunteam
+    volumes:
+      - media_uploads:/app/uploads
     ports:
-      - "8001:8000"
+      - "8011:8000"
+    depends_on:
+      crm-db:
+        condition: service_healthy
+    networks:
+      - shunteam-net
 
   crm-frontend:
-    build: 
-      context: ./frontend
-      dockerfile: ../frontend-dockerfile
+    build:
+      context: .
+      dockerfile: frontend-dockerfile
+      args:
+        - VITE_API_BASE=
     restart: always
     depends_on:
       - crm-backend
     ports:
-      - "3002:80"
+      - "3012:80"
+    networks:
+      - shunteam-net
+
+volumes:
+  pgdata:
+  media_uploads:
+
+networks:
+  shunteam-net:
+    driver: bridge

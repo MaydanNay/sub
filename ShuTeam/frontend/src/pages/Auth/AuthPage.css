@@ -1,0 +1,315 @@
+/* ════════════════════════════
+   AUTH PAGE — ShuTeam
+════════════════════════════ */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #141414;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── ФОН ── */
+.auth-bg {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  top: -80px; left: 50%;
+  transform: translateX(-50%);
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, rgba(119,188,121,0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-logo-mark {
+  width: 52px; height: 52px;
+  background: #77BC79;
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  font-weight: 900;
+  color: #141414;
+  letter-spacing: -1px;
+}
+
+.auth-logo-text {
+  font-size: 28px;
+  font-weight: 800;
+  color: #E6E6D7;
+  letter-spacing: -0.5px;
+}
+
+.auth-tagline {
+  font-size: 14px;
+  color: rgba(230,230,215,0.45);
+  text-align: center;
+}
+
+/* ── КАРТОЧКА ── */
+.auth-card {
+  background: #E6E6D7;
+  border-radius: 36px 36px 0 0;
+  padding: 12px 24px 50px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 0;
+  scrollbar-width: none;
+}
+
+.auth-card-handle {
+  width: 38px; height: 4px;
+  background: rgba(20,20,20,0.18);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+/* ── ШАГИ ── */
+.auth-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 22px;
+}
+
+.auth-step {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(20,20,20,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: rgba(20,20,20,0.35);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.auth-step.active {
+  background: #141414;
+  color: #E6E6D7;
+}
+
+.auth-step.done {
+  background: #77BC79;
+  color: #141414;
+}
+
+.auth-step-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(20,20,20,0.12);
+  transition: background 0.2s;
+}
+
+.auth-step-line.active { background: #141414; }
+
+/* ── ЗАГОЛОВОК ── */
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #141414;
+  margin-bottom: 4px;
+}
+
+.auth-sub {
+  font-size: 14px;
+  color: rgba(20,20,20,0.4);
+  margin-bottom: 22px;
+}
+
+/* ── ФОРМА ── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.auth-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(20,20,20,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auth-field input {
+  background: rgba(20,20,20,0.07);
+  border: none;
+  border-radius: 16px;
+  padding: 13px 15px;
+  font-size: 15px;
+  color: #141414;
+  outline: none;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.auth-field input:focus {
+  background: rgba(20,20,20,0.11);
+  box-shadow: 0 0 0 2px rgba(119,188,121,0.5);
+}
+
+/* Пароль */
+.pass-wrap {
+  position: relative;
+}
+
+.pass-wrap input {
+  width: 100%;
+  padding-right: 48px;
+  box-sizing: border-box;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 13px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; color: rgba(20,20,20,0.35);
+  display: flex; align-items: center;
+  padding: 4px;
+}
+
+/* Ссылка «Забыли пароль» */
+.forgot-link {
+  background: none; border: none;
+  font-size: 13px; font-weight: 600;
+  color: rgba(20,20,20,0.4);
+  cursor: pointer; font-family: inherit;
+  text-align: right; padding: 0;
+}
+
+/* Кнопка отправки */
+.auth-submit-btn {
+  background: #141414;
+  color: #E6E6D7;
+  border: none;
+  padding: 15px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  transition: opacity 0.2s;
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.auth-skip-btn {
+  background: none; border: none;
+  color: rgba(20,20,20,0.4);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  padding: 8px; text-align: center;
+}
+
+/* Разделитель */
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0 0;
+  color: rgba(20,20,20,0.3); font-size: 13px;
+}
+
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: rgba(20,20,20,0.12);
+}
+
+/* Переключение */
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(20,20,20,0.5);
+  margin-top: 14px;
+}
+
+.auth-switch button {
+  background: none; border: none;
+  color: #2d6e2f;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+
+/* ── КАТЕГОРИИ (шаг 2) ── */
+.auth-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-cat-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 15px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(20,20,20,0.15);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: #141414;
+  transition: all 0.15s;
+}
+
+.auth-cat-chip.selected {
+  background: #141414;
+  color: #E6E6D7;
+  border-color: #141414;
+}
+
+.auth-cat-hint {
+  font-size: 12px;
+  color: rgba(20,20,20,0.4);
+  text-align: center;
+  margin: 4px 0;
+}
+
+/* ── СООБЩЕНИЕ ОБ ОШИБКЕ ── */
+.auth-error {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: #b91c1c;
+  border-radius: 14px;
+  padding: 10px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}

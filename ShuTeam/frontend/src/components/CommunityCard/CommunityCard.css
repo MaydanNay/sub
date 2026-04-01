@@ -1,0 +1,78 @@
+.community-card-new {
+  background-color: #C6C6BE; /* Принудительно задаем фон карточки */
+  border-radius: var(--radius-m);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.card-tags {
+  display: flex;
+  gap: 10px;
+}
+
+.tag-category {
+  background-color: #a4d2a4;
+  color: #141414 !important;
+  padding: 6px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #141414 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.badge.closed { background-color: #e2adad; }
+.badge.open { background-color: #a4d2a4; }
+.badge.partial { background-color: #e2adad; }
+.badge.member { background-color: #9eccfa; }
+
+.card-main h3 {
+  font-size: 24px;
+  color: #141414 !important;
+  font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.card-main p {
+  font-size: 15px;
+  color: #141414 !important;
+  opacity: 0.8;
+  line-height: 1.2;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+
+.join-btn-new {
+  background-color: #141414;
+  color: #E6E6D7;
+  border: none;
+  padding: 16px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  outline: none;
+}

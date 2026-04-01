@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;700;800;900&display=swap');
+
+:root {
+  --bg-color: #141414;
+  --search-bg: #FFEC8B;
+  --list-container-bg: #E6E6D7;
+  --card-bg: #C6C6BE;
+  --text-primary: #ffffff;
+  --text-dark: #121212;
+  --text-secondary: #666666;
+  --accent-color: #4ade80; 
+  --padding-global: 5px;
+  --radius-xl: 40px;
+  --radius-l: 30px;
+  --radius-m: 30px;
+  --font-main: 'Alegreya Sans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: #000; /* Внешний фон для ПК */
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

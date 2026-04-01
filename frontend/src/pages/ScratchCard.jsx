@@ -22,7 +22,7 @@ const ScratchCard = () => {
         { id: 2, title: 'Скидка 20%', description: 'Вероятность 20%', type: 'win' },
         { id: 3, title: 'Бесплатная доставка', description: 'Вероятность 25%', type: 'win' },
         { id: 4, title: 'Подарок', description: 'Вероятность 15%', type: 'win' },
-        { id: 5, title: 'Купон 500₽', description: 'Вероятность 8%', type: 'mega' },
+        { id: 5, title: 'Купон 500₸', description: 'Вероятность 8%', type: 'mega' },
         { id: 6, title: 'ДЖЕКПОТ!', description: 'Вероятность 2%', type: 'mega' },
     ];
 

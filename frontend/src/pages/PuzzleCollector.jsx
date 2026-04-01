@@ -18,7 +18,7 @@ const PuzzleCollector = () => {
     ];
 
     const PRIZES = [
-        { id: 1, title: 'Купон на 1000₽', description: 'За сборку всего пазла', type: 'win' },
+        { id: 1, title: 'Купон на 1000₸', description: 'За сборку всего пазла', type: 'win' },
         { id: 2, title: 'Редкая деталь', description: 'С шансом 5% при покупке', type: 'info' },
     ];
 

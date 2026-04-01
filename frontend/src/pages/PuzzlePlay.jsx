@@ -276,7 +276,7 @@ const PuzzlePlay = () => {
                                 <p className="text-slate-400 text-[10px] font-black mb-8 uppercase tracking-[0.3em]">Весь пазл успешно собран</p>
                                 <div className="bg-white/5 rounded-[2.5rem] p-8 mb-10 border border-white/5 shadow-inner">
                                     <p className="text-indigo-400 font-black text-[10px] uppercase tracking-widest mb-3">Твоя награда:</p>
-                                    <p className="text-white text-3xl font-black italic tracking-tighter">КУПОН 1000₽</p>
+                                    <p className="text-white text-3xl font-black italic tracking-tighter">КУПОН 1000₸</p>
                                 </div>
                                 <motion.button
                                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}

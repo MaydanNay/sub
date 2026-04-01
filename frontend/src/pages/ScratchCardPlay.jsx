@@ -20,7 +20,7 @@ const ScratchCardPlay = () => {
         { id: 2, title: 'Скидка 20%', icon: IconStar, color: 'from-green-400 to-green-600', probability: 0.2 },
         { id: 3, title: 'Бесплатная доставка', icon: IconTruck, color: 'from-purple-400 to-purple-600', probability: 0.25 },
         { id: 4, title: 'Подарок', icon: IconGift, color: 'from-pink-400 to-pink-600', probability: 0.15 },
-        { id: 5, title: 'Купон 500₽', icon: IconCoin, color: 'from-yellow-400 to-amber-600', probability: 0.08 },
+        { id: 5, title: 'Купон 500₸', icon: IconCoin, color: 'from-yellow-400 to-amber-600', probability: 0.08 },
         { id: 6, title: 'ДЖЕКПОТ!', icon: IconJackpot, color: 'from-amber-400 to-red-600', probability: 0.02 },
     ];
 

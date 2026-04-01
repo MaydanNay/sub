@@ -14,6 +14,59 @@ class MemberRole(str, Enum):
     MODERATOR = "MODERATOR"
     MEMBER = "MEMBER"
 
+class GoalStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+class MemberStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+class MediaResponse(BaseModel):
+    urls: List[str]
+
+class ProgressUpdateRequest(BaseModel):
+    increment: int = 1
+    proof_urls: List[str] = []
+
+# ── Auth schemas ──────────────────────────────────────────────────────────────
+
+class RegisterRequest(BaseModel):
+    phone: str
+    name: str
+    password: str
+    city: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    phone: str
+    password: str
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    city: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+class UserPublic(BaseModel):
+    id: int
+    phone: str
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    city: Optional[str] = None
+    avatar_url: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AuthResponse(BaseModel):
+    user: UserPublic
+    token: str  # simple phone-based token for session
+
+# ── Legacy user schemas ───────────────────────────────────────────────────────
+
 class UserBase(BaseModel):
     phone: str
     name: Optional[str] = None
@@ -24,6 +77,8 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
+    bio: Optional[str] = None
+    city: Optional[str] = None
     created_at: datetime
     wallet: Optional["Wallet"] = None
 
@@ -72,15 +127,29 @@ class CommunityBase(BaseModel):
     description: str
     avatar_url: Optional[str] = None
     banner_url: Optional[str] = None
+    city: Optional[str] = None
+    category: Optional[str] = None
     privacy_type: PrivacyType = PrivacyType.PARTIAL
 
 class CommunityCreate(CommunityBase):
     pass
 
+class CommunityUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    avatar_url: Optional[str] = None
+    banner_url: Optional[str] = None
+    city: Optional[str] = None
+    category: Optional[str] = None
+    privacy_type: Optional[PrivacyType] = None
+
 class Community(CommunityBase):
     id: int
     created_at: datetime
     wallet: Optional["Wallet"] = None
+    members_count: int = 0
+    user_role: Optional[str] = None
+    user_status: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -92,6 +161,7 @@ class CommunityMemberBase(BaseModel):
 
 class CommunityMember(CommunityMemberBase):
     id: int
+    status: MemberStatus = MemberStatus.APPROVED
     joined_at: datetime
 
     class Config:
@@ -109,6 +179,9 @@ class MeetingBase(BaseModel):
     age_group: str = "All ages"
     is_open: bool = False
     cost: Decimal = Decimal(0)
+    media_urls: List[str] = []
+    community_name: Optional[str] = None
+    community_category: Optional[str] = None
 
 class MeetingCreate(MeetingBase):
     pass
@@ -160,6 +233,7 @@ class GoalBase(BaseModel):
     description: str
     goal_type: str
     duration_days: int
+    requires_moderation: bool = True
     reward_badge_id: Optional[int] = None
 
 class GoalCreate(GoalBase):
@@ -177,11 +251,27 @@ class GoalProgressBase(BaseModel):
     user_id: int
     current_value: int = 0
     target_value: int = 1
+    status: GoalStatus = GoalStatus.PENDING
     is_completed: bool = False
-    proof_url: Optional[str] = None
+    proof_urls: List[str] = []
 
 class GoalProgress(GoalProgressBase):
     id: int
+
+    class Config:
+        from_attributes = True
+
+class GalleryItemBase(BaseModel):
+    community_id: int
+    image_urls: List[str] = []
+    caption: Optional[str] = None
+
+class GalleryItemCreate(GalleryItemBase):
+    pass
+
+class GalleryItem(GalleryItemBase):
+    id: int
+    created_at: datetime
 
     class Config:
         from_attributes = True
