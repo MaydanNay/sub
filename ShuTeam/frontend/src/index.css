@@ -1,19 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;700;800;900&display=swap');
 
 :root {
-  --bg-color: #141414;
-  --search-bg: #FFEC8B;
-  --list-container-bg: #E6E6D7;
-  --card-bg: #C6C6BE;
+  --bg-color: #0c0c0c;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #0c0c0c 100%);
+  --accent-color: #4ade80;
+  --accent-glow: rgba(74, 222, 128, 0.3);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(12px);
   --text-primary: #ffffff;
-  --text-dark: #121212;
-  --text-secondary: #666666;
-  --accent-color: #4ade80; 
-  --padding-global: 5px;
+  --text-secondary: rgba(255, 255, 255, 0.6);
   --radius-xl: 40px;
   --radius-l: 30px;
-  --radius-m: 30px;
+  --radius-m: 20px;
   --font-main: 'Alegreya Sans', sans-serif;
+  
+  --premium-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--premium-shadow);
 }
 
 * {

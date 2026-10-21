@@ -1,0 +1,23 @@
+{
+  "name": "restart-clinic",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently -n api,mini,dash -c blue,green,yellow \"npm run dev -w backend\" \"npm run dev -w mini-app\" \"npm run dev -w dashboard\"",
+    "dev:api": "npm run dev -w backend",
+    "build": "npm run build -w backend && npm run build -w mini-app && npm run build -w dashboard",
+    "db:generate": "npm run db:generate -w backend",
+    "db:migrate": "npm run db:migrate -w backend",
+    "db:push": "npm run db:push -w backend",
+    "db:seed": "npm run db:seed -w backend"
+  },
+  "workspaces": [
+    "backend",
+    "mini-app",
+    "dashboard",
+    "shared"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

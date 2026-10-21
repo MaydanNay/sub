@@ -245,7 +245,7 @@ const Catalog = ({ openModal, openContactsModal }) => {
                     <a href="https://t.me/malikatakira" target="_blank" rel="noopener noreferrer" className="group">
                         <img src={telegramIcon} alt="TG" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                     </a>
-                    <a href="https://wa.me/77769960222" target="_blank" rel="noopener noreferrer" className="group">
+                    <a href="https://wa.me/77022236711" target="_blank" rel="noopener noreferrer" className="group">
                         <img src={whatsappIcon} alt="WP" className="w-8 h-8 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                     </a>
                     <a href="https://www.linkedin.com/in/sh%C5%AB-studio-4a13143b2?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer" className="group">

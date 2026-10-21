@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/api.ts","./src/main.tsx","./src/vite-env.d.ts","./src/components/BottomNav.tsx","./src/components/StatusScreen.tsx","./src/lib/mascotImage.ts","./src/pages/JourneyPage.tsx","./src/pages/MedcardPage.tsx","./src/pages/VisitsPage.tsx"],"version":"5.9.3"}

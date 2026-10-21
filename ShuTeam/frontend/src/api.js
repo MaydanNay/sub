@@ -33,6 +33,12 @@ async function request(path, options = {}) {
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
+  if (res.status === 401) {
+    logout();
+    window.dispatchEvent(new CustomEvent('app-logout'));
+    throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+  }
+
   if (!res.ok) {
     let detail = `HTTP ${res.status}`;
     try { const j = await res.json(); detail = j.detail || detail; } catch {}

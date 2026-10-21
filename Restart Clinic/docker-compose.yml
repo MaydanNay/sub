@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: restart
+      POSTGRES_PASSWORD: restart
+      POSTGRES_DB: restart_clinic
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "postgresql://restart:restart@postgres:5432/restart_clinic?schema=public"
+      PORT: 3001
+      WEBAPP_URL: "https://clinic.shustudio.kz"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: unless-stopped
+    ports:
+      - "3006:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

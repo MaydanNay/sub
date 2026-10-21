@@ -139,14 +139,13 @@
 .detail-section h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #141414;
   padding: 0 15px;
 }
 
 .detail-section p {
   padding: 0 15px;
   line-height: 1.5;
-  color: rgba(20, 20, 20, 0.8);
+  color: rgba(145, 145, 145, 0.8);
   margin-bottom: 20px;
 }
 
@@ -619,23 +618,22 @@
 .media-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  justify-content: center;
+  gap: 8px;
   width: 100%;
 }
 
 .media-album {
   background: #c6c6be;
-  border-radius: 20px;
-  padding: 20px 15px;
+  border-radius: 16px;
+  padding: 12px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   cursor: pointer;
   transition: transform 0.2s;
-  aspect-ratio: 1.2 / 1;
+  aspect-ratio: 1.5 / 1;
 }
 
 .media-album:hover {
@@ -643,16 +641,21 @@
 }
 
 .media-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   color: #141414;
   text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .media-count {
-  font-size: 11px;
+  font-size: 9px;
   color: rgba(20,20,20,0.5);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }

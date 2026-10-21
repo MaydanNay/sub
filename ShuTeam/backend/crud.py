@@ -126,20 +126,32 @@ def get_community(db: Session, community_id: int, user_id: int = None):
     return comm
 
 def get_communities(db: Session, skip: int = 0, limit: int = 100, search: str = None, category: str = None, city: str = None):
-    query = db.query(models.Community)
+    # Use subquery to count approved members to avoid N+1
+    member_count_sub = db.query(
+        models.CommunityMember.community_id,
+        func.count(models.CommunityMember.id).label('count')
+    ).filter(models.CommunityMember.status == models.MemberStatus.APPROVED)\
+     .group_by(models.CommunityMember.community_id).subquery()
+
+    query = db.query(
+        models.Community,
+        func.coalesce(member_count_sub.c.count, 0).label('members_count')
+    ).outerjoin(member_count_sub, models.Community.id == member_count_sub.c.community_id)
+
     if search and search.strip():
         query = query.filter(models.Community.name.ilike(f"%{search.strip()}%"))
     if category and category.strip():
         query = query.filter(models.Community.category.ilike(category.strip()))
     if city and city.strip():
         query = query.filter(models.Community.city.ilike(city.strip()))
+    
     results = query.order_by(models.Community.id.desc()).offset(skip).limit(limit).all()
-    for comm in results:
-        comm.members_count = db.query(models.CommunityMember).filter(
-            models.CommunityMember.community_id == comm.id,
-            models.CommunityMember.status == models.MemberStatus.APPROVED
-        ).count()
-    return results
+    
+    final_results = []
+    for comm, members_count in results:
+        comm.members_count = members_count
+        final_results.append(comm)
+    return final_results
 
 # --- Members ---
 def add_member(db: Session, community_id: int, user_id: int, role: str = "MEMBER"):
@@ -281,33 +293,44 @@ def create_meeting(db: Session, meeting: schemas.MeetingCreate):
     return db_meeting
 
 def get_meetings(db: Session, community_id: int = None, user_id: int = None, include_open: bool = False):
-    query = db.query(models.Meeting)
+    from sqlalchemy.orm import joinedload
+    
+    # Pre-fetch registration counts to avoid N+1
+    reg_count_sub = db.query(
+        models.MeetingRegistration.meeting_id,
+        func.count(models.MeetingRegistration.id).label('count')
+    ).group_by(models.MeetingRegistration.meeting_id).subquery()
+
+    query = db.query(
+        models.Meeting,
+        func.coalesce(reg_count_sub.c.count, 0).label('reg_count')
+    ).outerjoin(reg_count_sub, models.Meeting.id == reg_count_sub.c.meeting_id)\
+     .options(joinedload(models.Meeting.community))
+
     if community_id:
         query = query.filter(models.Meeting.community_id == community_id)
     elif user_id:
         from sqlalchemy import exists
-        
-        # Condition 1: User is a member of the community that owns the meeting
         membership_subquery = exists().where(
             models.CommunityMember.community_id == models.Meeting.community_id
         ).where(
             models.CommunityMember.user_id == user_id
         )
-        
         if include_open:
-            # Condition 2: Meeting is marked as open
             query = query.filter(or_(membership_subquery, models.Meeting.is_open == True))
         else:
             query = query.filter(membership_subquery)
     
     meetings = query.order_by(models.Meeting.date_time.asc()).all()
-    for m in meetings:
-        m.registration_count = db.query(models.MeetingRegistration).filter(models.MeetingRegistration.meeting_id == m.id).count()
+    
+    final_meetings = []
+    for m, reg_count in meetings:
+        m.registration_count = reg_count
         if m.community:
-            # We set these so that FastAPI's response_model=schemas.Meeting can find them
             m.community_name = m.community.name
             m.community_category = m.community.category
-    return meetings
+        final_meetings.append(m)
+    return final_meetings
 
 # --- Registrations ---
 def register_user_for_meeting(db: Session, meeting_id: int, user_id: int):
@@ -525,13 +548,20 @@ def get_community_stats(db: Session, community_id: int):
     month_names = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']
     
     for i in range(5, -1, -1):
-        first_day = today.replace(day=1) - datetime.timedelta(days=i*30) # Simple approximation
-        start_date = first_day.replace(day=1)
-        # End date is start of next month
-        if start_date.month == 12:
-            end_date = start_date.replace(year=start_date.year + 1, month=1)
+        # Calculate start of month accurately
+        target_month = today.month - i
+        target_year = today.year
+        while target_month <= 0:
+            target_month += 12
+            target_year -= 1
+        
+        start_date = datetime.datetime(target_year, target_month, 1)
+        
+        # Calculate end of month (start of next)
+        if target_month == 12:
+            end_date = datetime.datetime(target_year + 1, 1, 1)
         else:
-            end_date = start_date.replace(month=start_date.month + 1)
+            end_date = datetime.datetime(target_year, target_month + 1, 1)
             
         count = db.query(models.CommunityMember).filter(
             models.CommunityMember.community_id == community_id,

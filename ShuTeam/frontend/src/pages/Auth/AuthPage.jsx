@@ -84,8 +84,8 @@ const AuthPage = ({ onAuth }) => {
       {/* ── ФОН + ЛОГО ── */}
       <div className="auth-bg">
         <div className="auth-logo">
-          <div className="auth-logo-mark">S</div>
-          <span className="auth-logo-text">ShuTeam</span>
+          <img src="/favicon.ico" alt="ShuGroup Logo" className="auth-logo-img" />
+          <span className="auth-logo-text">ShuGroup</span>
         </div>
         <div className="auth-tagline">Офлайн-сообщества рядом с тобой</div>
       </div>

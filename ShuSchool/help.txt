@@ -1,0 +1,65 @@
+cd ShuSchool
+docker-compose down
+docker-compose up --build -d
+docker-compose logs -f
+
+
+
+
+
+ssh maydan@94.131.86.64
+
+
+rsync -avz --exclude '.env' --exclude 'node_modules' --exclude 'venv' --exclude '.venv' --exclude '__pycache__' --exclude '.git' ~/sub/ maydan@94.131.86.64:~/sub/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+👑 Владелец (Super Admin)	
+Логин: +77024383624
+Пароль: Maydan2000223	
+Cсылка: http://localhost:8080/core
+
+
+
+🛡️ Администратор школы	
+Логин: admin1	
+Пароль: password123	
+Cсылка: http://localhost:8080/staff
+
+👩‍🏫 Учитель	
+Логин: teacher1	
+Пароль: password123	
+Cсылка:  http://localhost:8080/staff
+
+
+
+🎓 Ученик	
+Логин: student1	
+Пароль: password123	
+Cсылка: http://localhost:8080/login
+
+👨‍👩‍👦 Родитель	
+Логин: parent1	
+Пароль: password123	
+Cсылка: http://localhost:8080/login
+
+Q-код
+http://localhost:8080/reception
+
+
+
+
+

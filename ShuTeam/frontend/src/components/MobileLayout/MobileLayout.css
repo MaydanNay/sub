@@ -1,14 +1,16 @@
 .mobile-view {
   width: 100%;
-  max-width: 430px; /* iPhone 15 Pro Max width approx */
+  max-width: 430px;
   height: 100vh;
-  background-color: var(--bg-color);
+  background: var(--bg-gradient);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: var(--padding-global);
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  padding: 0;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 1);
+  border-left: 1px solid var(--glass-border);
+  border-right: 1px solid var(--glass-border);
 }
 
 .mobile-content {

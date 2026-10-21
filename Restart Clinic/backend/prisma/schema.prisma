@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  ADMIN
+  DOCTOR
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RehabStage {
+  STAGE_1
+  STAGE_2
+  STAGE_3
+  STAGE_4
+}
+
+enum RewardTier {
+  NONE
+  BRONZE
+  SILVER
+  GOLD
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model StaffUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patients Patient[] @relation("AssignedDoctor")
+  issuedRewards PatientReward[] @relation("RewardIssuerDoctor")
+  createdRewards PatientReward[] @relation("RewardCreatedBy")
+}
+
+model Patient {
+  id              String           @id @default(cuid())
+  telegramId      BigInt           @unique
+  telegramUsername String?
+  phone           String?
+  fullName        String?
+  age             Int?
+  gender          Gender?
+  diagnosis       String?
+  hasAppAccess    Boolean          @default(false)
+  stage           RehabStage       @default(STAGE_1)
+  endurance       Int              @default(10)
+  ligaments       Int              @default(10)
+  balance         Int              @default(10)
+  visitCount      Int              @default(0)
+  scheduledVisits Int              @default(0)
+  completedVisits Int              @default(0)
+  targetVisits    Int?
+  mascotLevel     Int              @default(0)
+  nextVisitAt     DateTime?
+  courseCompleted Boolean          @default(false)
+  rewardTier      RewardTier       @default(NONE)
+  isPinned        Boolean          @default(false)
+  doctorId        String?
+  doctor          StaffUser?       @relation("AssignedDoctor", fields: [doctorId], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  application Application?
+  visits      Visit[]
+  rewards     PatientReward[]
+}
+
+model Application {
+  id               String            @id @default(cuid())
+  patientId        String            @unique
+  patient          Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  telegramUsername String?
+  phone            String
+  status           ApplicationStatus @default(PENDING)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Visit {
+  id        String       @id @default(cuid())
+  patientId String
+  patient   Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId  String
+  title     String?
+  note      String?
+  createdAt DateTime     @default(now())
+  medals    VisitMedal[]
+}
+
+model VisitMedal {
+  id        String         @id @default(cuid())
+  visitId   String
+  visit     Visit          @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  tier      VisitMedalTier
+  createdAt DateTime       @default(now())
+}
+
+enum VisitMedalTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+model PatientReward {
+  id               String               @id @default(cuid())
+  patientId        String
+  patient          Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  trigger          PatientRewardTrigger
+  grantedAt        DateTime?
+  issuerType       RewardIssuerType     @default(DOCTOR)
+  issuerDoctorId   String?
+  issuerDoctor     StaffUser?           @relation("RewardIssuerDoctor", fields: [issuerDoctorId], references: [id])
+  createdByStaffId   String?
+  createdBy        StaffUser?           @relation("RewardCreatedBy", fields: [createdByStaffId], references: [id])
+  createdAt        DateTime             @default(now())
+}
+
+enum PushType {
+  NIGHTMARE
+  MOTIVATIONAL
+  SYSTEM
+}
+
+enum PatientRewardTrigger {
+  STAGE_1
+  STAGE_2
+  STAGE_3
+  STAGE_4
+  COURSE_COMPLETE
+}
+
+enum RewardIssuerType {
+  ADMIN
+  DOCTOR
+}
+
+model PushNotification {
+  id        String   @id @default(cuid())
+  text      String
+  type      PushType @default(NIGHTMARE)
+  createdAt DateTime @default(now())
+}

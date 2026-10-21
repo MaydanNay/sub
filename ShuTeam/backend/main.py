@@ -15,7 +15,7 @@ oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", aut
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="ShuTeam CRM API")
+app = FastAPI(title="ShuGroup CRM API")
 
 os.makedirs("/app/uploads", exist_ok=True)
 
@@ -173,7 +173,7 @@ def startup_event():
                 address="ул. Достык, 12",
                 capacity=20,
                 amenities=["Wi-Fi", "Sockets", "Art supplies"],
-                discount_info="10% скидка участникам ShuTeam",
+                discount_info="10% скидка участникам ShuGroup",
                 image_urls=["https://images.unsplash.com/photo-1554118811-1e0d58224f24"]
             ))
 

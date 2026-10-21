@@ -25,12 +25,21 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
 
   frontend:
+    build: ./SHU/frontend
+    restart: always
+    depends_on:
+      - bot
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+
+  catalog-frontend:
     build: ./frontend
     restart: always
     depends_on:
       - backend
     ports:
-      - "${FRONTEND_PORT:-3000}:80"
+      - "3005:80"
 
   bot:
     build: ./SHU/bot

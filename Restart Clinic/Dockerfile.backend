@@ -1,0 +1,27 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Copy root package.json and lockfile
+COPY package*.json ./
+
+# Copy package.jsons for workspaces
+COPY backend/package*.json backend/
+COPY mini-app/package*.json mini-app/
+COPY dashboard/package*.json dashboard/
+COPY shared/package*.json shared/
+
+# Install dependencies for all workspaces
+RUN npm install
+
+# Copy source code
+COPY shared shared
+COPY backend backend
+
+# Generate prisma client
+WORKDIR /app/backend
+RUN npx prisma generate
+
+# Port
+EXPOSE 3001
+
+CMD ["sh", "-c", "npx prisma db push && npx tsx src/index.ts"]

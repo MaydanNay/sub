@@ -1,0 +1,59 @@
+ЗАПУСК (первый раз)
+-------------------
+cd "/home/maydan/projects/Restart Clinic"
+npm install
+cp .env.example .env
+cp mini-app/.env.example mini-app/.env
+cp dashboard/.env.example dashboard/.env
+
+docker compose up -d
+npm run db:push && npm run db:seed
+
+# В .env указать TELEGRAM_BOT_TOKEN (от @BotFather)
+
+ЗАПУСК (каждый раз)
+-------------------
+docker compose up -d
+npm run dev
+
+
+
+ССЫЛКИ
+------
+API:        http://localhost:3001
+Mini App:   http://localhost:5173
+Dashboard:  http://localhost:5174
+Бот:        https://t.me/<имя_бота>   (после создания в BotFather)
+
+
+
+ЛОГИНЫ (после seed)
+-------------------
+Админ:  admin@restart-clinic.local / admin123
+Врач:   doctor@restart-clinic.local / doctor123
+
+
+
+ОТДЕЛЬНО
+--------
+Только API:       npm run dev:api
+Только Mini App:  npm run dev -w mini-app
+Только Dashboard: npm run dev -w dashboard
+
+NGROK (Mini App в Telegram)
+---------------------------
+1. ngrok http 5173          ← один туннель на mini-app
+2. WEBAPP_URL = этот URL в .env + BotFather
+3. mini-app/.env — VITE_API_URL оставить пустым (API идёт через proxy)
+4. npm run dev — перезапустить после смены .env
+
+ПРИМЕЧАНИЕ
+----------
+Mini App в Telegram требует HTTPS (ngrok / cloudflare tunnel).
+В .env обязательно TELEGRAM_BOT_TOKEN — без него Mini App не авторизует.
+После смены ngrok-URL: обновить WEBAPP_URL и BotFather, перезапустить npm run dev.
+
+ПЕРСОНАЖ MINI APP
+-----------------
+Менять файл: mini-app/src/assets/pers.png  (НЕ dist/ — он пересобирается)
+После замены — обновить Mini App в Telegram (жёсткое обновление).

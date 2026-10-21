@@ -107,7 +107,7 @@ const Footer = ({ onFormSuccess }) => {
                     <a href="https://t.me/malikatakira" target="_blank" rel="noopener noreferrer">
                         <img src={telegramIcon} alt="TG" className="contact-icon" />
                     </a>
-                    <a href="https://wa.me/77769960222" target="_blank" rel="noopener noreferrer">
+                    <a href="https://wa.me/77022236711" target="_blank" rel="noopener noreferrer">
                         <img src={whatsappIcon} alt="WP" className="contact-icon" />
                     </a>
                     <a href="https://www.linkedin.com/in/sh%C5%AB-studio-4a13143b2?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer">

@@ -256,8 +256,7 @@ const Catalog = () => {
   };
 
   const applyCategories = () => {
-    const newChips = Array.from(new Set([...selectedChips, ...tempSelected]));
-    setSelectedChips(newChips);
+    setSelectedChips(tempSelected);
 
     // Сразу активируем добавленные категории и убираем "Все"
     if (tempSelected.length > 0) {
@@ -268,7 +267,11 @@ const Catalog = () => {
     }
 
     setIsModalOpen(false);
-    setTempSelected([]);
+  };
+
+  const openInterestsModal = () => {
+    setTempSelected([...selectedChips]);
+    setIsModalOpen(true);
   };
 
   const removeChip = (chipName) => {
@@ -410,7 +413,7 @@ const Catalog = () => {
                 Популярные
               </button>
 
-              <button className="add-btn" onClick={() => setIsModalOpen(true)}>+</button>
+              <button className="add-btn" onClick={openInterestsModal}>+</button>
             </div>
 
             <div className="community-list">
@@ -496,7 +499,7 @@ const Catalog = () => {
               {CATEGORIES.map(cat => (
                 <div
                   key={cat.id}
-                  className={`category-pill ${tempSelected.includes(cat.name) || selectedChips.includes(cat.name) ? 'active' : ''}`}
+                  className={`category-pill ${tempSelected.includes(cat.name) ? 'active' : ''}`}
                   onClick={() => toggleTempCategory(cat.name)}
                 >
                   {cat.name}
@@ -506,7 +509,7 @@ const Catalog = () => {
 
             <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Отмена</button>
-              <button className="btn-apply" onClick={applyCategories}>Применить</button>
+              <button className="btn-apply" onClick={applyCategories}>Сохранить</button>
             </div>
           </div>
         </div>

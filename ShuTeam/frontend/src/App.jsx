@@ -21,6 +21,14 @@ function App() {
     () => !!localStorage.getItem('token')
   );
 
+  React.useEffect(() => {
+    const handleAppLogout = () => {
+      setIsAuthenticated(false);
+    };
+    window.addEventListener('app-logout', handleAppLogout);
+    return () => window.removeEventListener('app-logout', handleAppLogout);
+  }, []);
+
   const handleAuth = () => setIsAuthenticated(true);
 
   const handleLogout = () => {

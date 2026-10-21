@@ -498,6 +498,15 @@ const CommunityDetail = () => {
                 position: 'absolute', top: '40px', right: '0', background: '#E6E6D7', borderRadius: '12px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '8px', zIndex: 100, minWidth: '180px', border: '1px solid #ccc'
               }}>
+                <button
+                  onClick={() => { handleShare(); setShowMoreMenu(false); }}
+                  style={{
+                    width: '100%', textAlign: 'left', padding: '10px', background: 'none', border: 'none',
+                    fontSize: '14px', cursor: 'pointer', borderRadius: '8px', color: '#141414'
+                  }}
+                >
+                  Поделиться
+                </button>
                 {((community.user_role || '').toUpperCase() === 'LEADER' || (community.user_role || '').toUpperCase() === 'MODERATOR') && (
                   <button
                     onClick={() => { setShowEditModal(true); setShowMoreMenu(false); }}
@@ -858,7 +867,7 @@ const CommunityDetail = () => {
                 </div>
               ) : (
                 <div className="gallery-feed" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  <button onClick={() => setSelectedAlbum(null)} style={{ background: 'transparent', border: 'none', color: '#141414', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', cursor: 'pointer', padding: 0, width: 'fit-content' }}>
+                  <button onClick={() => setSelectedAlbum(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(119, 119, 119, 1)ff', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', cursor: 'pointer', padding: 0, width: 'fit-content' }}>
                     <ArrowLeft size={16} /> Назад к альбомам
                   </button>
                   <div className="gallery-post" style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: 15 }}>

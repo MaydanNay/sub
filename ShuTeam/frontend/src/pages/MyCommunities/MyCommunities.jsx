@@ -151,7 +151,7 @@ const MyCommunities = () => {
         {communities.length === 0 ? (
           <div className="mc-empty" style={{ marginTop: 40 }}>
             <div className="mc-empty-icon" style={{ fontSize: 40, marginBottom: 10 }}>🏘️</div>
-            <p style={{ color: 'rgba(20,20,20,0.5)' }}>У вас пока нет сообществ</p>
+            <p style={{ color: 'rgba(235, 235, 235, 0.5)' }}>У вас пока нет сообществ</p>
           </div>
         ) : (
           <div className="mc-list">
