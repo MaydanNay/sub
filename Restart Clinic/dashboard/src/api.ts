@@ -53,9 +53,9 @@ export const adminApi = {
     id: string,
     data: Partial<{
       fullName: string;
-      age: number;
-      gender: Gender;
-      diagnosis: string;
+      age: number | null;
+      gender: Gender | null;
+      diagnosis: string | null;
       doctorId: string;
       stage: number;
       nextVisitAt: string | null;
