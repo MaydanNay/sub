@@ -33,10 +33,10 @@ export function AdminApplications() {
     setSubmitting(true);
     try {
       await adminApi.approve(selected.id, {
-        fullName: form.fullName,
+        fullName: form.fullName.trim(),
         age: Number(form.age),
         gender: form.gender as "MALE" | "FEMALE",
-        diagnosis: form.diagnosis,
+        diagnosis: form.diagnosis.trim(),
         doctorId: form.doctorId,
         nextVisitAt: new Date(form.nextVisitAt).toISOString(),
       });
@@ -183,9 +183,9 @@ export function AdminApplications() {
                 onClick={approve}
                 disabled={
                   submitting ||
-                  !form.fullName ||
-                  !form.diagnosis ||
-                  !form.age ||
+                  !form.fullName.trim() ||
+                  !form.diagnosis.trim() ||
+                  !Number(form.age) ||
                   !form.gender ||
                   !form.doctorId ||
                   !form.nextVisitAt

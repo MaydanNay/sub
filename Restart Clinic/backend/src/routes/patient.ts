@@ -71,7 +71,7 @@ const AUTH_MESSAGES: Record<AuthError, string> = {
   no_init_data: "Нет данных Telegram. Откройте Mini App через кнопку бота, не по прямой ссылке.",
   no_bot_token: "На сервере не задан TELEGRAM_BOT_TOKEN.",
   invalid_init_data: "Не удалось проверить подпись Telegram. Перезапустите npm run dev после смены токена бота.",
-  patient_not_found: "Сначала нажмите /start в боте Restart Clinic.",
+  patient_not_found: "Сначала оставьте заявку в боте Restart Clinic: /start → «Записаться на консультацию».",
 };
 
 export async function patientRoutes(app: FastifyInstance) {

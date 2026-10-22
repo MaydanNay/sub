@@ -10,6 +10,8 @@ import { patientRewardInclude, serializePatientReward, validateRewardInput } fro
 import { serialize } from "../lib/serialize.js";
 import bcrypt from "bcryptjs";
 import type { PatientRewardTrigger, RewardIssuerType } from "@prisma/client";
+import { parsePatientFields } from "../lib/patient-input.js";
+import { makePlaceholderTelegramId } from "../lib/patient-identity.js";
 
 export async function adminRoutes(app: FastifyInstance) {
   app.get(
@@ -49,8 +51,12 @@ export async function adminRoutes(app: FastifyInstance) {
         return reply.status(400).send({ error: "Заявка уже обработана" });
       }
 
+      const parsed = parsePatientFields(req.body, true);
+      if ("error" in parsed) return reply.status(400).send({ error: parsed.error });
+      const fields = parsed.data;
+
       const doctor = await prisma.staffUser.findFirst({
-        where: { id: req.body.doctorId, role: "DOCTOR" },
+        where: { id: fields.doctorId, role: "DOCTOR" },
       });
       if (!doctor) return reply.status(400).send({ error: "Врач не найден" });
 
@@ -66,11 +72,7 @@ export async function adminRoutes(app: FastifyInstance) {
         const updated = await tx.patient.update({
           where: { id: appRecord.patientId },
           data: {
-            fullName: req.body.fullName,
-            age: req.body.age,
-            gender: req.body.gender,
-            diagnosis: req.body.diagnosis,
-            doctorId: req.body.doctorId,
+            ...fields,
             hasAppAccess: true,
             ...(nextVisitAt
               ? { nextVisitAt, scheduledVisits: { increment: 1 } }
@@ -219,28 +221,36 @@ export async function adminRoutes(app: FastifyInstance) {
     "/api/admin/patients",
     { preHandler: [authenticate, requireRole("ADMIN")] },
     async (req, reply) => {
-      if (!req.body.telegramId && !req.body.phone) {
+      const phone = req.body.phone != null ? String(req.body.phone).trim() || null : null;
+      const telegramIdRaw =
+        req.body.telegramId != null ? String(req.body.telegramId).trim() : "";
+      if (!telegramIdRaw && !phone) {
         return reply.status(400).send({ error: "Нужен telegramId или phone" });
       }
+      if (telegramIdRaw && !/^[1-9]\d{0,15}$/.test(telegramIdRaw)) {
+        return reply.status(400).send({ error: "Некорректный telegramId" });
+      }
+
+      const parsed = parsePatientFields(req.body, true);
+      if ("error" in parsed) return reply.status(400).send({ error: parsed.error });
 
       const doctor = await prisma.staffUser.findFirst({
-        where: { id: req.body.doctorId, role: "DOCTOR" },
+        where: { id: parsed.data.doctorId, role: "DOCTOR" },
       });
       if (!doctor) return reply.status(400).send({ error: "Врач не найден" });
 
-      const telegramId = req.body.telegramId
-        ? BigInt(req.body.telegramId)
-        : BigInt(Date.now());
+      // Без telegramId — временный отрицательный ID; настоящий подставит бот,
+      // когда пациент поделится этим же номером (см. linkPlaceholderPatientByPhone).
+      const telegramId = telegramIdRaw ? BigInt(telegramIdRaw) : makePlaceholderTelegramId();
+      if (telegramIdRaw && (await prisma.patient.findUnique({ where: { telegramId } }))) {
+        return reply.status(400).send({ error: "Пациент с таким telegramId уже есть" });
+      }
 
       const patient = await prisma.patient.create({
         data: {
           telegramId,
-          phone: req.body.phone,
-          fullName: req.body.fullName,
-          age: req.body.age,
-          gender: req.body.gender,
-          diagnosis: req.body.diagnosis,
-          doctorId: req.body.doctorId,
+          phone,
+          ...parsed.data,
           hasAppAccess: true,
           scheduledVisits: 0,
         },
@@ -268,7 +278,17 @@ export async function adminRoutes(app: FastifyInstance) {
       const patient = await prisma.patient.findUnique({ where: { id: req.params.id } });
       if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
 
-      const data: Record<string, unknown> = { ...req.body };
+      // Только разрешённые поля; пустые значения -> null, а не "" или 0.
+      const parsed = parsePatientFields(req.body, false);
+      if ("error" in parsed) return reply.status(400).send({ error: parsed.error });
+      const data: Record<string, unknown> = { ...parsed.data };
+
+      if (parsed.data.doctorId) {
+        const doctor = await prisma.staffUser.findFirst({
+          where: { id: parsed.data.doctorId, role: "DOCTOR" },
+        });
+        if (!doctor) return reply.status(400).send({ error: "Врач не найден" });
+      }
       if (req.body.stage) {
         data.stage = toPrismaStage(req.body.stage);
       }

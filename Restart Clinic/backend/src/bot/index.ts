@@ -1,6 +1,7 @@
 import { Bot, InlineKeyboard, Keyboard } from "grammy";
 import { REWARD_TRIGGER_LABELS } from "@restart-clinic/shared";
 import { prisma } from "../lib/prisma.js";
+import { linkPlaceholderPatientByPhone } from "../lib/patient-identity.js";
 
 let botInstance: Bot | null = null;
 
@@ -20,18 +21,10 @@ export function createBot(token: string, webappUrl: string): Bot {
   bot.command("start", async (ctx) => {
     if (!ctx.from) return;
     const telegramId = BigInt(ctx.from.id);
-    let patient = await prisma.patient.findUnique({ where: { telegramId } });
+    // Пациента не создаём: запись появится, только когда человек поделится контактом.
+    const patient = await prisma.patient.findUnique({ where: { telegramId } });
 
-    if (!patient) {
-      patient = await prisma.patient.create({
-        data: {
-          telegramId,
-          telegramUsername: ctx.from.username,
-        },
-      });
-    }
-
-    if (patient.hasAppAccess) {
+    if (patient?.hasAppAccess) {
       const keyboard = new InlineKeyboard().webApp(
         "🚀 Открыть Restart Clinic",
         webappUrl
@@ -74,28 +67,34 @@ export function createBot(token: string, webappUrl: string): Bot {
     }
 
     const telegramId = BigInt(ctx.from.id);
-    const patient = await prisma.patient.findUnique({ where: { telegramId } });
-    if (!patient) {
-      await ctx.reply("Нажмите /start для начала.");
-      return;
-    }
+    let patient =
+      (await prisma.patient.findUnique({ where: { telegramId } })) ??
+      (await linkPlaceholderPatientByPhone(telegramId, contact.phone_number, ctx.from.username));
 
-    const existing = await prisma.application.findUnique({
-      where: { patientId: patient.id },
-    });
+    const existing = patient
+      ? await prisma.application.findUnique({ where: { patientId: patient.id } })
+      : null;
     if (existing?.status === "PENDING") {
       await ctx.reply("Ваша заявка уже принята. Администратор свяжется с вами.");
       return;
     }
-    if (existing?.status === "APPROVED" || patient.hasAppAccess) {
+    if (existing?.status === "APPROVED" || patient?.hasAppAccess) {
       await ctx.reply("У вас уже открыт доступ. Нажмите /start для входа в приложение.");
       return;
     }
 
-    await prisma.patient.update({
-      where: { id: patient.id },
-      data: { phone: contact.phone_number },
-    });
+    patient = patient
+      ? await prisma.patient.update({
+          where: { id: patient.id },
+          data: { phone: contact.phone_number, telegramUsername: ctx.from.username },
+        })
+      : await prisma.patient.create({
+          data: {
+            telegramId,
+            telegramUsername: ctx.from.username,
+            phone: contact.phone_number,
+          },
+        });
 
     if (existing) {
       await prisma.application.update({

@@ -17,7 +17,7 @@ venv/
 ENV/
 # Windows specific virtualenv folders
 Include/
-Lib/
+/Lib/
 Scripts/
 pyvenv.cfg
 

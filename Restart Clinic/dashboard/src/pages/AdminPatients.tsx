@@ -136,10 +136,11 @@ export function AdminPatients() {
     setSubmitting(true);
     try {
       await adminApi.updatePatient(editing.id, {
-        fullName: form.fullName,
-        age: Number(form.age),
-        gender: form.gender ? (form.gender as "MALE" | "FEMALE") : undefined,
-        diagnosis: form.diagnosis,
+        fullName: form.fullName.trim(),
+        // Пустое поле — null, а не 0 / "" (раньше Number("") давал возраст 0)
+        age: form.age ? Number(form.age) : null,
+        gender: form.gender ? (form.gender as "MALE" | "FEMALE") : null,
+        diagnosis: form.diagnosis.trim() || null,
         doctorId: form.doctorId,
         nextVisitAt: form.nextVisitAt
           ? new Date(form.nextVisitAt).toISOString()
@@ -316,7 +317,7 @@ export function AdminPatients() {
               </button>
               <button
                 onClick={saveEdit}
-                disabled={submitting || !form.fullName}
+                disabled={submitting || !form.fullName.trim()}
                 className="flex-1 bg-clinic-primary text-white rounded-lg py-2 disabled:opacity-50"
               >
                 {submitting ? "..." : "Сохранить"}
