@@ -5,7 +5,8 @@ import { useLanguage } from '../context/LanguageContext';
 import api from '../api';
 
 const Reception = () => {
-    const [qrValue, setQrValue] = useState("SCHOOL"); // fallback
+    const [qrValue, setQrValue] = useState(null);
+    const [qrError, setQrError] = useState(false);
     const [currentTime, setCurrentTime] = useState("");
     const [expiresIn, setExpiresIn] = useState(30);
     const { t } = useLanguage();
@@ -29,8 +30,12 @@ const Reception = () => {
                 const resp = await api.get('/attendance/reception-qr');
                 setQrValue(resp.data.code);
                 setExpiresIn(resp.data.expires_in);
+                setQrError(false);
             } catch (err) {
                 console.error("Failed to fetch reception QR", err);
+                // Never show a stale/static code: it would be rejected by the server
+                setQrValue(null);
+                setQrError(true);
             }
         };
 
@@ -68,12 +73,18 @@ const Reception = () => {
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <QRCodeSVG 
-                        value={qrValue} 
-                        size={400} 
-                        level="H"
-                        includeMargin={true}
-                    />
+                    {qrValue ? (
+                        <QRCodeSVG 
+                            value={qrValue} 
+                            size={400} 
+                            level="H"
+                            includeMargin={true}
+                        />
+                    ) : (
+                        <div style={{ width: 400, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: qrError ? '#ff4d4d' : '#888', fontSize: '20px' }}>
+                            {qrError ? 'Нет связи с сервером. QR-код появится автоматически.' : '...'}
+                        </div>
+                    )}
                 </div>
                 {/* Visual indicator of refresh */}
                 <div style={{ position: 'absolute', bottom: '-40px', width: '100%', textAlign: 'center', color: '#888', fontSize: '14px' }}>

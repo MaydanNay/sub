@@ -1,12 +1,12 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
+import { loginBody, parse } from "../lib/validation.js";
 
 export async function authRoutes(app: import("fastify").FastifyInstance) {
-  app.post<{
-    Body: { email: string; password: string };
-  }>("/api/auth/login", async (req, reply) => {
-    const { email, password } = req.body;
+  app.post("/api/auth/login", async (req, reply) => {
+    // A missing body used to throw TypeError -> 500
+    const { email, password } = parse(loginBody, req.body);
     const user = await prisma.staffUser.findUnique({ where: { email } });
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return reply.status(401).send({ error: "Неверный email или пароль" });

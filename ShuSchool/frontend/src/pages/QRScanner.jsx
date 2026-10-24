@@ -19,35 +19,32 @@ const QRScanner = () => {
             let lessonId = '';
             let entryCode = '';
             
-            if (decodedText === 'SCHOOL' || decodedText.startsWith('ENTRY_')) {
+            if (decodedText.startsWith('ENTRY_')) {
                 qrType = 'school_entry';
                 entryCode = decodedText;
             } else {
                 lessonId = decodedText;
             }
             
-            let queryUrl = `/attendance/scan?qr_type=${qrType}`;
-            if (lessonId) queryUrl += `&lesson_id=${lessonId}`;
-            if (entryCode) queryUrl += `&entry_code=${entryCode}`;
+            const params = { qr_type: qrType };
+            if (lessonId) params.lesson_id = lessonId;
+            if (entryCode) params.entry_code = entryCode;
 
-            const response = await api.post(queryUrl);
+            const response = await api.post('/attendance/scan', null, { params });
             
             if (response.data.status === 'already_scanned') {
                 alert(t('already_scanned_alert'));
                 return false; // For telegram: close after alert or keep open? We return false to close if already scanned or true to keep open. Better close and let user click again.
             }
             
-            setEarned(response.data.coins_earned || 3);
+            setEarned(response.data.coins_earned ?? 0);
             setScanResult(decodedText);
             setIsScanning(false);
             return true; // Successfully processed
         } catch (err) {
             console.warn("Scan error:", err);
-            // Fallback for demo/testing
-            setEarned(3);
-            setScanResult(decodedText);
-            setIsScanning(false);
-            return true;
+            alert(err.response?.data?.detail || t('error_loading_data'));
+            return false;
         }
     };
 

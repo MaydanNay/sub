@@ -1,5 +1,4 @@
-import datetime, os, shutil, time, hashlib, json, uuid
-import asyncio
+import datetime, os, shutil, time, hashlib, json, uuid, re, logging
 import hmac
 from urllib.parse import parse_qsl
 from dotenv import load_dotenv
@@ -16,8 +15,12 @@ from database import engine, get_db
 from migrate import update_db
 from openai import OpenAI
 
-# Standard OpenAI client initialization
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+logger = logging.getLogger("shuschool")
+
+# OpenAI() raises without a key, so the client is optional.
+# Sync calls run in FastAPI's threadpool; the timeout keeps a slow API from pinning threads.
+_openai_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=_openai_key, timeout=30.0, max_retries=1) if _openai_key else None
 
 # AI Agent Instructions
 HW_DECOMPOSER_INSTRUCTIONS = "Разбей домашнее задание на 3-7 понятных шагов для ученика. Ответ должен быть СТРОГО в формате JSON: {\"steps\": [\"Шаг 1\", \"Шаг 2\", ...]}. Все шаги должны быть на РУССКОМ ЯЗЫКЕ."
@@ -49,7 +52,7 @@ ROLE_TEACHER = "teacher"
 ROLE_STUDENT = "student"
 ROLE_PARENT = "parent"
 
-SSA_PHONE = "+77024383624"
+SSA_PHONE = os.getenv("OWNER_PHONE", "+77024383624")
 
 def update_mascot_state(character: models.Character):
     if not character:
@@ -91,17 +94,18 @@ def seed_data(db: Session):
                 db.add(models.Subject(**s))
                 db.commit()
         except IntegrityError:
-            db.rollback()
-        except Exception:
+            # Another worker inserted it first
             db.rollback()
     
     # Seed Super-Super Admin (SSA)
     try:
         # Search by phone number first as it is the primary ID for the SSA
         ssa = db.query(models.User).filter(models.User.phone_number == SSA_PHONE).first()
-        ssa_password = os.getenv("OWNER_PASSWORD", "Maydan2000223")
-        
-        if not ssa:
+        ssa_password = os.getenv("OWNER_PASSWORD")
+
+        if not ssa and not ssa_password:
+            logger.warning("OWNER_PASSWORD is not set: Super-Super Admin was not created")
+        elif not ssa:
             # Create if doesn't exist
             new_ssa = models.User(
                 username="ss-admin",
@@ -113,22 +117,22 @@ def seed_data(db: Session):
             )
             db.add(new_ssa)
             db.commit()
-            print(f"✅ Created new Super-Super Admin: {SSA_PHONE}")
+            logger.info("Created Super-Super Admin %s", SSA_PHONE)
         else:
             # Force Role and Approval if exists
             if ssa.role != ROLE_SSA or not ssa.is_approved:
                 ssa.role = ROLE_SSA
                 ssa.is_approved = True
                 db.commit()
-                print(f"⚡ Promoted existing user {ssa.username} (ID: {ssa.id}) to Super-Super Admin")
-    except Exception as e:
+                logger.info("Promoted user %s (ID %s) to Super-Super Admin", ssa.username, ssa.id)
+    except Exception:
         db.rollback()
-        print(f"❌ Error seeding SSA: {e}")
+        logger.exception("Error seeding SSA")
 
 app = FastAPI(title="ShuSchool API")
 
 @app.on_event("startup")
-async def startup_event():
+def startup_event():
     # Ensure migrations are applied
     update_db()
     
@@ -303,10 +307,13 @@ def get_teacher_stats(scope: str = "all", db: Session = Depends(get_db), current
 def get_class_students(class_name: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.check_role("teacher"))):
     is_assigned = class_name in (current_user.assigned_classes or [])
     
-    students = db.query(models.User).filter(
-        models.User.role == "student", 
+    students_query = db.query(models.User).filter(
+        models.User.role == "student",
         models.User.class_name == class_name
-    ).options(joinedload(models.User.character)).all()
+    )
+    if current_user.role not in (ROLE_SSA, ROLE_SUPER_ADMIN):
+        students_query = students_query.filter(models.User.school_id == current_user.school_id)
+    students = students_query.options(joinedload(models.User.character)).all()
     
     student_ids = [s.id for s in students]
     all_streaks = []
@@ -356,9 +363,6 @@ def get_class_students(class_name: str, db: Session = Depends(get_db), current_u
 
 @app.post("/auth/token", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    # Debug Logging
-    print(f"Login Attempt - Username: '{form_data.username}', Password length: {len(form_data.password)}")
-
     # Try username login first
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
     
@@ -370,8 +374,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             search_val = '+' + search_val[1:]
         
         user = db.query(models.User).filter(models.User.phone_number == search_val).first()
-        if user:
-             print(f"Matched User by Phone: {user.username} (ID: {user.id})")
 
     if not user:
         raise HTTPException(
@@ -512,7 +514,7 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db), current_user: 
     # Security:
     # 1. Super admin can see anyone
     # 2. Users in the same school can see each other
-    if current_user.role != "super_admin" and current_user.school_id != user.school_id and current_user.id != user.id:
+    if current_user.role not in (ROLE_SUPER_ADMIN, ROLE_SSA) and current_user.school_id != user.school_id and current_user.id != user.id:
         raise HTTPException(status_code=403, detail="Access denied to this profile")
         
     if user.school:
@@ -538,14 +540,23 @@ def update_me(user_update: schemas.UserUpdate, db: Session = Depends(get_db), cu
     db.refresh(current_user)
     return current_user
 
-@app.post("/auth/profile-image")
-async def upload_profile_image(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    file_extension = file.filename.split(".")[-1]
-    file_name = f"user_{current_user.id}.{file_extension}"
-    file_path = os.path.join("uploads", file_name)
-    
-    with open(file_path, "wb") as buffer:
+ALLOWED_UPLOAD_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "heic", "ico", "pdf", "doc", "docx"}
+
+def save_upload(file: UploadFile, stem: str) -> str:
+    """Writes the file into uploads/ and returns the stored file name."""
+    ext = (file.filename or "").rsplit(".", 1)[-1].lower()
+    if not re.fullmatch(r"[a-z0-9]{1,5}", ext) or ext not in ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+    file_name = f"{stem}.{ext}"
+    with open(os.path.join("uploads", file_name), "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+    return file_name
+
+# Plain def: file and DB I/O are blocking, FastAPI runs these in its threadpool
+@app.post("/auth/profile-image")
+def upload_profile_image(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    file_name = save_upload(file, f"user_{current_user.id}")
+    file_path = os.path.join("uploads", file_name)
     
     # Update user record
     image_url = f"/api/uploads/{file_name}"
@@ -568,7 +579,6 @@ def update_character_stats(db: Session, user_id: int, subject_id: int, value: fl
     stat_name = subject.mapped_stat
     current_stat = getattr(user.character, stat_name)
     setattr(user.character, stat_name, min(100.0, current_stat + value))
-    db.commit()
 
 @app.get("/subjects", response_model=List[schemas.Subject])
 def get_subjects(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
@@ -580,8 +590,21 @@ def get_subjects(db: Session = Depends(get_db), current_user: models.User = Depe
         return []
     return query.all()
 
+def get_school_students(db: Session, staff: models.User, ids) -> List[models.User]:
+    """Students with given ids visible to this staff member (same school unless SSA/super admin)."""
+    query = db.query(models.User).filter(models.User.id.in_(list(ids)), models.User.role == ROLE_STUDENT)
+    if staff.role not in (ROLE_SSA, ROLE_SUPER_ADMIN):
+        if staff.school_id is None:
+            return []
+        query = query.filter(models.User.school_id == staff.school_id)
+    return query.all()
+
 @app.post("/teacher/grades")
 def record_grades(grades: List[schemas.GradeCreate], db: Session = Depends(get_db), current_user: models.User = Depends(auth.check_role("teacher"))):
+    student_ids = {g.user_id for g in grades}
+    found = {st.id for st in get_school_students(db, current_user, student_ids)}
+    if student_ids - found:
+        raise HTTPException(status_code=404, detail=f"Students not found in your school: {sorted(student_ids - found)}")
     for g in grades:
         db_grade = models.Grade(
             user_id=g.user_id,
@@ -779,6 +802,16 @@ def start_lesson(data: schemas.LessonStart, db: Session = Depends(get_db), curre
 
 @app.post("/attendance/manual")
 def record_manual_attendance(user_id: int, lesson_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.check_role("teacher"))):
+    if not get_school_students(db, current_user, [user_id]):
+        raise HTTPException(status_code=404, detail="Student not found in your school")
+    records = db.query(models.Attendance).filter(
+        models.Attendance.user_id == user_id,
+        models.Attendance.lesson_id_str == lesson_id
+    ).all()
+    if any(r.status != "absent" for r in records):
+        return {"message": "Student already marked as present"}
+    for r in records:
+        db.delete(r)  # replace the auto-created "absent" mark
     db_att = models.Attendance(
         user_id=user_id,
         type="lesson",
@@ -798,13 +831,16 @@ def record_manual_attendance(user_id: int, lesson_id: str, db: Session = Depends
     return {"message": "Student marked as present"}
 
 # Real AI Decomposition using OpenAI
+def split_homework_lines(text: str) -> List[dict]:
+    """Deterministic decomposition used when AI is not configured or fails."""
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    if len(lines) < 2:
+        return [{"id": 1, "text": "Изучить материал"}, {"id": 2, "text": "Выполнить задание"}, {"id": 3, "text": "Проверить результат"}]
+    return [{"id": i+1, "text": line} for i, line in enumerate(lines[:7])]
+
 def decompose_homework(text: str) -> List[dict]:
-    if not os.getenv("OPENAI_API_KEY"):
-        # Fallback to simple logic if API not configured
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
-        if len(lines) < 2:
-            return [{"id": 1, "text": "Изучить материал"}, {"id": 2, "text": "Выполнить задание"}, {"id": 3, "text": "Проверить результат"}]
-        return [{"id": i+1, "text": line} for i, line in enumerate(lines[:7])]
+    if client is None:
+        return split_homework_lines(text)
     
     try:
         # Using standard ChatCompletion
@@ -826,11 +862,13 @@ def decompose_homework(text: str) -> List[dict]:
                      steps = val
                      break
         
+        if not steps:
+            raise ValueError(f"AI returned no steps: {data!r}")
         # Ensure correct format for frontend
         return [{"id": i+1, "text": str(s.get("text", s)) if isinstance(s, dict) else str(s)} for i, s in enumerate(steps[:10])]
-    except Exception as e:
-        print(f"AI Decomposition failed: {e}")
-        return [{"id": 1, "text": "Manual step (AI error)"}]
+    except Exception:
+        logger.exception("AI homework decomposition failed, using line split")
+        return split_homework_lines(text)
 
 
 @app.get("/")
@@ -1224,19 +1262,14 @@ def create_internship(hw: schemas.HomeworkCreate, db: Session = Depends(get_db),
     return db_hw
 
 @app.post("/homework/upload-proof")
-async def upload_hw_proof(file: UploadFile = File(...), current_user: models.User = Depends(auth.get_current_user)):
-    file_extension = file.filename.split(".")[-1]
-    import uuid
-    file_name = f"hw_{current_user.id}_{uuid.uuid4().hex[:8]}.{file_extension}"
-    file_path = os.path.join("uploads", file_name)
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
+def upload_hw_proof(file: UploadFile = File(...), current_user: models.User = Depends(auth.get_current_user)):
+    file_name = save_upload(file, f"hw_{current_user.id}_{uuid.uuid4().hex[:8]}")
     return {"attachment_url": f"/api/uploads/{file_name}"}
 
 @app.post("/homework/submit", response_model=schemas.HomeworkSubmission)
 def submit_homework(sub_data: schemas.HomeworkSubmissionCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    if not db.query(models.Homework).filter(models.Homework.id == sub_data.homework_id).first():
+        raise HTTPException(status_code=404, detail="Homework not found")
     # Check if submission already exists
     sub = db.query(models.HomeworkSubmission).filter(
         models.HomeworkSubmission.homework_id == sub_data.homework_id,
@@ -1322,13 +1355,17 @@ def approve_homework(approval: schemas.HWApproval, db: Session = Depends(get_db)
     if not student or current_user.school_id is None or student.school_id != current_user.school_id:
         raise HTTPException(status_code=403, detail="Not authorized to approve submissions from other schools")
     
+    if sub.teacher_confirmed:
+        raise HTTPException(status_code=400, detail="Submission already approved")
+    hw = db.query(models.Homework).filter(models.Homework.id == sub.homework_id).first()
+    if not hw:
+        raise HTTPException(status_code=404, detail="Homework not found")
+
     sub.teacher_confirmed = True
-    
+
     # Award bonus coins
-    student = db.query(models.User).filter(models.User.id == sub.student_id).first()
-    if student and student.character:
+    if student.character:
         settings = student.school.settings if student.school and student.school.settings else {}
-        hw = db.query(models.Homework).filter(models.Homework.id == sub.homework_id).first()
         
         # Decide bonus amount
         bonus = approval.bonus_coins
@@ -1406,7 +1443,7 @@ def record_behavior(behavior: schemas.BehaviorCreate, db: Session = Depends(get_
     db.refresh(student)
     return student
 
-SECRET_RECEPTION_KEY = "shu_school_secret_2026_reception"
+SECRET_RECEPTION_KEY = os.getenv("RECEPTION_SECRET") or f"reception:{auth.SECRET_KEY}"
 
 def get_current_reception_code():
     time_chunk = int(time.time() / 30)
@@ -1435,11 +1472,15 @@ def scan_qr(qr_type: str, lesson_id: Optional[str] = None, entry_code: Optional[
     user_id = current_user.id
     today = now.date()
     
+    if qr_type not in ("school_entry", "lesson"):
+        raise HTTPException(status_code=400, detail="Unknown QR type")
+    if current_user.role != ROLE_STUDENT or not current_user.character:
+        raise HTTPException(status_code=403, detail="Only students can scan attendance codes")
+
     # Check for duplicates
     if qr_type == "school_entry":
-        if entry_code != "SCHOOL": # Gracefully fallback for testing or old apps, but strictly we should enforce dynamic codes
-            if not entry_code or not is_valid_reception_code(entry_code):
-                raise HTTPException(status_code=400, detail="Invalid or expired QR code")
+        if not entry_code or not is_valid_reception_code(entry_code):
+            raise HTTPException(status_code=400, detail="Invalid or expired QR code")
                 
         existing = db.query(models.Attendance).filter(
             models.Attendance.user_id == user_id,
@@ -1455,6 +1496,9 @@ def scan_qr(qr_type: str, lesson_id: Optional[str] = None, entry_code: Optional[
             status = "on_time"
             
     else: # lesson
+        lesson = db.query(models.Lesson).filter(models.Lesson.lesson_id_str == lesson_id).first() if lesson_id else None
+        if not lesson or lesson.finished_at is not None:
+            raise HTTPException(status_code=400, detail="Lesson not found or already finished")
         # For lessons, check if already scanned THIS SPECIFIC lesson today
         # We store lesson_id as string in the DB (it's currently Integer in model, but we should change to String)
         existing = db.query(models.Attendance).filter(
@@ -1684,7 +1728,7 @@ def update_school_settings(settings: dict, db: Session = Depends(get_db), curren
 @app.post("/admin/users/{user_id}/promote")
 def promote_to_admin(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_approved_user)):
     # Only Admin (Zavuch), Owner (Director) or SuperAdmin can promote
-    if current_user.role not in ["admin", "owner", "super_admin"]:
+    if current_user.role not in [ROLE_ADMIN, ROLE_OWNER, ROLE_SUPER_ADMIN, ROLE_SSA]:
         raise HTTPException(status_code=403, detail="Not authorized to promote users")
         
     target_user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -1697,7 +1741,7 @@ def promote_to_admin(user_id: int, db: Session = Depends(get_db), current_user: 
             raise HTTPException(status_code=403, detail="You can only promote users within your own school")
     
     # Safety: Cannot demote a super_admin or promote to super_admin via this endpoint
-    if target_user.role == "super_admin":
+    if target_user.role in (ROLE_SUPER_ADMIN, ROLE_SSA):
         raise HTTPException(status_code=403, detail="Cannot modify a Super Admin")
         
     target_user.role = "admin"
@@ -1714,6 +1758,9 @@ def update_user_permissions(user_id: int, perms: UserPermissionsUpdate, db: Sess
     if not target_user:
         raise HTTPException(status_code=404, detail="User not found")
         
+    if current_user.role not in (ROLE_SUPER_ADMIN, ROLE_SSA) and (current_user.school_id is None or target_user.school_id != current_user.school_id):
+        raise HTTPException(status_code=403, detail="Not authorized to change users from other schools")
+
     target_user.can_create_internships = perms.can_create_internships
     db.commit()
     return {"message": f"Permissions updated for user {target_user.username}", "can_create_internships": target_user.can_create_internships}
@@ -1866,7 +1913,7 @@ def get_superadmin_stats(db: Session = Depends(get_db), current_user: models.Use
         "schools": total_schools,
         "active_users": active_users,
         "admins": total_admins,
-        "nps": 9.2 # Placeholder for future NPS calculation
+        "nps": None  # NPS is not collected yet
     }
 
 @app.get("/superadmin/users/search", response_model=List[schemas.User])
@@ -1971,7 +2018,7 @@ def get_notifications(db: Session = Depends(get_db), current_user: models.User =
                 title="Новое задание",
                 description=f"Ученик {s.student.full_name} сдал работу",
                 is_read=True,
-                created_at=s.id # dummy
+                created_at=datetime.datetime.utcnow()  # submissions have no timestamp column
             ))
             
     return db_notifs + virtual_notifs
@@ -2202,8 +2249,8 @@ def mascot_chat(req: schemas.MascotChatRequest, db: Session = Depends(get_db), c
     messages.append({"role": "user", "content": req.message})
 
     # 3. Handle OpenAI Call
-    if not os.getenv("OPENAI_API_KEY"):
-        return {"response": "Прости, мой ИИ-модуль сейчас отключен, но я всё равно рад тебя видеть! 🐾"}
+    if client is None:
+        raise HTTPException(status_code=503, detail="Mascot AI is not configured")
 
     try:
         response = client.chat.completions.create(
@@ -2218,11 +2265,8 @@ def mascot_chat(req: schemas.MascotChatRequest, db: Session = Depends(get_db), c
         db.add(models.MascotChatMessage(user_id=current_user.id, role="user", content=req.message))
         db.add(models.MascotChatMessage(user_id=current_user.id, role="assistant", content=ai_resp))
         db.commit()
-
-        return {"response": ai_resp}
-    except Exception as e:
-        print(f"Mascot AI failed: {e}")
-        return {"response": "Ой, что-то у меня в голове зашуршало... Давай попробуем еще раз позже? 🐾🌀"}
-    except Exception as e:
-        print(f"Mascot AI failed: {e}")
-        return {"response": "Ой, что-то у меня в голове зашуршало... Давай попробуем еще раз позже? 🐾🌀"}
+    except Exception:
+        db.rollback()
+        logger.exception("Mascot AI request failed")
+        raise HTTPException(status_code=502, detail="Mascot AI is temporarily unavailable")
+    return {"response": ai_resp}

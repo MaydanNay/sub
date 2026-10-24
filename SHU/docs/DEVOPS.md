@@ -13,7 +13,7 @@ The main reason for the separation is security: the frontend cannot hold the Tel
 The bot server requires the following environment variables. Ensure this file is never committed to version control.
 ```env
 TELEGRAM_BOT_TOKEN="your_bot_token_here"
-ADMIN_PASSWORD="Aa12345"
+ADMIN_PASSWORD="choose_a_strong_password"  # required, the bot exits without it
 PORT=3001
 ```
 
@@ -36,7 +36,7 @@ This script will:
 Before the website form can successfully send notifications, someone must register as the "admin" via the Telegram bot:
 1. Open the connected Telegram bot.
 2. Send the `/start` command.
-3. The bot will ask for a password. Reply with the value defined in `ADMIN_PASSWORD` (default: `Aa12345`).
+3. The bot will ask for a password. Reply with the value defined in `ADMIN_PASSWORD` (required, there is no default).
 4. The bot will save the Chat ID locally in `SHU/bot/admin.json`. Subsequent form submissions from the website will be routed to this Chat ID.
 
 ## ⚠️ Critical Performance Issue (To-Do for DevOps/Designers)

@@ -22,6 +22,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@crm-db:5432/${POSTGRES_DB}
       - SECRET_KEY=${SECRET_KEY}
+      - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD:-}
     volumes:
       - media_uploads:/app/uploads
     ports:

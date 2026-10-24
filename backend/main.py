@@ -1,15 +1,20 @@
 # Main entry point for ShuRun API
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, Header, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import crud, models, schemas, models_shubank, shubeauty
 from database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
+import hmac
 import random
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
 
+import logging
 import os
 import requests
+
+logger = logging.getLogger("shurun")
 
 models.Base.metadata.create_all(bind=engine)
 models_shubank.Base.metadata.create_all(bind=engine)
@@ -49,6 +54,12 @@ def get_db():
 @app.on_event("startup")
 def startup_event():
     db = SessionLocal()
+    try:
+        _seed(db)
+    finally:
+        db.close()
+
+def _seed(db: Session):
     # Seed Promotions
     if db.query(models.Promotion).count() == 0:
         promotions = [
@@ -77,8 +88,6 @@ def startup_event():
             db.add(db_char)
     db.commit()
 
-    db.close()
-
 # --- Existing Endpoints ---
 
 @app.get("/api/v1/promotions/random", response_model=schemas.Promotion)
@@ -100,27 +109,34 @@ def create_notify_request(lead: schemas.LeadRequestCreate, db: Session = Depends
     try:
         bot_url = os.getenv("BOT_URL", "http://bot:3001/api/notify")
         requests.post(bot_url, json=lead.dict(), timeout=5)
-    except Exception as e:
-        print(f"Failed to notify bot: {e}")
+    except requests.RequestException:
+        # The lead is already saved; a bot outage must not fail the request
+        logger.exception("Failed to notify bot about lead %s", db_lead.id)
     return db_lead
 
 # --- ShuBoom Endpoints ---
 
+def get_or_create_user(db: Session, phone: str) -> models.User:
+    phone = phone.strip()
+    if not phone:
+        raise HTTPException(status_code=400, detail="Phone is required")
+    user = crud.get_user_by_phone(db, phone)
+    if user:
+        return user
+    try:
+        return crud.create_user(db, schemas.UserCreate(phone=phone))
+    except IntegrityError:
+        # Concurrent request created the same user first
+        db.rollback()
+        user = crud.get_user_by_phone(db, phone)
+        if not user:
+            raise
+        return user
+
 @app.post("/api/v1/auth/login", response_model=schemas.User)
 def login(phone: str = "7770000000", db: Session = Depends(get_db)):
     # Mock login: Get or Create
-    phone = phone.strip()
-    user = crud.get_user_by_phone(db, phone)
-    if not user:
-        try:
-            user = crud.create_user(db, schemas.UserCreate(phone=phone))
-        except Exception:
-            # Handle race condition: user created by another request concurrently
-            db.rollback()
-            user = crud.get_user_by_phone(db, phone)
-            if not user:
-                raise HTTPException(status_code=500, detail="Could not create user")
-    return user
+    return get_or_create_user(db, phone)
 
 @app.get("/api/v1/user/{phone}", response_model=schemas.User)
 def get_user_profile(phone: str, db: Session = Depends(get_db)):
@@ -277,6 +293,8 @@ def complete_quest_shuboom(quest_id: str, user_phone: str, db: Session = Depends
         raise HTTPException(status_code=400, detail="Quest completion failed")
     return result
 
+CHEST_PRICES = {"BRONZE": 500, "SILVER": 1000, "GOLD": 2000, "LEGENDARY": 5000}
+
 @app.post("/api/v1/shop/buy_chest")
 def buy_chest(chest_type: str, user_phone: str, db: Session = Depends(get_db)):
     user_phone = user_phone.strip()
@@ -284,26 +302,16 @@ def buy_chest(chest_type: str, user_phone: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    cost = 0
-    if chest_type == "BRONZE": cost = 500
-    elif chest_type == "SILVER": cost = 1000
-    elif chest_type == "GOLD": cost = 2000
-    elif chest_type == "LEGENDARY": cost = 5000
-    
-    if user.coins < cost:
-        raise HTTPException(status_code=400, detail="Not enough coins")
-    
-    try:
-        if crud.spend_coins(db, user.id, cost):
-            crud.set_pending_chest(db, user.id, chest_type)
-            db.commit()
-            return {"success": True, "chest_type": chest_type, "coins_remaining": user.coins}
-        else:
-            db.rollback()
-            raise HTTPException(status_code=400, detail="Transaction failed: Insufficient balance")
-    except Exception as e:
+    cost = CHEST_PRICES.get(chest_type)
+    if cost is None:
+        raise HTTPException(status_code=400, detail=f"Unknown chest type: {chest_type}")
+
+    if not crud.spend_coins(db, user.id, cost):
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Transaction error: {str(e)}")
+        raise HTTPException(status_code=400, detail="Not enough coins")
+    crud.set_pending_chest(db, user.id, chest_type)
+    db.commit()
+    return {"success": True, "chest_type": chest_type, "coins_remaining": user.coins}
 
 # --- ShuBank Together Endpoints (Tech Spec 1.0) ---
 
@@ -362,14 +370,9 @@ def get_shubank_state(user_phone: str = "demo_client_hash", db: Session = Depend
             quests_completed=user.quests_completed or [],
             current_skin_id=user.current_skin_id
         )
-    except Exception as e:
+    except Exception:
         db.rollback()
-        print(f"Error in get_shubank_state: {e}")
-        # Return default state if DB fails during demo to prevent app crash
-        return schemas.ShuBankUserState(
-            energy=50, calmness=0, coins=0, home_level=1, 
-            shubank_name="ShuBank", deposit_balance=0.0, inventory=[], quests_completed=[]
-        )
+        raise
 
 @app.post("/api/v1/shubank/shop/buy")
 def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
@@ -380,7 +383,9 @@ def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "
         'skin_7': 4000, 'skin_8': 4500, 'skin_9': 5000,
         'item_mining_farm': 5000
     }
-    cost = prices.get(request.item_id, 1000)
+    cost = prices.get(request.item_id)
+    if cost is None:
+        raise HTTPException(status_code=400, detail=f"Unknown item: {request.item_id}")
 
     try:
         # Use with_for_update() to prevent race conditions during purchase
@@ -391,11 +396,11 @@ def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if user.coins < cost:
-            raise HTTPException(status_code=400, detail="Insufficient coins")
-        
         if any(item.item_id == request.item_id for item in user.inventory):
             return {"success": True, "message": "Already owned"}
+
+        if user.coins < cost:
+            raise HTTPException(status_code=400, detail="Insufficient coins")
 
         user.coins -= cost
         new_item = models_shubank.ShuBankInventory(
@@ -406,9 +411,9 @@ def buy_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "
         db.add(new_item)
         db.commit()
         return {"success": True, "item_id": request.item_id}
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
+        raise
 
 @app.post("/api/v1/shubank/inventory/equip")
 def equip_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
@@ -432,9 +437,9 @@ def equip_shubank_item(request: schemas.ShuBankShopBuyRequest, user_phone: str =
         user.current_skin_id = request.item_id
         db.commit()
         return {"success": True, "current_skin_id": user.current_skin_id}
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 @app.post("/api/v1/shubank/pride/create")
 def create_pride(request: schemas.ShuBankPrideCreateRequest, db: Session = Depends(get_db)):
     try:
@@ -446,9 +451,9 @@ def create_pride(request: schemas.ShuBankPrideCreateRequest, db: Session = Depen
         db.add(pride)
         db.commit()
         return {"success": True}
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 
 @app.post("/api/v1/shubank/minigame/sync")
 def sync_minigame_coins(request: schemas.ShuBankMinigameSyncRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
@@ -466,9 +471,9 @@ def sync_minigame_coins(request: schemas.ShuBankMinigameSyncRequest, user_phone:
         user.coins += earned
         db.commit()
         return {"success": True, "earned": earned, "total_coins": user.coins}
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 
 @app.post("/api/v1/shubank/quest/complete")
 def complete_quest(request: schemas.ShuBankQuestCompleteRequest, user_phone: str = "demo_client_hash", db: Session = Depends(get_db)):
@@ -499,14 +504,18 @@ def complete_quest(request: schemas.ShuBankQuestCompleteRequest, user_phone: str
             db.commit()
             return {"success": True, "reward_earned": reward}
         return {"success": True, "reward_earned": 0, "message": "Already completed"}
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 
 # --- System & Demo Tools ---
 
 @app.post("/api/v1/system/reset")
-def hard_reset_demo(db: Session = Depends(get_db)):
+def hard_reset_demo(x_admin_token: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    # Wipes all user data: only allowed when ADMIN_TOKEN is configured and matches
+    admin_token = os.getenv("ADMIN_TOKEN")
+    if not admin_token or not x_admin_token or not hmac.compare_digest(x_admin_token, admin_token):
+        raise HTTPException(status_code=403, detail="Forbidden")
     try:
         # Clear ShuBank Data
         db.query(models_shubank.ShuBankInventory).delete()
@@ -520,9 +529,9 @@ def hard_reset_demo(db: Session = Depends(get_db)):
         
         db.commit()
         return {"success": True, "message": "Demo data cleared"}
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 
 # --- Integration Webhooks (Bank -> Game) ---
 
@@ -540,10 +549,10 @@ def webhook_transaction(request: schemas.BankTransactionWebhook, db: Session = D
             user.transaction_count = (user.transaction_count or 0) + 1
             db.commit()
             return {"status": "ok", "user": user.bank_client_id, "energy": user.energy}
-        return {"status": "user_not_found"}
-    except Exception as e:
+        raise HTTPException(status_code=404, detail="User not found")
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 
 @app.post("/api/v1/shubank/webhooks/bank/deposit_update")
 def webhook_deposit(request: schemas.BankDepositUpdateWebhook, db: Session = Depends(get_db)):
@@ -576,44 +585,31 @@ def webhook_deposit(request: schemas.BankDepositUpdateWebhook, db: Session = Dep
             
             db.commit()
             return {"status": "ok", "calmness": user.calmness, "level": user.home_level}
-        return {"status": "user_not_found"}
-    except Exception as e:
+        raise HTTPException(status_code=404, detail="User not found")
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise
 
 # --- ShuRun Endpoints ---
 
 @app.get("/api/v1/shurun/runs", response_model=List[schemas.ShuRunRun])
 def get_shurun_runs(user_phone: str, db: Session = Depends(get_db)):
-    user_phone = user_phone.strip()
-    user = crud.get_user_by_phone(db, user_phone)
-    if not user:
-        # Auto-create for demo convenience if user doesn't exist
-        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
+    user = get_or_create_user(db, user_phone)
     return crud.get_user_runs(db, user.id)
 
 @app.post("/api/v1/shurun/runs", response_model=schemas.ShuRunRun)
 def save_shurun_run(run: schemas.ShuRunRunBase, user_phone: str, db: Session = Depends(get_db)):
-    user_phone = user_phone.strip()
-    user = crud.get_user_by_phone(db, user_phone)
-    if not user:
-        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
+    user = get_or_create_user(db, user_phone)
     return crud.create_user_run(db, user.id, run)
 
 @app.get("/api/v1/shurun/orders", response_model=List[schemas.ShuRunOrder])
 def get_shurun_orders(user_phone: str, db: Session = Depends(get_db)):
-    user_phone = user_phone.strip()
-    user = crud.get_user_by_phone(db, user_phone)
-    if not user:
-        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
+    user = get_or_create_user(db, user_phone)
     return crud.get_user_orders(db, user.id)
 
 @app.post("/api/v1/shurun/orders", response_model=schemas.ShuRunOrder)
 def save_shurun_order(order: schemas.ShuRunOrderBase, user_phone: str, db: Session = Depends(get_db)):
-    user_phone = user_phone.strip()
-    user = crud.get_user_by_phone(db, user_phone)
-    if not user:
-        user = crud.create_user(db, schemas.UserCreate(phone=user_phone))
+    user = get_or_create_user(db, user_phone)
     return crud.create_user_order(db, user.id, order)
 
 

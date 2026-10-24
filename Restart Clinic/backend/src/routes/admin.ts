@@ -2,14 +2,24 @@ import type { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authenticate, requireRole, type JwtPayload } from "./auth.js";
 import { toPrismaStage } from "../lib/progress.js";
-import type { RehabStage } from "@restart-clinic/shared";
-import type { Gender } from "@restart-clinic/shared";
 import { getBot, notifyAppointmentScheduled, notifyPatientAccessGranted } from "../bot/index.js";
 import { grantEligibleRewards } from "../lib/rewards.js";
 import { patientRewardInclude, serializePatientReward, validateRewardInput } from "../lib/patient-rewards.js";
 import { serialize } from "../lib/serialize.js";
 import bcrypt from "bcryptjs";
-import type { PatientRewardTrigger, RewardIssuerType } from "@prisma/client";
+import type { PatientRewardTrigger, Prisma, RewardIssuerType } from "@prisma/client";
+import {
+  approveApplicationBody,
+  createDoctorBody,
+  createPatientBody,
+  parse,
+  pushNotificationBody,
+  updatePatientBody,
+} from "../lib/validation.js";
+
+async function findDoctor(id: string) {
+  return prisma.staffUser.findFirst({ where: { id, role: "DOCTOR" } });
+}
 
 export async function adminRoutes(app: FastifyInstance) {
   app.get(
@@ -26,20 +36,11 @@ export async function adminRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post<{
-    Params: { id: string };
-    Body: {
-      fullName: string;
-      age: number;
-      gender: Gender;
-      diagnosis: string;
-      doctorId: string;
-      nextVisitAt?: string;
-    };
-  }>(
+  app.post<{ Params: { id: string } }>(
     "/api/admin/applications/:id/approve",
     { preHandler: [authenticate, requireRole("ADMIN")] },
     async (req, reply) => {
+      const body = parse(approveApplicationBody, req.body);
       const appRecord = await prisma.application.findUnique({
         where: { id: req.params.id },
         include: { patient: true },
@@ -49,28 +50,18 @@ export async function adminRoutes(app: FastifyInstance) {
         return reply.status(400).send({ error: "Заявка уже обработана" });
       }
 
-      const doctor = await prisma.staffUser.findFirst({
-        where: { id: req.body.doctorId, role: "DOCTOR" },
-      });
-      if (!doctor) return reply.status(400).send({ error: "Врач не найден" });
+      if (!(await findDoctor(body.doctorId))) return reply.status(400).send({ error: "Врач не найден" });
 
-      let nextVisitAt: Date | undefined;
-      if (req.body.nextVisitAt) {
-        nextVisitAt = new Date(req.body.nextVisitAt);
-        if (Number.isNaN(nextVisitAt.getTime())) {
-          return reply.status(400).send({ error: "Некорректная дата приёма" });
-        }
-      }
-
+      const { nextVisitAt } = body;
       const patient = await prisma.$transaction(async (tx) => {
         const updated = await tx.patient.update({
           where: { id: appRecord.patientId },
           data: {
-            fullName: req.body.fullName,
-            age: req.body.age,
-            gender: req.body.gender,
-            diagnosis: req.body.diagnosis,
-            doctorId: req.body.doctorId,
+            fullName: body.fullName,
+            age: body.age,
+            gender: body.gender,
+            diagnosis: body.diagnosis,
+            doctorId: body.doctorId,
             hasAppAccess: true,
             ...(nextVisitAt
               ? { nextVisitAt, scheduledVisits: { increment: 1 } }
@@ -122,42 +113,36 @@ export async function adminRoutes(app: FastifyInstance) {
         select: { id: true, fullName: true, email: true },
         orderBy: { createdAt: "desc" }
       });
-      return Promise.all(
-        doctors.map(async (doc) => {
-          const visitCount = await prisma.visit.count({ where: { doctorId: doc.id } });
-          return { ...doc, visitCount };
-        })
-      );
+      // One grouped query instead of one count query per doctor
+      const counts = await prisma.visit.groupBy({
+        by: ["doctorId"],
+        where: { doctorId: { in: doctors.map((d) => d.id) } },
+        _count: { _all: true },
+      });
+      const visitsByDoctor = new Map(counts.map((c) => [c.doctorId, c._count._all]));
+      return doctors.map((doc) => ({ ...doc, visitCount: visitsByDoctor.get(doc.id) ?? 0 }));
     }
   );
 
-  app.post<{
-    Body: {
-      email: string;
-      fullName: string;
-      password?: string;
-    }
-  }>(
+  app.post(
     "/api/admin/doctors",
     { preHandler: [authenticate, requireRole("ADMIN")] },
     async (req, reply) => {
-      const { email, fullName, password } = req.body;
+      // Password is required: an empty field used to silently become "doctor123"
+      const { email, fullName, password } = parse(createDoctorBody, req.body);
       const existing = await prisma.staffUser.findUnique({ where: { email } });
       if (existing) {
         return reply.status(400).send({ error: "Email уже используется" });
       }
-      
-      const passwordHash = password 
-        ? await bcrypt.hash(password, 10)
-        : await bcrypt.hash("doctor123", 10);
-        
+
       const doctor = await prisma.staffUser.create({
         data: {
           email,
           fullName,
-          passwordHash,
+          passwordHash: await bcrypt.hash(password, 10),
           role: "DOCTOR"
         },
+        select: { id: true, email: true, fullName: true, role: true, createdAt: true },
       });
       return serialize(doctor);
     }
@@ -173,20 +158,12 @@ export async function adminRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post<{ Body: { text: string; type?: "NIGHTMARE" | "MOTIVATIONAL" | "SYSTEM" } }>(
+  app.post(
     "/api/admin/push-notifications",
     { preHandler: [authenticate, requireRole("ADMIN")] },
-    async (req, reply) => {
-      const text = req.body.text?.trim();
-      if (!text) {
-        return reply.status(400).send({ error: "Текст не может быть пустым" });
-      }
-      return prisma.pushNotification.create({
-        data: { 
-          text,
-          type: req.body.type ?? "NIGHTMARE"
-        },
-      });
+    async (req) => {
+      const data = parse(pushNotificationBody, req.body);
+      return prisma.pushNotification.create({ data });
     }
   );
 
@@ -194,53 +171,36 @@ export async function adminRoutes(app: FastifyInstance) {
     "/api/admin/push-notifications/:id",
     { preHandler: [authenticate, requireRole("ADMIN")] },
     async (req, reply) => {
-      try {
-        await prisma.pushNotification.delete({
-          where: { id: req.params.id },
-        });
-        return { ok: true };
-      } catch (e) {
-        return reply.status(404).send({ error: "Уведомление не найдено" });
-      }
+      // Any error used to be reported as 404; now only "nothing deleted" is
+      const { count } = await prisma.pushNotification.deleteMany({
+        where: { id: req.params.id },
+      });
+      if (count === 0) return reply.status(404).send({ error: "Уведомление не найдено" });
+      return { ok: true };
     }
   );
 
-  app.post<{
-    Body: {
-      fullName: string;
-      age: number;
-      gender: Gender;
-      diagnosis: string;
-      doctorId: string;
-      phone?: string;
-      telegramId?: string;
-    };
-  }>(
+  app.post(
     "/api/admin/patients",
     { preHandler: [authenticate, requireRole("ADMIN")] },
     async (req, reply) => {
-      if (!req.body.telegramId && !req.body.phone) {
-        return reply.status(400).send({ error: "Нужен telegramId или phone" });
-      }
+      const body = parse(createPatientBody, req.body);
 
-      const doctor = await prisma.staffUser.findFirst({
-        where: { id: req.body.doctorId, role: "DOCTOR" },
-      });
-      if (!doctor) return reply.status(400).send({ error: "Врач не найден" });
+      if (!(await findDoctor(body.doctorId))) return reply.status(400).send({ error: "Врач не найден" });
 
-      const telegramId = req.body.telegramId
-        ? BigInt(req.body.telegramId)
-        : BigInt(Date.now());
+      // telegramId is required and unique in the schema, so phone-only patients
+      // get a timestamp placeholder; bot messages to them fail until a real id is linked.
+      const telegramId = body.telegramId ? BigInt(body.telegramId) : BigInt(Date.now());
 
       const patient = await prisma.patient.create({
         data: {
           telegramId,
-          phone: req.body.phone,
-          fullName: req.body.fullName,
-          age: req.body.age,
-          gender: req.body.gender,
-          diagnosis: req.body.diagnosis,
-          doctorId: req.body.doctorId,
+          phone: body.phone,
+          fullName: body.fullName,
+          age: body.age,
+          gender: body.gender,
+          diagnosis: body.diagnosis,
+          doctorId: body.doctorId,
           hasAppAccess: true,
           scheduledVisits: 0,
         },
@@ -250,41 +210,28 @@ export async function adminRoutes(app: FastifyInstance) {
     }
   );
 
-  app.patch<{
-    Params: { id: string };
-    Body: Partial<{
-      fullName: string;
-      age: number;
-      gender: Gender;
-      diagnosis: string;
-      doctorId: string;
-      stage: RehabStage;
-      nextVisitAt: string | null;
-    }>;
-  }>(
+  app.patch<{ Params: { id: string } }>(
     "/api/admin/patients/:id",
     { preHandler: [authenticate, requireRole("ADMIN")] },
     async (req, reply) => {
+      // Whitelisted fields: the raw body used to be spread into prisma.update,
+      // so a client could set hasAppAccess, completedVisits, telegramId, ...
+      const body = parse(updatePatientBody, req.body);
       const patient = await prisma.patient.findUnique({ where: { id: req.params.id } });
       if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
 
-      const data: Record<string, unknown> = { ...req.body };
-      if (req.body.stage) {
-        data.stage = toPrismaStage(req.body.stage);
+      if (body.doctorId && !(await findDoctor(body.doctorId))) {
+        return reply.status(400).send({ error: "Врач не найден" });
       }
 
-      let nextVisitAt: Date | undefined;
-      let clearNextVisit = false;
-      if (req.body.nextVisitAt === null) {
-        data.nextVisitAt = null;
-        clearNextVisit = true;
-      } else if (req.body.nextVisitAt) {
-        nextVisitAt = new Date(req.body.nextVisitAt);
-        if (Number.isNaN(nextVisitAt.getTime())) {
-          return reply.status(400).send({ error: "Некорректная дата приёма" });
-        }
+      const { stage, nextVisitAt, ...fields } = body;
+      const data: Prisma.PatientUncheckedUpdateInput = { ...fields };
+      if (stage) {
+        data.stage = toPrismaStage(stage);
+      }
+      if (nextVisitAt !== undefined) {
         data.nextVisitAt = nextVisitAt;
-        if (patient.nextVisitAt === null) {
+        if (nextVisitAt && patient.nextVisitAt === null) {
           data.scheduledVisits = { increment: 1 };
         }
       }
@@ -296,12 +243,7 @@ export async function adminRoutes(app: FastifyInstance) {
       });
 
       const bot = getBot();
-      if (
-        bot &&
-        nextVisitAt &&
-        !clearNextVisit &&
-        patient.nextVisitAt?.getTime() !== nextVisitAt.getTime()
-      ) {
+      if (bot && nextVisitAt && patient.nextVisitAt?.getTime() !== nextVisitAt.getTime()) {
         try {
           await notifyAppointmentScheduled(bot, patient.telegramId, nextVisitAt);
         } catch (e) {
@@ -376,7 +318,7 @@ export async function adminRoutes(app: FastifyInstance) {
       const patient = await prisma.patient.findUnique({ where: { id: req.params.id } });
       if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
 
-      const parsed = validateRewardInput(req.body);
+      const parsed = validateRewardInput(req.body ?? {});
       if ("error" in parsed) return reply.status(400).send({ error: parsed.error });
 
       const issuerType = req.body.issuerType;
@@ -390,9 +332,7 @@ export async function adminRoutes(app: FastifyInstance) {
         if (!doctorId) {
           return reply.status(400).send({ error: "Выберите врача" });
         }
-        const doctor = await prisma.staffUser.findFirst({
-          where: { id: doctorId, role: "DOCTOR" },
-        });
+        const doctor = await findDoctor(doctorId);
         if (!doctor) return reply.status(400).send({ error: "Врач не найден" });
         issuerDoctorId = doctor.id;
       }

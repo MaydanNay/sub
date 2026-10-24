@@ -6,14 +6,22 @@ import { authRoutes } from "./routes/auth.js";
 import { adminRoutes } from "./routes/admin.js";
 import { doctorRoutes } from "./routes/doctor.js";
 import { patientRoutes } from "./routes/patient.js";
-import { createBot } from "./bot/index.js";
+import { createBot, getBot } from "./bot/index.js";
 import { startNotificationJobs } from "./jobs/notifications.js";
 import { prisma } from "./lib/prisma.js";
+import { registerErrorHandler } from "./lib/errors.js";
 
 const PORT = Number(process.env.PORT ?? 3001);
 const WEBAPP_URL = process.env.WEBAPP_URL ?? "http://localhost:5173";
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === "production") {
+  // A known fallback secret would let anyone mint staff tokens
+  throw new Error("JWT_SECRET must be set in production");
+}
+
 const app = Fastify({ logger: true });
+registerErrorHandler(app);
 
 await app.register(cors, {
   origin: true,
@@ -21,7 +29,7 @@ await app.register(cors, {
 });
 
 await app.register(jwt, {
-  secret: process.env.JWT_SECRET ?? "dev-secret-change-me",
+  secret: JWT_SECRET ?? "dev-secret-change-me",
 });
 
 await authRoutes(app);
@@ -34,23 +42,28 @@ app.get("/api/health", async () => ({ ok: true }));
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
 if (botToken) {
   const bot = createBot(botToken, WEBAPP_URL);
-  bot.start({
-    onStart: () => console.log("Telegram bot started"),
-  });
-  startNotificationJobs();
+  // start() resolves only when polling stops; a bad token rejects it
+  bot
+    .start({ onStart: () => app.log.info("Telegram bot started") })
+    .catch((err) => app.log.error(err, "Telegram bot stopped with an error"));
+  startNotificationJobs(app.log);
 } else {
-  console.warn("TELEGRAM_BOT_TOKEN not set — bot disabled");
+  app.log.warn("TELEGRAM_BOT_TOKEN not set — bot disabled");
 }
 
 try {
   await app.listen({ port: PORT, host: "0.0.0.0" });
-  console.log(`API listening on http://localhost:${PORT}`);
 } catch (err) {
   app.log.error(err);
   process.exit(1);
 }
 
-process.on("SIGINT", async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
+// Docker sends SIGTERM, Ctrl+C sends SIGINT
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.once(signal, async () => {
+    await getBot()?.stop();
+    await app.close();
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+}
