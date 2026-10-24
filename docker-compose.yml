@@ -18,6 +18,7 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-shurun_user}:${POSTGRES_PASSWORD:-shurun_password}@db:5432/${POSTGRES_DB:-shurun_db}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://127.0.0.1,http://localhost:80}
       - BOT_URL=http://bot:3001/api/notify
+      - ADMIN_TOKEN=${ADMIN_TOKEN:-}
     depends_on:
       - db
       - bot
