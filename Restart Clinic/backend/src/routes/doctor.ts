@@ -6,7 +6,6 @@ import {
   getDisciplineAndReward,
   toPrismaStage,
 } from "../lib/progress.js";
-import type { RehabStage } from "@restart-clinic/shared";
 import { getBot, notifyVisitRecorded } from "../bot/index.js";
 import { serialize } from "../lib/serialize.js";
 import { grantEligibleRewards } from "../lib/rewards.js";
@@ -18,6 +17,7 @@ import {
   validatePatientVisitMedals,
 } from "../lib/medals.js";
 import type { PatientRewardTrigger, VisitMedalTier } from "@prisma/client";
+import { HttpError, nextVisitBody, parse, stageBody, targetVisitsBody, visitBody } from "../lib/validation.js";
 
 export async function doctorRoutes(app: FastifyInstance) {
   app.get(
@@ -40,16 +40,17 @@ export async function doctorRoutes(app: FastifyInstance) {
     async (req) => {
       const user = req.user as JwtPayload;
       
-      const visits = await prisma.visit.findMany({
-        where: { doctorId: user.sub },
-        include: { patient: { select: { fullName: true } } },
-        orderBy: { createdAt: "desc" }
-      });
-
-      const scheduled = await prisma.patient.findMany({
-        where: { doctorId: user.sub, nextVisitAt: { not: null } },
-        select: { id: true, fullName: true, nextVisitAt: true }
-      });
+      const [visits, scheduled] = await Promise.all([
+        prisma.visit.findMany({
+          where: { doctorId: user.sub },
+          include: { patient: { select: { fullName: true } } },
+          orderBy: { createdAt: "desc" }
+        }),
+        prisma.patient.findMany({
+          where: { doctorId: user.sub, nextVisitAt: { not: null } },
+          select: { id: true, fullName: true, nextVisitAt: true }
+        }),
+      ]);
 
       return serialize({ visits, scheduled });
     }
@@ -79,86 +80,61 @@ export async function doctorRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post<{
-    Params: { id: string };
-    Body: { note?: string; title?: string; medals?: VisitMedalTier[] };
-  }>(
+  app.post<{ Params: { id: string } }>(
     "/api/doctor/patients/:id/visit",
     { preHandler: [authenticate, requireRole("DOCTOR")] },
     async (req, reply) => {
       const user = req.user as JwtPayload;
-      const patient = await prisma.patient.findFirst({
-        where: { id: req.params.id, doctorId: user.sub },
-      });
-      if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
-      if (patient.courseCompleted) {
-        return reply.status(400).send({ error: "Курс уже завершён" });
-      }
+      const body = parse(visitBody, req.body);
+      const medals: VisitMedalTier[] = body.medals;
 
-      const medals = req.body.medals ?? [];
-      const validTiers: VisitMedalTier[] = ["BRONZE", "SILVER", "GOLD"];
-      if (medals.some((m) => !validTiers.includes(m))) {
-        return reply.status(400).send({ error: "Некорректный тип медали" });
-      }
-
-      const medalError = await validatePatientVisitMedals(patient.id, medals);
-      if (medalError) return reply.status(400).send({ error: medalError });
-
-      const visitNumber = patient.completedVisits + 1;
-      const title = req.body.title?.trim() || `Посещение №${visitNumber}`;
-      if (title.length > 120) {
-        return reply.status(400).send({ error: "Название посещения слишком длинное" });
-      }
-
-      const progress = applyVisitProgress(patient);
-
-      let updated;
-      try {
-        updated = await prisma.$transaction(async (tx) => {
-          const inTxError = await validatePatientVisitMedals(patient.id, medals);
-          if (inTxError) throw new Error(inTxError);
-
-          const visit = await tx.visit.create({
-            data: {
-              patientId: patient.id,
-              doctorId: user.sub,
-              title,
-              note: req.body.note?.trim() || null,
-            },
-          });
-
-          if (medals.length > 0) {
-            await tx.visitMedal.createMany({
-              data: medals.map((tier) => ({ visitId: visit.id, tier })),
-            });
-          }
-
-          return tx.patient.update({
-            where: { id: patient.id },
-            data: progress,
-          });
+      const updated = await prisma.$transaction(async (tx) => {
+        // Row lock: two visits recorded at once both read the same
+        // completedVisits/stats and one increment was lost
+        await tx.$queryRaw`SELECT 1 FROM "Patient" WHERE id = ${req.params.id} FOR UPDATE`;
+        const patient = await tx.patient.findFirst({
+          where: { id: req.params.id, doctorId: user.sub },
         });
-      } catch (e) {
-        if (e instanceof Error && e.message.includes("медал")) {
-          return reply.status(400).send({ error: e.message });
-        }
-        throw e;
-      }
+        if (!patient) throw new HttpError(404, "Пациент не найден");
+        if (patient.courseCompleted) throw new HttpError(400, "Курс уже завершён");
 
+        const medalError = await validatePatientVisitMedals(patient.id, medals, tx);
+        if (medalError) throw new HttpError(400, medalError);
+
+        const visit = await tx.visit.create({
+          data: {
+            patientId: patient.id,
+            doctorId: user.sub,
+            title: body.title || `Посещение №${patient.completedVisits + 1}`,
+            note: body.note?.trim() || null,
+          },
+        });
+
+        if (medals.length > 0) {
+          await tx.visitMedal.createMany({
+            data: medals.map((tier) => ({ visitId: visit.id, tier })),
+          });
+        }
+
+        return tx.patient.update({
+          where: { id: patient.id },
+          data: applyVisitProgress(patient),
+        });
+      });
+
+      // Independent side effects run concurrently; neither may fail the saved visit
       const bot = getBot();
-      if (bot) {
-        try {
-          await notifyVisitRecorded(bot, patient.telegramId, {
+      await Promise.all([
+        bot &&
+          notifyVisitRecorded(bot, updated.telegramId, {
             endurance: updated.endurance,
             ligaments: updated.ligaments,
             balance: updated.balance,
-          });
-        } catch (e) {
-          req.log.warn(e, "Failed to notify patient about visit");
-        }
-      }
-
-      await grantEligibleRewards(patient.id, bot);
+          }).catch((e) => req.log.warn(e, "Failed to notify patient about visit")),
+        grantEligibleRewards(updated.id, bot).catch((e) =>
+          req.log.error(e, "Failed to grant rewards after visit")
+        ),
+      ]);
 
       return serialize(updated);
     }
@@ -185,30 +161,29 @@ export async function doctorRoutes(app: FastifyInstance) {
     }
   );
 
-  app.patch<{
-    Params: { id: string };
-    Body: { stage: RehabStage };
-  }>(
+  app.patch<{ Params: { id: string } }>(
     "/api/doctor/patients/:id/stage",
     { preHandler: [authenticate, requireRole("DOCTOR")] },
     async (req, reply) => {
       const user = req.user as JwtPayload;
+      // stage outside 1..4 used to reach Prisma as undefined
+      const { stage: stageNum } = parse(stageBody, req.body);
       const patient = await prisma.patient.findFirst({
         where: { id: req.params.id, doctorId: user.sub },
       });
       if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
 
-      const stage = toPrismaStage(req.body.stage);
+      const stage = toPrismaStage(stageNum);
       let endurance = patient.endurance;
       let ligaments = patient.ligaments;
       let balance = patient.balance;
 
-      if (req.body.stage === 3) {
+      if (stageNum === 3) {
         endurance = Math.min(endurance, 50);
         ligaments = Math.min(ligaments, 50);
         balance = Math.min(balance, 50);
       }
-      if (req.body.stage === 4) {
+      if (stageNum === 4) {
         endurance = 100;
         ligaments = 100;
         balance = 100;
@@ -225,25 +200,18 @@ export async function doctorRoutes(app: FastifyInstance) {
     }
   );
 
-  app.patch<{
-    Params: { id: string };
-    Body: { nextVisitAt: string };
-  }>(
+  app.patch<{ Params: { id: string } }>(
     "/api/doctor/patients/:id/next-visit",
     { preHandler: [authenticate, requireRole("DOCTOR")] },
     async (req, reply) => {
       const user = req.user as JwtPayload;
+      const { nextVisitAt } = parse(nextVisitBody, req.body);
       const patient = await prisma.patient.findFirst({
         where: { id: req.params.id, doctorId: user.sub },
       });
       if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
       if (patient.courseCompleted) {
         return reply.status(400).send({ error: "Курс уже завершён" });
-      }
-
-      const nextVisitAt = new Date(req.body.nextVisitAt);
-      if (Number.isNaN(nextVisitAt.getTime())) {
-        return reply.status(400).send({ error: "Некорректная дата визита" });
       }
 
       const isNewAppointment = patient.nextVisitAt === null;
@@ -260,14 +228,12 @@ export async function doctorRoutes(app: FastifyInstance) {
     }
   );
 
-  app.patch<{
-    Params: { id: string };
-    Body: { targetVisits: number | null };
-  }>(
+  app.patch<{ Params: { id: string } }>(
     "/api/doctor/patients/:id/target-visits",
     { preHandler: [authenticate, requireRole("DOCTOR")] },
     async (req, reply) => {
       const user = req.user as JwtPayload;
+      const { targetVisits } = parse(targetVisitsBody, req.body);
       const patient = await prisma.patient.findFirst({
         where: { id: req.params.id, doctorId: user.sub },
       });
@@ -276,7 +242,7 @@ export async function doctorRoutes(app: FastifyInstance) {
       return serialize(
         await prisma.patient.update({
           where: { id: patient.id },
-          data: { targetVisits: req.body.targetVisits },
+          data: { targetVisits },
         })
       );
     }
@@ -337,7 +303,7 @@ export async function doctorRoutes(app: FastifyInstance) {
       });
       if (!patient) return reply.status(404).send({ error: "Пациент не найден" });
 
-      const parsed = validateRewardInput(req.body);
+      const parsed = validateRewardInput(req.body ?? {});
       if ("error" in parsed) return reply.status(400).send({ error: parsed.error });
 
       const reward = await prisma.patientReward.create({

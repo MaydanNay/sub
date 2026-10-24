@@ -20,16 +20,12 @@ export function createBot(token: string, webappUrl: string): Bot {
   bot.command("start", async (ctx) => {
     if (!ctx.from) return;
     const telegramId = BigInt(ctx.from.id);
-    let patient = await prisma.patient.findUnique({ where: { telegramId } });
-
-    if (!patient) {
-      patient = await prisma.patient.create({
-        data: {
-          telegramId,
-          telegramUsername: ctx.from.username,
-        },
-      });
-    }
+    // upsert: two quick /start taps used to race into a unique-constraint error
+    const patient = await prisma.patient.upsert({
+      where: { telegramId },
+      update: {},
+      create: { telegramId, telegramUsername: ctx.from.username },
+    });
 
     if (patient.hasAppAccess) {
       const keyboard = new InlineKeyboard().webApp(
@@ -92,30 +88,22 @@ export function createBot(token: string, webappUrl: string): Bot {
       return;
     }
 
-    await prisma.patient.update({
-      where: { id: patient.id },
-      data: { phone: contact.phone_number },
-    });
-
-    if (existing) {
-      await prisma.application.update({
+    const applicationData = {
+      phone: contact.phone_number,
+      telegramUsername: ctx.from.username,
+      status: "PENDING" as const,
+    };
+    await prisma.$transaction([
+      prisma.patient.update({
+        where: { id: patient.id },
+        data: { phone: contact.phone_number },
+      }),
+      prisma.application.upsert({
         where: { patientId: patient.id },
-        data: {
-          phone: contact.phone_number,
-          telegramUsername: ctx.from.username,
-          status: "PENDING",
-        },
-      });
-    } else {
-      await prisma.application.create({
-        data: {
-          patientId: patient.id,
-          phone: contact.phone_number,
-          telegramUsername: ctx.from.username,
-          status: "PENDING",
-        },
-      });
-    }
+        update: applicationData,
+        create: { patientId: patient.id, ...applicationData },
+      }),
+    ]);
 
     await ctx.reply(
       "✅ Заявка отправлена!\n\nАдминистратор Restart Clinic свяжется с вами для назначения первичного приёма.",
@@ -123,7 +111,11 @@ export function createBot(token: string, webappUrl: string): Bot {
     );
   });
 
-  bot.catch((err) => console.error("Bot error:", err));
+  bot.catch(async (err) => {
+    console.error("Bot error:", err.error);
+    // Tell the user instead of leaving them without a reply
+    await err.ctx.reply("Произошла ошибка. Попробуйте ещё раз чуть позже.").catch(() => undefined);
+  });
 
   return bot;
 }
@@ -207,12 +199,10 @@ export async function notifyAppointmentReminder(
   );
 }
 
-export async function notifyInactivePatient(bot: Bot, telegramId: bigint) {
-  const nightmares = await prisma.pushNotification.findMany({ where: { type: "NIGHTMARE" } });
-  let text = `⚠️ Вы давно не были на реабилитации. Ваши показатели выносливости начали падать. Запишитесь на приём!`;
-  if (nightmares.length > 0) {
-    const random = nightmares[Math.floor(Math.random() * nightmares.length)];
-    text = random.text;
-  }
+export async function notifyInactivePatient(bot: Bot, telegramId: bigint, texts: string[]) {
+  const text =
+    texts.length > 0
+      ? texts[Math.floor(Math.random() * texts.length)]
+      : `⚠️ Вы давно не были на реабилитации. Ваши показатели выносливости начали падать. Запишитесь на приём!`;
   await bot.api.sendMessage(Number(telegramId), text);
 }

@@ -32,7 +32,7 @@ export function AdminDoctors() {
       await adminApi.createDoctor({
         fullName: form.fullName,
         email: form.email,
-        password: form.password || undefined,
+        password: form.password,
       });
       setIsModalOpen(false);
       setForm({ fullName: "", email: "", password: "" });
@@ -120,7 +120,9 @@ export function AdminDoctors() {
                 <span className="text-sm font-medium text-gray-700 mb-1 block">Пароль</span>
                 <input
                   type="password"
-                  placeholder="Оставьте пустым для 'password'"
+                  required
+                  minLength={8}
+                  placeholder="Минимум 8 символов"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   className="w-full border rounded-lg px-3 py-2"

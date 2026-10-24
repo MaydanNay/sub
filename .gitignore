@@ -15,10 +15,11 @@ __pycache__/
 .venv/
 venv/
 ENV/
-# Windows specific virtualenv folders
-Include/
-Lib/
-Scripts/
+# Windows virtualenv created in the repo root (anchored: unanchored "Lib/" also
+# matched src/lib/ on case-insensitive filesystems)
+/Include/
+/Lib/
+/Scripts/
 pyvenv.cfg
 
 # Database

@@ -1,4 +1,4 @@
-import type { VisitMedalTier } from "@prisma/client";
+import type { Prisma, VisitMedalTier } from "@prisma/client";
 import { prisma } from "./prisma.js";
 import {
   calculateMedalQuotas,
@@ -10,12 +10,15 @@ import {
 
 export { MEDAL_EMOJI };
 
+/** Either the global client or a transaction client */
+type Db = Prisma.TransactionClient;
+
 export function toSharedMedalTier(tier: VisitMedalTier): SharedMedalTier {
   return tier as SharedMedalTier;
 }
 
-export async function getPatientMedalUsage(patientId: string) {
-  const grouped = await prisma.visitMedal.groupBy({
+export async function getPatientMedalUsage(patientId: string, db: Db = prisma) {
+  const grouped = await db.visitMedal.groupBy({
     by: ["tier"],
     where: { visit: { patientId } },
     _count: { _all: true },
@@ -28,8 +31,8 @@ export async function getPatientMedalUsage(patientId: string) {
   return used;
 }
 
-export async function getPatientMedalQuotas(patientId: string) {
-  const patient = await prisma.patient.findUnique({
+export async function getPatientMedalQuotas(patientId: string, db: Db = prisma) {
+  const patient = await db.patient.findUnique({
     where: { id: patientId },
     select: { targetVisits: true, scheduledVisits: true, completedVisits: true },
   });
@@ -43,10 +46,14 @@ export async function getPatientMedalQuotas(patientId: string) {
   return { quotas: calculateMedalQuotas(total), total };
 }
 
-export async function validatePatientVisitMedals(patientId: string, medals: VisitMedalTier[]) {
+export async function validatePatientVisitMedals(
+  patientId: string,
+  medals: VisitMedalTier[],
+  db: Db = prisma
+) {
   const [{ quotas }, used] = await Promise.all([
-    getPatientMedalQuotas(patientId),
-    getPatientMedalUsage(patientId),
+    getPatientMedalQuotas(patientId, db),
+    getPatientMedalUsage(patientId, db),
   ]);
   return validateVisitMedals(
     medals as SharedMedalTier[],

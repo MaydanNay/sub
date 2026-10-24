@@ -69,7 +69,7 @@ export const adminApi = {
     api<Patient>(`/api/admin/patients/${id}/pin`, { method: "PATCH" }),
   deletePatient: (id: string) =>
     api<{ ok: boolean }>(`/api/admin/patients/${id}`, { method: "DELETE" }),
-  createDoctor: (data: { email: string; fullName: string; password?: string }) =>
+  createDoctor: (data: { email: string; fullName: string; password: string }) =>
     api<Doctor>(`/api/admin/doctors`, {
       method: "POST",
       body: JSON.stringify(data),

@@ -59,8 +59,9 @@ export async function grantEligibleRewards(patientId: string, bot?: Bot | null) 
     if (bot) {
       try {
         await notifyRewardGranted(bot, patient.telegramId, reward.title, reward.trigger);
-      } catch {
+      } catch (err) {
         // notification failure should not block grant
+        console.warn(`Reward notification failed for patient ${patient.id}`, err);
       }
     }
   }
