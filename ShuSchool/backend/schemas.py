@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 import datetime
 
@@ -69,13 +69,13 @@ class Token(BaseModel):
 class BehaviorCreate(BaseModel):
     user_id: int
     type: str
-    coin_penalty: int
+    coin_penalty: int = Field(ge=0)
     description: Optional[str] = None
 
 class HWApproval(BaseModel):
     submission_id: int
-    bonus_coins: int = 5
-    score: Optional[int] = None
+    bonus_coins: int = Field(default=5, ge=0)
+    score: Optional[int] = Field(default=None, ge=1, le=5)
 
 class Character(BaseModel):
     id: int
@@ -225,7 +225,7 @@ class Transaction(BaseModel):
 class GradeCreate(BaseModel):
     user_id: int
     subject_id: int
-    score: int
+    score: int = Field(ge=1, le=5)
     lesson_id: Optional[int] = None
     grade_type: Optional[str] = "classwork"
     comment: Optional[str] = None

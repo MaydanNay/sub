@@ -54,8 +54,10 @@ async def start_bots():
         logging.info("🚀 Запуск опроса Telegram ботов (aiogram)...")
         try:
             await asyncio.gather(*tasks)
-        except Exception as e:
-            logging.error(f"❌ Ошибка в работе Telegram ботов: {e}")
+        except Exception:
+            # Exit non-zero so the container restart policy brings the bots back
+            logging.exception("❌ Ошибка в работе Telegram ботов")
+            raise
     else:
         logging.warning("⚠️ Телеграмм боты полностью отключены: отсутствуют токены в .env")
 
