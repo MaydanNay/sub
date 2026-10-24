@@ -7,8 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 import datetime
+import logging
+import secrets
 import shutil
+import uuid
 from typing import List, Optional
+
+logger = logging.getLogger("shuteam")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
@@ -17,7 +22,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ShuGroup CRM API")
 
-os.makedirs("/app/uploads", exist_ok=True)
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/app/uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def get_db():
     db = SessionLocal()
@@ -43,40 +49,42 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)):
     if not token:
         return None
-    try:
-        payload = security.decode_access_token(token)
-        if not payload:
-            return None
-        phone = payload.get("sub")
-        if not phone:
-            return None
-        return crud.get_user_by_phone(db, phone)
-    except:
+    payload = security.decode_access_token(token)
+    phone = payload.get("sub") if payload else None
+    if not phone:
         return None
+    return crud.get_user_by_phone(db, phone)
+
+STAFF_ROLES = (models.MemberRole.LEADER, models.MemberRole.MODERATOR)
+
+def require_community_role(db: Session, community_id: int, user_id: int, detail: str, roles=STAFF_ROLES):
+    membership = db.query(models.CommunityMember).filter(
+        models.CommunityMember.community_id == community_id,
+        models.CommunityMember.user_id == user_id
+    ).first()
+    if not membership or membership.role not in roles:
+        raise HTTPException(status_code=403, detail=detail)
+    return membership
+
+def save_upload(file: UploadFile, prefix: str = "") -> str:
+    # basename() strips any client-supplied path ("../../etc/passwd")
+    original = os.path.basename(file.filename or "file").replace(" ", "_") or "file"
+    filename = f"{prefix}{uuid.uuid4().hex}_{original}"
+    with open(os.path.join(UPLOAD_DIR, filename), "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return f"/api/v1/media/{filename}"
 
 @app.post("/api/v1/media/upload", response_model=schemas.MediaResponse)
-def upload_files(files: List[UploadFile] = File(...)):
-    urls = []
-    for file in files:
-        filename = f"{datetime.datetime.now().timestamp()}_{file.filename.replace(' ', '_')}"
-        file_path = os.path.join("/app/uploads", filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        urls.append(f"/api/v1/media/{filename}")
-    return schemas.MediaResponse(urls=urls)
+def upload_files(files: List[UploadFile] = File(...), current_user: models.User = Depends(get_current_user)):
+    return schemas.MediaResponse(urls=[save_upload(f) for f in files])
 
 @app.post("/api/v1/auth/me/avatar")
 def update_avatar(file: UploadFile = File(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    filename = f"avatar_{current_user.id}_{datetime.datetime.now().timestamp()}_{file.filename.replace(' ', '_')}"
-    file_path = os.path.join("/app/uploads", filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    avatar_url = f"/api/v1/media/{filename}"
+    avatar_url = save_upload(file, prefix=f"avatar_{current_user.id}_")
     crud.update_profile(db, current_user.id, schemas.ProfileUpdate(avatar_url=avatar_url))
     return {"status": "success", "avatar_url": avatar_url}
 
-app.mount("/api/v1/media", StaticFiles(directory="/app/uploads"), name="media")
+app.mount("/api/v1/media", StaticFiles(directory=UPLOAD_DIR), name="media")
 
 app.add_middleware(
     CORSMiddleware,
@@ -106,7 +114,7 @@ def login(data: schemas.LoginRequest, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=401, detail="Пользователь с таким номером не найден.")
     
-    if not security.verify_password(data.password, user.password_hash):
+    if not user.password_hash or not security.verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Неверный пароль. Попробуйте еще раз.")
     
     token = security.create_access_token({"sub": user.phone})
@@ -127,27 +135,34 @@ def update_me(data: schemas.ProfileUpdate, current_user: models.User = Depends(g
 def startup_event():
     import time
     from sqlalchemy import text
+    from sqlalchemy.exc import OperationalError
     # Wait for Postgres to be ready (healthcheck should handle this, but extra safety)
     for attempt in range(10):
+        db = SessionLocal()
         try:
-            db = SessionLocal()
             db.execute(text("SELECT 1"))
             break
-        except Exception:
+        except OperationalError:
             db.close()
+            logger.warning("Database is not ready (attempt %d/10)", attempt + 1)
             time.sleep(2)
     else:
-        return  # Give up seeding, app will still serve requests
+        logger.error("Database unavailable, seeding skipped")
+        return
 
     try:
         if db.query(models.Community).count() == 0:
             # Create a default user for seed communities if none
             seed_user = db.query(models.User).first()
             if not seed_user:
+                seed_password = os.getenv("SEED_ADMIN_PASSWORD")
+                if not seed_password:
+                    seed_password = secrets.token_urlsafe(12)
+                    logger.warning("SEED_ADMIN_PASSWORD not set: seed admin 77777777777 got a random password")
                 seed_user = crud.register_user(db, schemas.RegisterRequest(
                     phone="77777777777",
                     name="Admin",
-                    password="admin",
+                    password=seed_password,
                     city="Астана"
                 ))
             
@@ -206,8 +221,9 @@ def startup_event():
                 cost=0,
                 is_open=True
             ))
-    except Exception as e:
-        print(f"[startup] Seed error (non-fatal): {e}")
+    except Exception:
+        db.rollback()
+        logger.exception("Seed failed (non-fatal)")
     finally:
         db.close()
 
@@ -231,13 +247,7 @@ def get_community_detail(community_id: int, current_user: Optional[models.User] 
 @app.patch("/api/v1/crm/communities/{community_id}", response_model=schemas.Community)
 def update_community_endpoint(community_id: int, community_update: schemas.CommunityUpdate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Check permissions: only community leader or moderator can update community
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="У вас нет прав для редактирования этого сообщества")
+    require_community_role(db, community_id, current_user.id, "У вас нет прав для редактирования этого сообщества")
         
     updated = crud.update_community(db, community_id, community_update)
     if not updated:
@@ -246,13 +256,7 @@ def update_community_endpoint(community_id: int, community_update: schemas.Commu
 
 @app.delete("/api/v1/crm/communities/{community_id}")
 def delete_community_endpoint(community_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role != models.MemberRole.LEADER:
-        raise HTTPException(status_code=403, detail="Только владелец сообщества может его удалить")
+    require_community_role(db, community_id, current_user.id, "Только владелец сообщества может его удалить", roles=(models.MemberRole.LEADER,))
         
     success = crud.delete_community(db, community_id)
     if not success:
@@ -275,13 +279,7 @@ def list_meetings(community_id: int = None, current_user: models.User = Depends(
 @app.post("/api/v1/crm/meetings", response_model=schemas.Meeting)
 def create_meeting(meeting: schemas.MeetingCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Check permissions: only community leader or moderator can create meetings
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == meeting.community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="У вас нет прав для создания встреч в этом сообществе")
+    require_community_role(db, meeting.community_id, current_user.id, "У вас нет прав для создания встреч в этом сообществе")
         
     return crud.create_meeting(db, meeting)
 
@@ -295,11 +293,23 @@ def list_transactions(current_user: models.User = Depends(get_current_user), db:
 
 @app.post("/api/v1/crm/meetings/participate")
 def participate_meeting(meeting_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Process payment (90/10 split)
-    if not crud.process_meeting_payment(db, meeting_id, current_user.id):
-        raise HTTPException(status_code=400, detail="Insufficient funds in wallet")
-        
-    return crud.register_user_for_meeting(db, meeting_id, current_user.id)
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    existing = crud.get_meeting_registration(db, meeting_id, current_user.id)
+    if existing:
+        return existing  # already registered: never charge twice
+    try:
+        # Payment (90/10 split) and registration commit together
+        if not crud.process_meeting_payment(db, meeting, current_user.id):
+            raise HTTPException(status_code=400, detail="Insufficient funds in wallet")
+        reg = crud.register_user_for_meeting(db, meeting_id, current_user.id, commit=False)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(reg)
+    return reg
 
 @app.get("/api/v1/crm/meetings/{meeting_id}/participants", response_model=List[schemas.MeetingRegistration])
 def list_meeting_participants(meeting_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -307,23 +317,20 @@ def list_meeting_participants(meeting_id: int, current_user: models.User = Depen
 
 @app.post("/api/v1/crm/meetings/check-in")
 def check_in_participant(meeting_id: int, user_phone: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Typically only a leader/moderator should check people in
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    require_community_role(db, meeting.community_id, current_user.id, "Only leaders and moderators can check in participants")
     user = crud.get_user_by_phone(db, user_phone)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not crud.check_in_participant(db, meeting_id, user.id):
-        raise HTTPException(status_code=400, detail="Registration not found or error")
+        raise HTTPException(status_code=404, detail="User is not registered for this meeting")
     return {"status": "success", "message": "Participant checked in"}
 @app.get("/api/v1/crm/communities/{community_id}/stats")
 def get_community_analytics(community_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Verify permission: only leader/admin/moderator of this community
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="У вас нет прав для просмотра статистики этого сообщества")
+    require_community_role(db, community_id, current_user.id, "У вас нет прав для просмотра статистики этого сообщества")
         
     return crud.get_community_stats(db, community_id)
 
@@ -333,18 +340,14 @@ def list_venues(db: Session = Depends(get_db)):
 
 @app.post("/api/v1/crm/communities/join")
 def join_community(community_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not db.query(models.Community).filter(models.Community.id == community_id).first():
+        raise HTTPException(status_code=404, detail="Community not found")
     return crud.add_member(db, community_id, current_user.id)
 
 @app.get("/api/v1/crm/communities/{community_id}/requests")
 def get_community_requests(community_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Verify permission: only leader/admin/moderator
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Permission denied")
+    require_community_role(db, community_id, current_user.id, "Permission denied")
         
     return crud.get_pending_members(db, community_id)
 
@@ -354,14 +357,7 @@ def approve_membership(membership_id: int, current_user: models.User = Depends(g
     if not membership:
         raise HTTPException(status_code=404, detail="Membership not found")
         
-    # Check permissions of current_user in that community
-    admin_membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == membership.community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not admin_membership or admin_membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Permission denied")
+    require_community_role(db, membership.community_id, current_user.id, "Permission denied")
         
     return crud.update_membership_status(db, membership_id, models.MemberStatus.APPROVED)
 
@@ -371,27 +367,14 @@ def reject_membership(membership_id: int, current_user: models.User = Depends(ge
     if not membership:
         raise HTTPException(status_code=404, detail="Membership not found")
         
-    # Check permissions
-    admin_membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == membership.community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not admin_membership or admin_membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Permission denied")
+    require_community_role(db, membership.community_id, current_user.id, "Permission denied")
         
     return crud.update_membership_status(db, membership_id, models.MemberStatus.REJECTED)
 
 @app.get("/api/v1/crm/communities/{community_id}/pending-proofs")
 def get_pending_proofs(community_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Verify permission: only leader/admin/moderator of this community
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Только лидеры могут модерировать достижения")
+    require_community_role(db, community_id, current_user.id, "Только лидеры могут модерировать достижения")
         
     return crud.get_pending_proofs(db, community_id)
 
@@ -402,13 +385,9 @@ def approve_proof(progress_id: int, current_user: models.User = Depends(get_curr
         raise HTTPException(status_code=404, detail="Progress not found")
         
     goal = db.query(models.Goal).filter(models.Goal.id == progress.goal_id).first()
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == goal.community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Permission denied")
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    require_community_role(db, goal.community_id, current_user.id, "Permission denied")
         
     return crud.approve_goal_progress(db, progress_id)
 
@@ -419,13 +398,9 @@ def reject_proof(progress_id: int, current_user: models.User = Depends(get_curre
         raise HTTPException(status_code=404, detail="Progress not found")
         
     goal = db.query(models.Goal).filter(models.Goal.id == progress.goal_id).first()
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == goal.community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Permission denied")
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    require_community_role(db, goal.community_id, current_user.id, "Permission denied")
         
     return crud.reject_goal_progress(db, progress_id)
 
@@ -435,19 +410,23 @@ def get_community_goals(community_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/crm/goals", response_model=schemas.Goal)
 def create_community_goal(goal: schemas.GoalCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == goal.community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="У вас нет прав для создания целей в этом сообществе")
+    require_community_role(db, goal.community_id, current_user.id, "У вас нет прав для создания целей в этом сообществе")
         
     return crud.create_goal(db, goal)
 
 @app.post("/api/v1/crm/goals/{goal_id}/progress")
 def update_goal_progress(goal_id: int, data: schemas.ProgressUpdateRequest, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return crud.update_goal_progress(db, goal_id, current_user.id, data.increment, data.proof_urls)
+    goal = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    member = db.query(models.CommunityMember).filter(
+        models.CommunityMember.community_id == goal.community_id,
+        models.CommunityMember.user_id == current_user.id,
+        models.CommunityMember.status == models.MemberStatus.APPROVED
+    ).first()
+    if not member:
+        raise HTTPException(status_code=403, detail="Only community members can report progress")
+    return crud.update_goal_progress(db, goal, current_user.id, data.increment, data.proof_urls)
 
 @app.get("/api/v1/crm/user/badges", response_model=List[schemas.Badge])
 def get_user_badges(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -461,12 +440,6 @@ def get_community_gallery(community_id: int, db: Session = Depends(get_db)):
 @app.post("/api/v1/crm/communities/{community_id}/gallery", response_model=schemas.GalleryItem)
 def add_gallery_item(community_id: int, item: schemas.GalleryItemCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Verify permission: only leader/admin/moderator
-    membership = db.query(models.CommunityMember).filter(
-        models.CommunityMember.community_id == community_id,
-        models.CommunityMember.user_id == current_user.id
-    ).first()
-    
-    if not membership or membership.role not in [models.MemberRole.LEADER, models.MemberRole.MODERATOR]:
-        raise HTTPException(status_code=403, detail="Only leaders and moderators can add to gallery")
+    require_community_role(db, community_id, current_user.id, "Only leaders and moderators can add to gallery")
         
     return crud.create_gallery_item(db, community_id, item)

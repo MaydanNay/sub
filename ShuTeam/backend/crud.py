@@ -34,20 +34,6 @@ def register_user(db: Session, data: schemas.RegisterRequest):
     db.refresh(db_user)
     return db_user
 
-def login_user(db: Session, data: schemas.LoginRequest):
-    """Verify credentials. Returns user on success, None on failure."""
-    user = get_user_by_phone(db, data.phone)
-    if not user:
-        return None
-    if not user.password_hash:
-        # Legacy phone-only user — accept any password and set it now
-        user.password_hash = hash_password(data.password)
-        db.commit()
-        return user
-    if not verify_password(data.password, user.password_hash):
-        return None
-    return user
-
 def update_profile(db: Session, user_id: int, data: schemas.ProfileUpdate):
     user = get_user_by_id(db, user_id)
     if not user:
@@ -333,19 +319,24 @@ def get_meetings(db: Session, community_id: int = None, user_id: int = None, inc
     return final_meetings
 
 # --- Registrations ---
-def register_user_for_meeting(db: Session, meeting_id: int, user_id: int):
-    # Check existing
-    existing = db.query(models.MeetingRegistration).filter(
+def get_meeting_registration(db: Session, meeting_id: int, user_id: int):
+    return db.query(models.MeetingRegistration).filter(
         models.MeetingRegistration.meeting_id == meeting_id,
         models.MeetingRegistration.user_id == user_id
     ).first()
+
+def register_user_for_meeting(db: Session, meeting_id: int, user_id: int, commit: bool = True):
+    existing = get_meeting_registration(db, meeting_id, user_id)
     if existing:
         return existing
-        
+
     db_reg = models.MeetingRegistration(meeting_id=meeting_id, user_id=user_id)
     db.add(db_reg)
-    db.commit()
-    db.refresh(db_reg)
+    if commit:
+        db.commit()
+        db.refresh(db_reg)
+    else:
+        db.flush()
     return db_reg
 
 def get_meeting_participants(db: Session, meeting_id: int):
@@ -363,33 +354,35 @@ def check_in_participant(db: Session, meeting_id: int, user_id: int):
     return False
 
 # --- Finance & Wallets ---
-def get_or_create_wallet(db: Session, user_id: int = None, community_id: int = None):
+def get_or_create_wallet(db: Session, user_id: int = None, community_id: int = None, commit: bool = True):
     if user_id:
-        wallet = db.query(models.Wallet).filter(models.Wallet.user_id == user_id).first()
-        if not wallet:
-            wallet = models.Wallet(user_id=user_id, balance=10000) # Give 10k starting tokens for demo
-            db.add(wallet)
-            db.commit()
-            db.refresh(wallet)
-        return wallet
-    if community_id:
-        wallet = db.query(models.Wallet).filter(models.Wallet.community_id == community_id).first()
-        if not wallet:
-            wallet = models.Wallet(community_id=community_id, balance=0)
-            db.add(wallet)
-            db.commit()
-            db.refresh(wallet)
-        return wallet
-    return None
+        query = db.query(models.Wallet).filter(models.Wallet.user_id == user_id)
+        defaults = {"user_id": user_id, "balance": 10000}  # 10k starting tokens for demo
+    elif community_id:
+        query = db.query(models.Wallet).filter(models.Wallet.community_id == community_id)
+        defaults = {"community_id": community_id, "balance": 0}
+    else:
+        raise ValueError("user_id or community_id is required")
 
-def process_meeting_payment(db: Session, meeting_id: int, user_id: int):
-    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
-    if not meeting or meeting.cost <= 0:
+    wallet = query.with_for_update().first()
+    if not wallet:
+        wallet = models.Wallet(**defaults)
+        db.add(wallet)
+        if commit:
+            db.commit()
+            db.refresh(wallet)
+        else:
+            db.flush()
+    return wallet
+
+def process_meeting_payment(db: Session, meeting: models.Meeting, user_id: int):
+    """Stages the payment in the current transaction; the caller commits."""
+    if not meeting.cost or meeting.cost <= 0:
         return True
-        
-    user_wallet = get_or_create_wallet(db, user_id=user_id)
-    if not user_wallet or user_wallet.balance < meeting.cost:
-        return False # Insufficient funds or wallet error
+
+    user_wallet = get_or_create_wallet(db, user_id=user_id, commit=False)
+    if user_wallet.balance < meeting.cost:
+        return False
         
     # 1. Deduct from user
     user_wallet.balance -= meeting.cost
@@ -406,9 +399,8 @@ def process_meeting_payment(db: Session, meeting_id: int, user_id: int):
     platform_share = cost_dec * Decimal("0.1")
     
     # Community/Platform wallet (mocked as community wallet)
-    comm_wallet = get_or_create_wallet(db, community_id=meeting.community_id)
-    if comm_wallet:
-        comm_wallet.balance += platform_share
+    comm_wallet = get_or_create_wallet(db, community_id=meeting.community_id, commit=False)
+    comm_wallet.balance += platform_share
     
     # Find leader (first member with LEADER role)
     leader_member = db.query(models.CommunityMember).filter(
@@ -417,17 +409,16 @@ def process_meeting_payment(db: Session, meeting_id: int, user_id: int):
     ).first()
     
     if leader_member:
-        leader_wallet = get_or_create_wallet(db, user_id=leader_member.user_id)
-        if leader_wallet:
-            leader_wallet.balance += leader_share
-            db.add(models.Transaction(
-                user_id=leader_member.user_id,
-                amount=leader_share,
-                type="CREDIT",
-                description=f"Leader payout (90%) for meeting: {meeting.title}"
-            ))
-        
-    db.commit()
+        leader_wallet = get_or_create_wallet(db, user_id=leader_member.user_id, commit=False)
+        leader_wallet.balance += leader_share
+        db.add(models.Transaction(
+            user_id=leader_member.user_id,
+            amount=leader_share,
+            type="CREDIT",
+            description=f"Leader payout (90%) for meeting: {meeting.title}"
+        ))
+
+    db.flush()
     return True
 
 def get_transactions(db: Session, user_id: int):
@@ -455,17 +446,18 @@ def create_goal(db: Session, goal: schemas.GoalCreate):
 def get_community_goals(db: Session, community_id: int):
     return db.query(models.Goal).filter(models.Goal.community_id == community_id).all()
 
-def update_goal_progress(db: Session, goal_id: int, user_id: int, increment: int = 1, proof_urls: List[str] = None):
+def update_goal_progress(db: Session, goal: models.Goal, user_id: int, increment: int = 1, proof_urls: List[str] = None):
+    goal_id = goal.id
     progress = db.query(models.GoalProgress).filter(
         models.GoalProgress.goal_id == goal_id,
         models.GoalProgress.user_id == user_id
     ).first()
-    
+
     if not progress:
-        goal = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
         progress = models.GoalProgress(
             goal_id=goal_id,
             user_id=user_id,
+            current_value=0,
             target_value=1 if goal.goal_type == "WEEKLY" else 10
         )
         db.add(progress)
@@ -479,9 +471,8 @@ def update_goal_progress(db: Session, goal_id: int, user_id: int, increment: int
             progress.proof_urls = list(set(progress.proof_urls + proof_urls))
         else:
             progress.proof_urls = list(set(progress.proof_urls + [proof_urls]))
-        
-    goal = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
-    
+
+
     if progress.current_value >= progress.target_value:
         if goal and goal.requires_moderation:
             if progress.status != models.GoalStatus.APPROVED:

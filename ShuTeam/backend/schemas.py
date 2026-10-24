@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from decimal import Decimal
@@ -28,7 +28,7 @@ class MediaResponse(BaseModel):
     urls: List[str]
 
 class ProgressUpdateRequest(BaseModel):
-    increment: int = 1
+    increment: int = Field(default=1, ge=1)
     proof_urls: List[str] = []
 
 # ── Auth schemas ──────────────────────────────────────────────────────────────
