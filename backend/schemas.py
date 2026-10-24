@@ -1,5 +1,5 @@
 # Pydantic schemas for ShuRun API
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from enum import Enum
 from datetime import datetime
@@ -99,7 +99,7 @@ class User(UserBase):
 class BuyRequest(BaseModel):
     item_id: str
     item_type: str  # 'skin' or 'promo'
-    cost: int
+    cost: int = Field(ge=0)
 
 class ScanRequest(BaseModel):
     qr_data: str
@@ -148,10 +148,10 @@ class ShuBankShopBuyRequest(BaseModel):
 class ShuBankPrideCreateRequest(BaseModel):
     name: str
     type: str # 'family', 'friends', 'corporate'
-    goal_amount: float
+    goal_amount: float = Field(gt=0)
 
 class ShuBankMinigameSyncRequest(BaseModel):
-    coins: int
+    coins: int = Field(ge=0)
 
 class ShuBankQuestCompleteRequest(BaseModel):
     quest_id: str

@@ -4,6 +4,9 @@ from sqlalchemy.sql.expression import func
 import models, schemas
 import random
 import datetime
+import logging
+
+logger = logging.getLogger("shurun.crud")
 
 # --- Promotions ---
 def get_promotion(db: Session, promotion_id: int):
@@ -274,22 +277,18 @@ def buy_shop_item(db: Session, user_id: int, item_id: str, item_type: str, cost:
     if item_type == 'skin':
         save_skin_to_user(db, user_id, item_id)
     elif item_type in ['promo', 'offer', 'food']:
-        # If it's a numeric ID in string format or 'promo1' format
-        try:
-            # Handle 'promo1', 'offer2' etc
-            numeric_id = "".join(filter(str.isdigit, item_id))
-            if numeric_id:
-                save_coupon_to_user(db, user_id, int(numeric_id))
-            else:
-                # If no digits, might be a named ID like 'croissant'
-                # For now let's just log it or treat as a generic "bought" item
-                # Actually, coupons table expects an ID. For food/named items, 
-                # we don't have a specific table yet, but we can use the item_id as is if it fits.
-                # However, models.User.coupons is list of ints.
-                pass
-        except Exception:
-            pass
-            
+        # 'promo1', 'offer2' -> coupon id 1, 2
+        numeric_id = "".join(filter(str.isdigit, item_id))
+        if numeric_id:
+            save_coupon_to_user(db, user_id, int(numeric_id))
+        else:
+            # Named goods ('croissant', 'latte') have no storage on User yet:
+            # coins are charged, the purchase itself is not persisted.
+            logger.warning("Item %s bought by user %s is not persisted (no storage for named items)", item_id, user_id)
+    else:
+        db.rollback()
+        return False
+
     db.commit()
     return True
 
